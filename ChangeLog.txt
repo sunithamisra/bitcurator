@@ -1,0 +1,10 @@
+BitCurator
+
+Tools for Digital Forensics Methods and Workflows in
+Real-World Collecting Institutions
+----------------------------------------------------
+
+Copyright (C) 2012
+All rights reserved.
+
+
