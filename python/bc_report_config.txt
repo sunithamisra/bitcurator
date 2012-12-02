@@ -1,0 +1,27 @@
+#####################################################################
+#################Config File for BitCurator Report###################
+## F: Feature Files
+## R: Fiwalk/BE Report files
+## Format: File_type (F/R):Reportfile-name:numlines
+## numlines: number of lines to report, 0 for all lines
+#####################################################################
+# Feature Files to report
+#F:junk_to_test:0
+F:rfc822:30
+F:domain:0
+F:email:100
+F:exif:0
+F:telephone:0
+F:url:0
+F:windirs:0
+F:winpe:0
+F:zip:0
+
+# Fiwalk and Bulk Extractor Report files
+R:bc_format_bargraph:0
+R:FiwalkReport:0
+R:FiwalkDeletedFiles:0
+R:BeReport:0
+
+# Miscellaneous
+
