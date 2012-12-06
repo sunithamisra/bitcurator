@@ -2,14 +2,15 @@
 #################Config File for BitCurator Report###################
 ## F: Feature Files
 ## R: Fiwalk/BE Report files
+## M: List files of a format
 ## Format: File_type (F/R):Reportfile-name:numlines
 ## numlines: number of lines to report, 0 for all lines
 #####################################################################
 # Feature Files to report
 #F:junk_to_test:0
-F:rfc822:30
-F:domain:0
-F:email:100
+#F:rfc822:30
+#F:domain:0
+#F:email:100
 F:exif:0
 F:telephone:0
 F:url:0
@@ -23,5 +24,20 @@ R:FiwalkReport:0
 R:FiwalkDeletedFiles:0
 R:BeReport:0
 
-# Miscellaneous
+# File Format: List all the files with the following file formats
+M:empty
+M:data
+M:none
+M:AppleDouble
+M:XML
+##M:SQLite3x
+##M:nISO-EA-NLT
+##M:NISO-EA
+##M:Hitachi
+##M:PDP-11
+##M:ISO-8859
+##M:ISO-8859-NLT
+##M:ASCII
+M:PDF1.4
+##M:DOSCOM
 
