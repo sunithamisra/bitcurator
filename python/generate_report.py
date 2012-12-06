@@ -58,15 +58,14 @@ from pylab import *
 import datetime
 import pylab as p
 
+# A list of the report files is maintained, to keep track of which ones
+# are actually reported, based on the configuration.
 reportFileList = [None]*20
 reportFiles = 0
 
 def bc_addToReportFileList(pdf_file):
     reportFileList[PdfReport.reportFiles] = pdf_file
-    # print("bc_addTpReportFileList: Creating PDF File: ", pdf_file, PdfReport.reportFiles)
     PdfReport.reportFiles += 1
-    ## for i in range(0, PdfReport.reportFiles):
-        ## print("D: reportList[i]:", i, reportFileList[i]) 
 
 def bc_printReportFileList():
     print("The following Report Files are Generated: ")
@@ -90,7 +89,6 @@ def is_comment_line(line):
 def match_and_write(of, line, pattern, separator):
     if re.match(pattern,line):
         line1 = re.split(":", line.rstrip('\n'))
-        ##print("match_and_write: DEBUG: LINE1: ", line1, line1[1])
         of.write(bytes(line1[1], 'UTF-8')) 
         if (separator):
             of.write(b";") 
@@ -99,8 +97,6 @@ def match_and_write(of, line, pattern, separator):
 
 def bc_analyze_zip_file(of, line):
     line1 = line.split("\t")
-    ##for i  in range(0, len(line1)):
-        ##print("DEBUG:", line1[i])
 
 def bc_update_histo_list(list_item):
     # Walk through the list looking for the list_item.
@@ -294,18 +290,17 @@ class PDF_BE(FPDF):
                 #Closure line
                 self.cell(sum(w),0,'','T')
 
-        def bc_adjust_text(self, cell_text, cell_width):
+        def bc_adjust_text_be(self, cell_text, cell_width):
             if len(cell_text) > cell_width:
                 short_len = cell_width/2 - 5
-                print("SSSSSSSSSHORTLEN:",len(cell_text), cell_width, short_len)
+                ## print("D: Adjust_text:",len(cell_text), cell_width, short_len)
                 text = cell_text[0:int(short_len)] + '...' + cell_text[-int(short_len):]
                 return text
             return cell_text
            
 
-        ##def bc_write_colomn(w[0],6,filename,'LR',0,'L',fill)
         def bc_write_column(self, w,h,cell_text, fill):
-            text = self.bc_adjust_text(cell_text, w)
+            text = self.bc_adjust_text_be(cell_text, w)
             self.cell(w,h,text,'LR',0,'L',fill)
 
         def make_table_feat(self, feature_file, header):
@@ -429,7 +424,7 @@ class PDF(FPDF):
                 this.set_font('Arial','I',8)
                 # Page number
                 ##this.cell(0,10,'Page '+str(this.page())+'/{nb}',0,0,'C')
-                this.cell(0,10,'Page '+str(this.page)+'/{nb}',0,0,'C')
+                this.cell(0,10,'Page '+str(this.page),0,0,'C')
 
         def chapter_title(self,num,label):
                 #Arial 12
@@ -466,40 +461,44 @@ class PDF(FPDF):
                 self.chapter_title(num,title)
                 self.chapter_body(name)
 
+        def set_table_hdr_attributes(self, w, header):
+            self.set_font('Times','B',10)
+            self.set_fill_color(200,0,0)
+            self.set_text_color(255)
+            self.set_draw_color(128,0,0)
+            self.set_line_width(.3)
+            self.set_font('','B')
+
+            for i in range(0,len(header)):
+                self.cell(w[i],7,header[i],1,0,'C',1)
+            self.ln()
+               
+        def set_table_body_attributes(self):
+            self.set_fill_color(224,235,255)
+            self.set_text_color(0)
+            self.set_font('Times','',8)
         #
         # This function builds the table for reporting the overall statistics
         # Source : fiwalk
         #
         def make_table_stat(self, header):
-                #Colors, line width and bold font
-                self.set_fill_color(80,0,0)
-                self.set_text_color(255)
-                self.set_draw_color(128,0,0)
-                self.set_line_width(.3)
-                self.set_font('','B')
-
+                # Header
                 w=[50,20]
 
-                for i in range(0,len(header)):
-                        self.cell(w[i],7,header[i],1,0,'C',1)
-                self.ln()
+                #Colors, line width and bold font
+                self.set_table_hdr_attributes(w, header)
 
                 #Color and font restoration
-                self.set_fill_color(224,235,255)
-                self.set_text_color(0)
-                self.set_font('')
+                self.set_table_body_attributes()
 
                 fill=0
                 self.set_font('Times','',12)
 
-                ##self.cell(w[0],6,txt="Number Of Files",'LR',0,'L',fill)
-                #self.cell(w[0],6,txt="Number Of Files",align="c")
                 self.cell(w[0],6,"Number of Files",'LR',0,'L',fill)
                 self.cell(w[1],6,str(DirReport.numfiles),'LR',0,'L',fill)
                 self.ln()
 
                 self.cell(w[0],6,"Total Directories",'LR',0,'L',fill)
-                #self.cell(w[1],6,DirReport.numfiles,'LR',0,'L',fill)
                 self.cell(w[1],6,str(DirReport.dirs),'LR',0,'L',fill)
                 self.ln()
               
@@ -526,15 +525,20 @@ class PDF(FPDF):
                 # Closure line
                 self.cell(sum(w),0,'','T')
 
-        def bc_adjust_text_2(self, cell_text, cell_width):
-            if len(cell_text) > cell_width:
-                short_len = cell_width/2 - 5
+        #
+        # Utility Function to Shorten the text length to fit in the cell.
+        #
+        def bc_adjust_text_pdf(self, cell_text, cell_width):
+            if len(cell_text) > int(cell_width - 15):
+                short_len = cell_width/2 - 10
                 ## print("Shortlen:",len(cell_text), cell_width, short_len)
                 text = cell_text[0:int(short_len)] + '...' + cell_text[-int(short_len):]
                 return text
             return cell_text
            
-        # Make a List of all the Deleted Files
+        #
+        # Make a Table of all the Deleted Files
+        #
         def make_table_delfiles(self, header):
 
             imgname = image_fileinfo[0] + ': ' + image_fileinfo_val[0]
@@ -546,43 +550,84 @@ class PDF(FPDF):
             self.set_font('Times','B',10)
             self.cell(0, 12, imgname , border=0, ln=1)
 
-            #Colors, line width and bold font
-            self.set_font('Times','B',12)
-            self.set_fill_color(100,0,0)
-            self.set_text_color(255)
-            self.set_draw_color(128,0,0)
-            self.set_line_width(.3)
-            self.set_font('','B')
-
+            # Set Colimn width
             w = [12,150]
-            for i in range(0,len(header)):
-                    self.cell(w[i],7,header[i],1,0,'C',1)
-            self.ln()
+
+            #Colors, line width and bold font
+            self.set_table_hdr_attributes(w, header)
 
             #Color and font restoration
-            self.set_fill_color(224,235,255)
-            self.set_text_color(0)
-            self.set_font('Times','',8)
-            
+            self.set_table_body_attributes()
 
             fill=0
             num_deleted_files = 0
             for i in range(0, len(DirReport.myDictList)):
                 if DirReport.myDictList[i]['unalloc']:
                     num_deleted_files+=1
-                    ## print("D: Deleted File: ", num_deleted_files, DirReport.myDictList[i]['filename'])    
+                    ## print("D: Deleted File: ", 
+                    ## num_deleted_files,DirReport.myDictList[i]['filename'])    
                     self.cell(w[0],6,str(num_deleted_files),'LR',0,'L',fill)
                     mystr = (DirReport.myDictList[i]['filename'])
-                    text = self.bc_adjust_text_2(mystr, w[1])
+                    text = self.bc_adjust_text_pdf(mystr, w[1])
                     self.cell(w[1],6,text,'LR',0,'L',fill)
                     self.ln()
                     fill=not fill
                     bc_table_end_page(self, num_deleted_files, header, w)
 
-                #Closure line
+            #Closure line
             self.cell(sum(w),0,'','T')
     
+        def bc_get_full_format_name(self, file_format):
+            for i in range (0, (len(DirReport.dictFileFmtArray)-1)):
+                if file_format == DirReport.dictFileFmtA[i]:
+                    return(DirReport.dictFileFmtArray[i])
+            return("unknown")    
 
+        #
+        # Make a Table of all the files with the given format type
+        # Full format is what appears in the image file.
+        # 
+        def make_table_fmtfiles(self, header, file_format):
+            imgname = image_fileinfo[0] + ': ' + image_fileinfo_val[0]
+            full_filefmt = self.bc_get_full_format_name(file_format)
+            format_heading = 'Format: '+full_filefmt
+
+            # Write the headlines for the table:
+            self.underline = 1
+            self.set_font('Times','B',10)
+            self.cell(0, 12, imgname , border=0, ln=1)
+            self.cell(0, 12, format_heading, border=0, ln=1)
+            self.underline = 0
+
+            # Set Colimn width
+            w = [12,150]
+
+            #Colors, line width and bold font
+            self.set_table_hdr_attributes(w, header)
+
+            #Color and font restoration
+            self.set_table_body_attributes()
+            
+            fill=0
+            num_files = 0
+            for i in range(0, len(DirReport.myDictList)):
+                mystr =  normalize(DirReport.myDictList[i]['libmagic'])
+                if mystr == full_filefmt:
+                    num_files+=1
+                    self.cell(w[0],6,str(num_files),'LR',0,'L',fill)
+                    mystr = (DirReport.myDictList[i]['filename'])
+                    text = self.bc_adjust_text_pdf(mystr, w[1])
+                    self.cell(w[1],6,text,'LR',0,'L',fill)
+                    self.ln()
+                    fill=not fill
+                    bc_table_end_page(self, num_files, header, w)
+            self.cell(sum(w),0,'','T')
+            return
+
+        #
+        # Makes table of a consolidated report of chosen few attributes
+        # of all the files listed by fiwalk
+        #
         def make_table(self, header):
 
                 self.set_text_color(10)
@@ -598,51 +643,35 @@ class PDF(FPDF):
                 self.cell(0, 5, "DIR: directory:d; Regular file:r", border=0, ln=1)
                 self.cell(0, 5, "Size: Size of the file in bytes", border=0, ln=1)
                 self.cell(0, 5, "Deleted: If the file is Deleted ", border=0, ln=1)
-                #Colors, line width and bold font
-                self.set_fill_color(100,0,0)
-                self.set_text_color(255)
-                self.set_draw_color(128,0,0)
-                self.set_line_width(.3)
-                self.set_font('','B')
 
                 #Header
-                w=[60,20,10,15,12,30,50]
+                w=[60,20,10,15,12,15,65]
 
-                for i in range(0,len(header)):
-                        self.cell(w[i],7,header[i],1,0,'C',1)
-                self.ln()
+                #Colors, line width and bold font
+                self.set_table_hdr_attributes(w, header)
 
                 #Color and font restoration
-                self.set_fill_color(224,235,255)
-                self.set_text_color(0)
-                self.set_font('')
-
+                self.set_table_body_attributes()
+    
                 fill=0
-                #for row in range(DirReport[0] to DirReport.myDictList[array_index]):
+
+                ## Warn the user if the length of  a feature file is > 5000
+                if DirReport.array_ind > 5000:
+                    print("#### Warning #### Report file has exceeded 5000 knes limit")
+
                 self.set_font('Times','',8)
                 for i in range(0, DirReport.array_ind-1):
                     ## FIXME: Make the filename wrap around if it is longer than w[0]
-                    #self.cell(w[0],6,DirReport.myDictList[i]['filename'],'LR',0,'L',fill)
                     column = 6
-                    if len(DirReport.myDictList[i]['filename']) > w[0]:
-                        # FIXME: wrap-around hack till hover-text is implemented. 
-                        # See template.py for example of usig multi_cell
-                        ##self.multi_cell(w[0],6,DirReport.myDictList[i]['filename'],'LR',0,'L',fill)
-                        ## print("D: Length exceeded column width: ", 
-                            ## len(DirReport.myDictList[i]['filename']), w[0])
-                        text = DirReport.myDictList[i]['filename']
-                        # FIXME: For some reason, the actual table column width
-                        # seems much lesser than w[0] - like 45. So hardcoded
-                        # for now till explored the reason.
-                        text = text[0:20] + '...' + text[-20:]
-                        self.cell(w[0],6,text,'LR',0,'L',fill)
-                        
-                    else:
-                        self.cell(w[0],6,DirReport.myDictList[i]['filename'],'LR',0,'L',fill)
-      
+
+                    cell_text = DirReport.myDictList[i]['filename']
+                    text = self.bc_adjust_text_pdf(cell_text, w[0])
+                    self.cell(w[0],6,text,'LR',0,'L',fill)
+
                     ### The following is supposed to trim the characters to the
                     ### size available. But it is removing all charaters if the
-                    ### text size exceeds w[0]  - FIXME
+                    ### text size exceeds w[0]. Hence used the above
+                    ### primitive methid  - FIXME
 
                     ###text = DirReport.myDictList[i]['filename']
                     ###text = self.multi_cell(w=w[0], h=6, txt=text,
@@ -660,7 +689,7 @@ class PDF(FPDF):
 
                     self.cell(w[5],column,DirReport.myDictList[i]['mode'],'LR',0,'L',fill)
                     if len(DirReport.myDictList[i]['libmagic']) > w[6]:
-                        # FIXME: wrap-around hack till hover-text is implemented. 
+                        # wrap-around hack till hover-text is implemented. 
                         text = DirReport.myDictList[i]['libmagic']
                         text = text[0:20] + '...' + text[-15:]
                         self.cell(w[6],column,text,'LR',0,'L',fill)
@@ -677,10 +706,6 @@ class PDF(FPDF):
                 self.cell(sum(w),0,'','T')
 
 def create_report_file(input_file, annotated_file):
-
-    # Table header
-    ## print("D: Report FEATURE FILE ", annotated_file)
-
     # Table column headers
     tab_header_feat = ['Filename', 'position','Feature ']
 
@@ -691,13 +716,14 @@ def create_report_file(input_file, annotated_file):
 
     # Name the pdf file: Remove the first 10 charaxters: "annotated_"
     # and the last 4 characters: ".txt" and add :.pdf" in the suffix.
-    ## print("D: LEN: ", len("annotated_"), len(annotated_file))
     pdf_file = PdfReport.outdir +'/' + annotated_file[10:-3] + 'pdf'
     pdf.output(pdf_file,'F')
-    ## print("D: PDF: Creating PDF File: ", pdf_file)
     bc_addToReportFileList(pdf_file)
     return(pdf_file)
 
+#
+# Class PdfReport: 
+#
 class PdfReport:
     domain_list_all = []
     domain_list = []
@@ -706,7 +732,7 @@ class PdfReport:
  
     # Feature file reports: Two separeate sets are maintained - one for 
     # feature report files and one for all the rest. The latter is a fixed
-    # set, where are the number of feature report files depends on the bulk-
+    # set, where the number of feature report files depends on the bulk-
     # extractor output (and hence the aff image in question).  
 
     # Two sets are defined for feature list: one for a flag to indicate
@@ -716,7 +742,7 @@ class PdfReport:
     bc_config_feature = {}
     bc_config_feature_lines = {}
 
-    # he following is a set of all non-feature pdf report files. It is a 
+    # The following is a set of all non-feature pdf report files. It is a 
     # growing set. Add more as and when new reports are added.
     bc_config_report_files = {'bc_format_bargraph':0,'FiwalkReport':0, \
                               'FiwalkDeletedFiles':0,'BeReport':0}
@@ -726,22 +752,44 @@ class PdfReport:
     bc_config_report_lines = {'bc_format_bargraph':0,'FiwalkReport':0, \
                               'FiwalkDeletedFiles':0,'BeReport':0}
 
+    # Initialize all the elements of the configfilefmt_files to 0 XXXX
+    ## bc_config_filefmt_files = DirReport.dictFileFmt
+    ## bc_config_filefmt_files = [None]*len(DirReport.dictFileFmt)
+    bc_config_filefmt_files = {'empty':0,'data':0,'none':0,\
+                        'AppleDouble':0,\
+                        'XML':0,\
+                        'SQLite3x':0,\
+                        'nISO-EA-NLT':0,\
+                        'NISO-EA':0,\
+                        'Hitachi':0,\
+                        'PDP-11':0,\
+                        'ISO-8859':0,\
+                        'ISO-8859-NLT':0,\
+                        'ASCII':0,\
+                        'ASCII-NLT':0,\
+                        'PDF1.4':0,\
+                        'DOSCOM':0 }
+    #bc_config_filefmt_files = [None]*len(bc_config_filefmt_files)
+
     def __init__(self,fn, use_config_file):
  
         import os.path,glob
         self.name = fn
-        ## print("D:PdfReport:init: Opted to Use config file?: ", use_config_file)
         default_config = False
         
         if os.path.isdir(fn):
-            ## print("D:PdfReport:init: Yes output file Is a Directory ", fn)
             self.dname = fn
             self.files = set([os.path.basename(x) for x in glob.glob(os.path.join(fn,"*.txt"))])
 
             num_features = len(self.files)
             temp_feature_list = list(self.files)
-            ## print("D:PdfReport:init: feature :", self.files)
-            ## print("D:PdfReport:init: num_features:", len(temp_feature_list))
+        else:
+            print(">>> File %s doesnot exist" % fn) 
+            return
+
+        # Print out a warning if the number of feature files is > 500
+        if num_features > 500:
+            print("### WARNING ### The number of features exceeds 500 ###")
 
         # Initialize the array now that we know the number of elements
         for i in range(0,len(self.files)):
@@ -759,7 +807,7 @@ class PdfReport:
                 default_config = True
         else:
             # Config file not specified
-            print("D: Config File not specified. Using defaults")
+            print(">> Config File not specified. Using defaults")
             default_config = True
 
         if default_config == False:
@@ -773,7 +821,7 @@ class PdfReport:
                 # Set the flag for the particular feature to 1 indicating
                 # the user wants to see the report for this feature.
                 if line1[0] == 'F':
-                    ## Test if line1[1] is a legitimate feature
+                    ## Test if line1[1] is a legitimate feature>
                     if line1[1] in self.bc_config_feature:
                         ## print("D:PdfReport:init: Setting bc_config_feat %s to 1 " % line1[1])
                         self.bc_config_feature[line1[1]] = 1
@@ -788,15 +836,19 @@ class PdfReport:
                 elif line1[0] == 'R':
                     ## Test if line1[1] is a legitimate report file
                     if line1[1] in self.bc_config_report_files:
-                        ## print("D: Setting bc_config_report_file %s to 1 " % line1[1])
                         self.bc_config_report_files[line1[1]] = 1
                         self.bc_config_report_lines[line1[1]] = int(line1[2])
                     else:
                         print("Info: Report file %s is not legitimate" % line1[1])
                         print("Info: Fix the config file")
+                elif line1[0] == 'M':
+                    # Get the file format
+                    file_format = line1[1].rstrip('\n')
+                   
+                    # Get all the files that have this format from the dict.
+                    self.bc_config_filefmt_files[file_format] = 1
               
         else:
-            print("D: Using default Config values ")
             # Default config: Report the first five feature files and
             # all of the non-feature files     
             num_features = len(temp_feature_list)
@@ -810,6 +862,7 @@ class PdfReport:
                 # ex: annotated_email.txt ==> email
                 filename = filename[10:-4]
                 self.bc_config_feature[filename] = 1
+
                 # Report all the lines:
                 self.bc_config_feature_lines[filename] = 0
 
@@ -819,17 +872,17 @@ class PdfReport:
             self.bc_config_report_files['BeReport'] = 1
                     
 
-        print("D: Repotring the following files: ")
-        print(self.bc_config_feature)
-        print(self.bc_config_feature_lines)
-        print(self.bc_config_report_files)
-        print(self.bc_config_report_lines)
+        ## print("D: Reporting the following files: ")
+        ## print(self.bc_config_feature)
+        ## print(self.bc_config_feature_lines)
+        ## print(self.bc_config_report_files)
+        ## print(self.bc_config_report_lines)
+        ## print(self.bc_config_filefmt_files)
 
     def open(self,fname,mode='r'):
         print("DEBUG: OPEN= %s " % fname, self);
             
     def be_process_generate_report(self, fn, display_option1):
-        ## print("D: be_process_generate_report: ", fn.outdir, fn, display_option1)
         PdfReport.outdir = fn.outdir
 
         # Final output will be in pdf form. Text is retained for sometime 
@@ -852,7 +905,7 @@ class PdfReport:
             # report file. If not, skip to the next feature.
             feature = annotated_file[10:-4]
             if PdfReport.bc_config_feature[feature] == 0:
-                ## print("D:be_process_generate_report: NOT Reporting feature ", feature)
+                ## NOT Reporting this feature 
                 continue
 
             ifd = open(input_file, "r")
@@ -886,7 +939,6 @@ def fw_get_file_info(line1):
     for i in range(0, (len(image_fileinfo)-1)):
         if line1[0] in image_fileinfo[i]:
             image_fileinfo_val[i] = line1[1]
-            ##print ("II: line10 is skip_lines0, VAL", i, image_fileinfo[i], image_fileinfo_val[i])
             break
     ## else:
         ## print("D: fw_get_file_info: No MATCH", line1[0], line1[1])
@@ -994,7 +1046,7 @@ def match_file_write(of, line, pattern, linenum):
             line1 = re.split(":", line)
             of.write(bytes(line1[1], 'UTF-8')) 
 
-# Normalizing function. Here we need just thes stripping.
+# Normalizing function. Here we need just the stripping.
 def normalize(s):
     #for p in string.punctuation:
         #s = s.replace(p, '')
@@ -1028,8 +1080,10 @@ def get_file_info(line):
             if re.match(mystr, fileformat):
                 # match found. Increment the value
                 DirReport.dictFileFmtVal[i] += 1
-
                 break
+                #print("AAAAAAAAAA FILENAME:",DirReport.dict_array['filename']) 
+                #DirReport.dictFmtFiles.append(DirReport.dict_array['filename']
+
         else:
             print("Not Found fileformat: ", fileformat)
     elif re.match("filesize", line):
@@ -1137,12 +1191,10 @@ def fw_print_fileinfo(pdf):
 #
 def fw_list_deleted_files():
     # Traverse through myDictList, look for unalloc=1 and print the filename
-    ## print("D: Length of myDictList : ", len(DirReport.myDictList))
     num_deleted_files = 0
     for i in range(0, len(DirReport.myDictList)):
         if DirReport.myDictList[i]['unalloc']:
             num_deleted_files+=1
-            ## print("D: Deleted File: ", num_deleted_files, DirReport.myDictList[i]['filename'])    
     
 #
 # This class is used to report information from the output file created 
@@ -1182,6 +1234,7 @@ class DirReport:
                         "ISO-8859",\
                         "ISO-8859-NLT",\
                         "ASCII",\
+                        "ASCII-NLT",\
                         "PDF1.4",\
                         "DOSCOM" ]
     dictFileFmt = {"empty","data","none",\
@@ -1195,6 +1248,7 @@ class DirReport:
                         "ISO-8859",\
                         "ISO-8859-NLT",\
                         "ASCII",\
+                        "ASCII-NLT",\
                         "PDF1.4",\
                         "DOSCOM" }
     dictFileFmtArray = ["empty","data","none",\
@@ -1207,7 +1261,8 @@ class DirReport:
                         "PDP-11 UNIX/RT ldp",\
                         "ISO-8859 text",\
                         "ISO-8859 text, with no line terminators",\
-                        "ASCII text","ASCII text, with no line terminators",\
+                        "ASCII text",
+                        "ASCII text, with no line terminators",\
                         "PDF document, version 1.4",\
                         "DOS executable (COM)" ]
     
@@ -1218,9 +1273,8 @@ class DirReport:
     page = 0
     max_entries_per_page =30 
     outdir = ''
-    def __init__(self,fn):
 
- 
+    def __init__(self,fn):
         import os.path,glob
         self.name = fn
         ## print("D: FN: ", fn)
@@ -1243,9 +1297,8 @@ class DirReport:
         ## print("DEBUG: OPEN= %s " % fname, self);
         print("D = %s " % fname);
 
-    ###def process_generate_report_fiwalk(self, fn, display_option1, display_numfiles):
     def process_generate_report_fiwalk(self, fn):
-        print("DEBUG: ", fn.outdir, fn)
+        ## print("DEBUG: ", fn.outdir, fn)
         ofn = fn.outdir + "FI.txt"
         ofn_pdf = fn.outdir + "FI.pdf"
 
@@ -1274,7 +1327,6 @@ class DirReport:
         of2 = open(ofn_dict,"wb")
      
         input_file = fn.fiwalk_txtfile
-        # print("D: file: ", input_file)
         ifd = open(input_file, "r")
         linenum = 0
         for line in ifd:
@@ -1319,6 +1371,15 @@ class DirReport:
         of1.close()
         of2.close()
 
+        # Table headers
+        header_stat = ['Statistics','']
+        header_be = ['Bulk Extractor Report Files','Feature Instances','FLTF','FIUF','FICR']
+        header_files = ['filename','partition','DIR','size','Deleted','ntfs-mode','filetype']
+        
+        tab_header_delfiles = ['Sl Num', 'Deleted File']
+        tab_header_file_format = ['Sl Num', 'Filename']
+        tab_header_file_fmts = ['Num', 'File Format']
+
         # Data for Histogram
         # The frequency of each file-format type is mapped into a histogram/plot.
         # We calculate the number of files in each file format here.
@@ -1330,27 +1391,30 @@ class DirReport:
         for i in range(0, (len(self.dictFileFmtArray)-1)):
             # FIXME: use list(dictFileFmt) instead
             self.dictFileFmt[self.dictFileFmtA[i]] =  self.dictFileFmtVal[i]
-            ## print("Debug %s Num: %d" % (self.dictFileFmtArray[i], self.dictFileFmtVal[i])) 
+            ## print("Debug %s Num: %d" % (self.dictFileFmtArray[i], 
+                      ## self.dictFileFmtVal[i])) 
             ## print("Debug: dictFileFmt[%s] = %d" %(self.dictFileFmtA[i], 
                       ## self.dictFileFmt[self.dictFileFmtA[i]] ))
+            file_format = self.dictFileFmtA[i]
+            if PdfReport.bc_config_filefmt_files[file_format] == 1:
+                pdf=PDF()
+                pdf.compress = False
+                pdf.set_font('Arial','',10)
+                pdf.add_page()
+                pdf.make_table_fmtfiles(tab_header_file_fmts, file_format)
+                pdf_file = fn.outdir + '/format_' + file_format + '.pdf'
+                
+                pdf.output(pdf_file,'F')
+                bc_addToReportFileList(pdf_file)
                               
         ## Report the bargraph only if the configuration file says so
         if PdfReport.bc_config_report_files['bc_format_bargraph']:
-            ## print("D: Generating bc_format_bargraph file ") 
             bc_draw_histogram_fileformat(self.dictFileFmt)
-
-        # Table header
-        header_stat = ['Statistics','']
-        header_be = ['Bulk Extractor Report Files','Feature Instances','FLTF','FIUF','FICR']
-        header_files = ['filename','partition','DIR','size','Deleted','ntfs-mode','filetype']
-        
-        tab_header_delfiles = ['Sl Num', 'Deleted File']
 
         ## Report the Fiwalk Report file only if the config file says so
         if PdfReport.bc_config_report_files['FiwalkReport'] == 1:
-            ## print("D: Generating Fiwalk Report")
-
-            # Write the txt files to pdf file
+            pdf=PDF()
+            pdf.compress = False
             pdf.set_title("Bitcurator Report")
  
             # Print the information about the input image being analyzed
@@ -1389,9 +1453,8 @@ class DirReport:
             bc_addToReportFileList(pdf_file)
 
         ## Now add the info from bulk-extractor output (be_ofn)
-        ## Report the Deleted Files Report file only if the config file says so
+        ## Report the BE Report file only if the config file says so
         if PdfReport.bc_config_report_files['BeReport'] == 1:
-            ## print("D: Generating BE Report file BeReport.pdf")
             pdf=PDF_BE()
             pdf.compress = False
 
