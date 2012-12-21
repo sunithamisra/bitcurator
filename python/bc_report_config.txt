@@ -1,22 +1,25 @@
 #####################################################################
 #################Config File for BitCurator Report###################
+## L: Logo. Specify the logo image to go with the report
 ## F: Feature Files
 ## R: Fiwalk/BE Report files
 ## M: List files of a format
 ## Format: File_type (F/R):Reportfile-name:numlines
 ## numlines: number of lines to report, 0 for all lines
 #####################################################################
+#L:FinalBitCuratorLogo-NoText.png
 # Feature Files to report
 #F:junk_to_test:0
 #F:rfc822:30
-#F:domain:0
-#F:email:100
+F:domain:0
+F:email:100
 F:exif:0
 F:telephone:0
-F:url:0
-F:windirs:0
+F:url:100
+F:windirs:100
 F:winpe:0
 F:zip:0
+F:json:0
 
 # Fiwalk and Bulk Extractor Report files
 R:bc_format_bargraph:0
@@ -28,8 +31,8 @@ R:BeReport:0
 M:empty
 M:data
 M:none
-M:AppleDouble
-M:XML
+M:AppleDouble encoded Macintosh file
+M:XML document text
 ##M:SQLite3x
 ##M:nISO-EA-NLT
 ##M:NISO-EA
