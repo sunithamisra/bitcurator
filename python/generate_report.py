@@ -57,6 +57,7 @@ from matplotlib.backends.backend_pdf import PdfPages
 from pylab import *
 import datetime
 import pylab as p
+import sys
 try:
     from argparse import ArgumentParser
 except ImportError:
@@ -69,6 +70,7 @@ except ImportError:
 reportFileList = [None]*35
 reportFiles = 0
 
+input_image_name = ''
 image_fileinfo_val = {}
 image_fileinfo = ['image_filename', 'sectorsize','pagesize','acquisition_seconds', 'partition_offset','block_size','ftype','ftype_str','block_count','first_block','last_block']
 
@@ -305,7 +307,6 @@ class PDF_BE(FPDF):
 
         def bc_write_column(self, w,h,cell_text, fill):
             text = self.bc_adjust_text_be(cell_text, w)
-            #print("TEXT: %s", text)
             self.cell(w,h,text,'LR',0,'L',fill)
 
         def make_table_feat(self, feature_file, header):
@@ -378,6 +379,13 @@ class PDF_BE(FPDF):
 
                 position = row[0]
 
+                # If it is a special file, check if the user wants it to 
+                # be repoted. If not, exclude this from the table.
+                #if pdf.report_special_files is_special_file(filename):
+                #if is_special_file(filename):
+                if (PdfReport.bc_config_report_special_files == False) and (is_special_file(filename)):
+                    ## print("D: File %s is special. So skipping" %(filename))
+                    continue
                 self.bc_write_column(w[0],6,filename,fill)
                 self.bc_write_column(w[1],6,position,fill)
                 self.bc_write_column(w[2],6,feature,fill)
@@ -417,6 +425,9 @@ def filename_from_path(path):
 
 def stringfix(strname):
     return(re.sub('_',' ',strname.upper()))
+
+#numlines_warning_limit = 500
+numfeatures_warning_limit = 30
 
 # Class PDF to write the report to a PDF file.
 # It uses the python-3 port of FPDF software from 
@@ -488,6 +499,63 @@ class PDF(FPDF):
             self.set_fill_color(224,235,255)
             self.set_text_color(0)
             self.set_font('Times','',8)
+
+        # Get the "long form" of the "short form" of the format :-)
+        # Uses info from the two structures dictFileFmtVal and bcFmtDict.
+        # The two structures could be combined into one in the future.
+        def bc_get_LongformFmt(self, short_form_fmt):
+            for x in DirReport.dictFileFmtVal:
+                if x == short_form_fmt:
+                    for y in DirReport.bcFmtDict:
+                        if x == DirReport.bcFmtDict[y]:
+                            return (y)
+
+        # This tabe will have the translation of the long and short forms
+        # of the format name and the number of files for each format. This
+        # has the supplemental information for the bar chart and combines
+        # the information fron from dictFileFmtVal and bcFmtDict.
+        def bc_make_table_fileformat(self, header, dictFileFmtVal, bcFmtDict):
+            # Header
+            w=[120,30,20]
+        
+            self.set_font('Times','B',12)
+            self.underline = 1
+            self.cell(0, 6, 'File Format Table', ln=1)
+        
+            self.set_font('Times','',10)
+            imgname = image_fileinfo[0] + ': ' + image_fileinfo_val[0]
+        
+            self.cell(0, 6, 'Disk Image: '+filename_from_path(imgname), ln=1)
+        
+            #Colors, line width and bold font
+            self.set_table_hdr_attributes(w, header)
+        
+            #Color and font restoration
+            self.set_table_body_attributes()
+        
+            fill=0
+            self.set_font('Times','',10)
+
+            ## print("D:", dictFileFmtVal)
+            ## print("D:", bcFmtDict)
+            self.bc_get_LongformFmt("PDP-11")
+
+            num_items = 0
+            for i in dictFileFmtVal:
+                num_items += 1
+                ## print("D: ", i, dictFileFmtVal[i])
+                trimmed_text = PDF.bc_adjust_text_pdf(PDF, self.bc_get_LongformFmt(i), w[0], 30)
+                self.cell(w[0],6,trimmed_text,'LR',0,'L',fill)
+                self.cell(w[1],6,i,'LR',0,'L',fill)
+                self.cell(w[2],6,str(dictFileFmtVal[i]),'LR',0,'C',fill)
+                self.ln()
+                fill=not fill
+                bc_table_end_page(self, num_items, header, w)
+
+            # Closure line
+            self.cell(sum(w),0,'','T')
+            
+                
         #
         # This function builds the table for reporting the overall statistics
         # Source : fiwalk
@@ -502,6 +570,7 @@ class PDF(FPDF):
               
                 self.set_font('Times','',10)
                 imgname = image_fileinfo[0] + ': ' + image_fileinfo_val[0]
+
                 self.cell(0, 6, 'Disk Image: '+filename_from_path(imgname), ln=1)
 
                 #Colors, line width and bold font
@@ -561,10 +630,10 @@ class PDF(FPDF):
         #
         # Utility Function to Shorten the text length to fit in the cell.
         #
-        def bc_adjust_text_pdf(self, cell_text, cell_width):
+        def bc_adjust_text_pdf(self, cell_text, cell_width, shrink_back):
             if len(cell_text) > int(cell_width - 15):
-                short_len = cell_width/2 - 10
-                ## print("Shortlen:",len(cell_text), cell_width, short_len)
+                short_len = cell_width/2 - shrink_back
+                ## print("D: Shortlen:",len(cell_text), cell_width, short_len)
                 text = cell_text[0:int(short_len)] + '...' + cell_text[-int(short_len):]
                 return text
             return cell_text
@@ -602,7 +671,7 @@ class PDF(FPDF):
                     ## num_deleted_files,DirReport.myDictList[i]['filename'])    
                     self.cell(w[0],6,str(num_deleted_files),'LR',0,'L',fill)
                     mystr = (DirReport.myDictList[i]['filename'])
-                    text = self.bc_adjust_text_pdf(mystr, w[1])
+                    text = self.bc_adjust_text_pdf(mystr, w[1], 10)
                     self.cell(w[1],6,text,'LR',0,'L',fill)
                     self.ln()
                     fill=not fill
@@ -611,21 +680,12 @@ class PDF(FPDF):
             #Closure line
             self.cell(sum(w),0,'','T')
     
-        #### REMOVE
-        #### def bc_get_full_format_name(self, file_format):
-            #### for i in range (0, (len(DirReport.dictFileFmtArray)-1)):
-                #### if file_format == DirReport.dictFileFmtA[i]:
-                    #### return(DirReport.dictFileFmtArray[i])
-            #### return("unknown")    
-
         #
         # Make a Table of all the files with the given format type
         # Full format is what appears in the image file.
         # 
         def make_table_fmtfiles(self, header, file_format):
             imgname = image_fileinfo[0] + ': ' + image_fileinfo_val[0]
-            ####full_filefmt = self.bc_get_full_format_name(file_format)
-            ####format_heading = 'Format: '+full_filefmt
             format_heading = 'Format: '+file_format
 
             # Write the headlines for the table:
@@ -654,7 +714,7 @@ class PDF(FPDF):
                     num_files+=1
                     self.cell(w[0],6,str(num_files),'LR',0,'L',fill)
                     mystr = (DirReport.myDictList[i]['filename'])
-                    text = self.bc_adjust_text_pdf(mystr, w[1])
+                    text = self.bc_adjust_text_pdf(mystr, w[1], 10)
                     self.cell(w[1],6,text,'LR',0,'L',fill)
                     self.ln()
                     fill=not fill
@@ -694,22 +754,38 @@ class PDF(FPDF):
                 fill=0
 
                 ## Warn the user if the length of  a feature file is > 5000
-                if DirReport.array_ind > 5000:
-                    print("#### Warning #### Report file has exceeded 5000 knes limit")
+                if PdfReport.bc_max_lines_to_report and \
+                     DirReport.array_ind > PdfReport.bc_max_lines_to_report:
+                    print("### WARNING ### Report file has exceeded %d lines limit###", PdfReport.bc_max_lines_to_report) 
 
                 self.set_font('Times','',8)
+                linenum = 0
                 for i in range(0, DirReport.array_ind-1):
-                    ## FIXME: Make the filename wrap around if it is longer than w[0]
                     column = 6
-
                     cell_text = DirReport.myDictList[i]['filename']
-                    text = self.bc_adjust_text_pdf(cell_text, w[0])
+
+                    # Check if config file is set to not report special files
+                    if (PdfReport.bc_config_report_special_files == False) \
+                        and (is_special_file(cell_text)):
+                        ## print("D: File %s is special. Skipping" %(cell_text))
+                        continue
+ 
+                    # Config file sets the maxlines to 0 to report all the lines
+                    # or a specific number to limit the reporting lines.
+                    if (PdfReport.bc_config_report_lines['FiwalkReport'] != 0):
+                        if (linenum >= PdfReport.bc_config_report_lines['FiwalkReport']):
+                            # Lines reached max: Breaking
+                            ## print("FiwalkReport: Exceeded Maxlines: ", linenum)
+                            break 
+                    
+                    linenum += 1
+                    text = self.bc_adjust_text_pdf(cell_text, w[0], 10)
                     self.cell(w[0],6,text,'LR',0,'L',fill)
 
                     ### The following is supposed to trim the characters to the
                     ### size available. But it is removing all charaters if the
                     ### text size exceeds w[0]. Hence used the above
-                    ### primitive methid  - FIXME
+                    ### primitive method  - FIXME
 
                     ###text = DirReport.myDictList[i]['filename']
                     ###text = self.multi_cell(w=w[0], h=6, txt=text,
@@ -769,6 +845,9 @@ def bc_parse_config_file():
     for x, y in PdfReport.bc_config_filefmt_files.items():
         PdfReport.bc_config_filefmt_files[x] = 0
 
+    # By default, report special files
+    PdfReport.bc_config_report_special_files = True
+
     ## print("D:config_filefmt: ", PdfReport.bc_config_filefmt_files)
 
     for line in ifd:
@@ -801,6 +880,8 @@ def bc_parse_config_file():
             if line1[1] in PdfReport.bc_config_report_files:
                 PdfReport.bc_config_report_files[line1[1]] = 1
                 PdfReport.bc_config_report_lines[line1[1]] = int(line1[2])
+                ## print("D: Reporting %d lines for file %s" \
+                      ## %(PdfReport.bc_config_report_lines[line1[1]], line1[1]))
             else:
                 print("Info: Report file %s is not legitimate" % line1[1])
                 print("Info: Fix the config file")
@@ -810,6 +891,23 @@ def bc_parse_config_file():
            
             # Get all the files that have this format from the dict.
             PdfReport.bc_config_filefmt_files[file_format] = 1
+        elif line1[0] == 'S':
+            # Find out if user wants special files to be reported
+            if line1[1].rstrip() == 'REPORT_SPECIAL_FILES':
+                if line1[2].rstrip() == 'YES':
+                    PdfReport.bc_config_report_special_files = True
+                else:
+                    print("D: Not reporting Special files")
+                    PdfReport.bc_config_report_special_files = False
+            elif line1[1].rstrip() == 'MAX_LINES_TO_REPORT':
+                PdfReport.bc_max_lines_to_report = int(line1[2])
+                ## print("Config: MAX LINES TO REPORT: ", PdfReport.bc_max_lines_to_report)
+            elif line1[1].rstrip() == 'MAX_FILE_FORMAT_FILES_TO_REPORT':
+                PdfReport.bc_max_fmtfiles_to_report = int(line1[2])
+                ## print("Config: MAX FMT FILES TO REPORT: ", PdfReport.bc_max_fmtfiles_to_report)
+            elif line1[1].rstrip() == 'MAX_FEATURE_FILES_TO_REPORT':
+                PdfReport.bc_max_featfiles_to_report = int(line1[2])
+                print("Config: MAX FEATURE FILES TO REPORT: ", PdfReport.bc_max_featfiles_to_report)
 
 # Class PdfReport: 
 #
@@ -831,6 +929,11 @@ class PdfReport:
     default_config = False
     bc_config_feature = {}
     bc_config_feature_lines = {}
+    bc_config_report_special_files = True
+    bc_max_featfiles_to_report = 0
+    bc_max_fmtfiles_to_report = 0
+    bc_max_lines_to_report = 0
+    
 
     # The following is a set of all non-feature pdf report files. It is a 
     # growing set. Add more as and when new reports are added.
@@ -843,8 +946,6 @@ class PdfReport:
                               'FiwalkDeletedFiles':0,'BeReport':0}
 
     # Initialize all the elements of the configfilefmt_files to 0 XXXX
-    ## bc_config_filefmt_files = DirReport.dictFileFmt
-    ## bc_config_filefmt_files = [None]*len(DirReport.dictFileFmt)
     bc_config_filefmt_files = {'empty':0,'data':0,'none':0,\
                         'AppleDouble':0,\
                         'XML':0,\
@@ -881,9 +982,15 @@ class PdfReport:
             print(">>> File %s doesnot exist" % fn) 
             return
 
-        # Print out a warning if the number of feature files is > 500
-        if num_features > 500:
-            print("### WARNING ### The number of features exceeds 500 ###")
+        # Open the Configuration File: If it doesn't exist, default 
+        if use_config_file == 'Y' or use_config_file == 'y':
+            if (os.path.exists("bc_report_config.txt") == False):
+                print("Info: Config file bc_report_config.txt does not exist. Using Default parameters")
+                default_config = True
+        else:
+            # Config file not specified
+            ## print(">> Config File not specified. Using defaults")
+            default_config = True
 
         # Initialize the array now that we know the number of elements
         for i in range(0,len(self.files)):
@@ -893,16 +1000,6 @@ class PdfReport:
             filename = filename[10:-4]
             self.bc_config_feature[filename] = 0
             self.bc_config_feature_lines[filename] = 0
-
-        # Open the Configuration File: If it doesn't exist, default 
-        if use_config_file == 'Y' or use_config_file == 'y':
-            if (os.path.exists("bc_report_config.txt") == False):
-                print("Info: Config file bc_report_config.txt does not exist. Using Default parameters")
-                default_config = True
-        else:
-            # Config file not specified
-            print(">> Config File not specified. Using defaults")
-            default_config = True
 
         if default_config == False:
             bc_parse_config_file()
@@ -923,11 +1020,11 @@ class PdfReport:
                 filename = filename[10:-4]
                 self.bc_config_feature[filename] = 1
 
-                # Report a maximum of 100 lines:
+                # Report a maximum of configured number of lines:
                 # FIXME: Setting it to 0 will try reporting all lines of 
                 # all the files. This is breaking jow and jof. Need to see
                 # what is causing the breakage.
-                self.bc_config_feature_lines[filename] = 100
+                self.bc_config_feature_lines[filename] = PdfReport.bc_max_lines_to_report
 
             self.bc_config_report_files['bc_format_bargraph'] = 1
             self.bc_config_report_files['FiwalkReport'] = 1
@@ -941,6 +1038,12 @@ class PdfReport:
         ## print(self.bc_config_report_files)
         ## print(self.bc_config_report_lines)
         ## print(self.bc_config_filefmt_files)
+
+        # Print out a warning if the number of feature files exceeds limit
+        if PdfReport.bc_max_featfiles_to_report and \
+              num_features > PdfReport.bc_max_featfiles_to_report:
+            print("### WARNING ### The number of features exceeds %d ###"
+                              %(PdfReport.bc_max_featfiles_to_report)) 
 
     def open(self,fname,mode='r'):
         print("DEBUG: OPEN= %s " % fname, self);
@@ -1001,6 +1104,13 @@ def fw_get_file_info(line1):
     ## else:
         ## print("D: fw_get_file_info: No MATCH", line1[0], line1[1])
         
+# is_special_file returns True if the file starts with a dot. Other
+# criteria to label it a special file can be added as needed.
+def is_special_file(filename):
+    trimmed_filename = filename.lstrip()
+    if trimmed_filename[0] == '.':
+        return(True)
+    return(False)
 
 # This function makes a dictionary datastructure of the contents of
 # of the input file, which has the file attributes for every file found.
@@ -1032,13 +1142,6 @@ def make_dict(linenum, line):
     # one is not the first element.
     #
     if line1[0] in 'filename': #Next sub-array 
-        ##FIXME: Need to eliminate special files (with dots and dotdots)
-        ## If the first char is . or .. ignore
-        #print("line10-filename: ", str(line1[1]))
-
-        if line1[1][0] == ".":
-            print("dotted filename: ", line1[1]) 
-
         DirReport.array_ind = DirReport.array_ind + 1
         if DirReport.is_first_file==True:
             DirReport.is_first_file = False
@@ -1218,10 +1321,11 @@ def generate_bar_graph(item_dict):
     bc_addToReportFileList(outfile)
     pp.savefig(fig)
     pp.close()
-    os.system("evince ./bc_format_bargraph`.pdf")
+    #os.system("evince ./bc_format_bargraph.pdf")
 
 def bc_draw_histogram_fileformat(item_dict):
     generate_bar_graph(item_dict)
+
 
 #
 # Fiwalk generates info about the image and puts it on top of the output file
@@ -1271,7 +1375,6 @@ class DirReport:
     moreNumlinks = 0
     emptyFiles = 0
     bigFiles = 0
-    #dict_files = {'filename','size', 'mode', 'uid', 'gid', 'seq', 'created'};
     dict_array = ["filename", "partition", "id", "name_type", "filesize", \
                   "alloc", "unalloc", "used", "inode", "meta_type", "mode", \
                   "nlink", \
@@ -1279,48 +1382,17 @@ class DirReport:
                   "atime", "atime_txt", "crtime", "crtime_txt", "libmagic", "seq"] 
     dict_val = {}
     myDictList = []
-
     bcFmtDict = {}
-
-    ##dictFileFmtList = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
     dictFileFmtVal = {}
-    dictFileFmt = {"empty","data","none",\
-                        "AppleDouble",\
-                        "XML",\
-                        "SQLite3x",\
-                        "nISO-EA-NLT",\
-                        "NISO-EA",\
-                        "Hitachi",\
-                        "PDP-11",\
-                        "ISO-8859",\
-                        "ISO-8859-NLT",\
-                        "ASCII",\
-                        "ASCII-NLT",\
-                        "PDF1.4",\
-                        "DOSCOM", \
-                        "ASCII-E-CRLFLT",\
-                        "ASCII-mail-CRLFLT",\
-                        "JPEG-1.01",\
-                        "newsRmailASCII_CRLFLT" }
-    dictFileFmtArray = ["empty","data","none",\
-                        "AppleDouble encoded Macintosh file",\
-                        "XML document text",\
-                        "SQLite 3.x database",\
-                        "Non-ISO extended-ASCII text, with no line terminators",\
-                        "Non-ISO extended-ASCII text",\
-                        "Hitachi SH big-endian COFF object, not stripped",\
-                        "PDP-11 UNIX/RT ldp",\
-                        "ISO-8859 text",\
-                        "ISO-8859 text, with no line terminators",\
-                        "ASCII text",
-                        "ASCII text, with no line terminators",\
-                        "PDF document, version 1.4",\
-                        "DOS executable (COM)",
-                        "ASCII English text, with CRLF line terminators",
-                        "ASCII mail text, with CRLF line terminators",
-                        "JPEG image data, JFIF standard 1.01",
-                        "news or mail, ASCII text, with CRLF line terminators" ]
-    
+
+    # The file format names are very lengthy and hence using these names
+    # as they are from the fiwalk output files makes the barchart look ugly. 
+    # But defining a short form for each format gets tough since the formats
+    # are ready dynamically. So a static array like the following is maintained 
+    # with some known format names mapped to their shorter forms. Those that are
+    # not here, will have a short name formed dynamically, with first and last 
+    # few characters of the lenghty format name. The purpose of the following
+    # static table is to have at least some meaningful names in the bar graph. 
     dictFileFmtStatic = \
          {'empty':'empty','data':'data','none':'none',\
           'AppleDouble encoded Macintosh file':'AppleDouble',\
@@ -1491,16 +1563,16 @@ class DirReport:
         header_files = ['Filename','Partition','DIR','Size','Deleted','Filetype']
         
         tab_header_delfiles = [' # ', 'Deleted File']
-        tab_header_file_fmts = [' # ', 'File Format']
+        tab_header_file_fmts = [' # ', 'File']
         tab_header_statistics = ['Feature', 'Value']
+        tab_header_bargraph = ['Format', 'Short Form', 'Files']
 
         # Data for Histogram
         # The frequency of each file-format type is mapped into a histogram/plot.
         # We calculate the number of files in each file format here.
-        # Looking at a couple of sample data, 15 file formats are identified.
-        # More can be added as they are found. Look at dictFleFmtArray for the
-        # identifed list of formats.
 
+        #print("MMMMMAX FORMAT FILEs to be reported: %d", PdfReport.bc_max_fmtfiles_to_report)
+        num_fmt_files = 0
         for x in self.bcFmtDict:
             file_format = x
             #### FIXME -1st ####
@@ -1517,10 +1589,26 @@ class DirReport:
                 
             pdf.output(pdf_file,'F')
             bc_addToReportFileList(pdf_file)
+          
+            num_fmt_files += 1
+            if num_fmt_files >= PdfReport.bc_max_fmtfiles_to_report:
+                ## print("D: FMT files exceeded max limit of %d" %(num_fmt_files))
+                break
                               
         ## Report the bargraph only if the configuration file says so
         if PdfReport.bc_config_report_files['bc_format_bargraph']:
             bc_draw_histogram_fileformat(self.dictFileFmtVal)
+
+            # Also make a table of the same information
+            pdf=PDF()
+            pdf.compress = False
+            pdf.set_font('Arial','',10)
+            pdf.add_page()
+            pdf.bc_make_table_fileformat(tab_header_bargraph, self.dictFileFmtVal, self.bcFmtDict)
+            pdf_file = fn.outdir + '/format_table.pdf'
+            pdf.output(pdf_file,'F')
+            bc_addToReportFileList(pdf_file)
+
 
         ## Report the Fiwalk Report file only if the config file says so
         if PdfReport.bc_config_report_files['FiwalkReport'] == 1:
@@ -1592,21 +1680,32 @@ if __name__=="__main__":
     ## print("D: FIWALK_TXTFILE", args.fiwalk_txtfile)
     ## print("D: OUTDIR", args.outdir)
 
+    config_file = "bc_report_config.txt"
     if args.pdf_report:
-        print(">>> Do you want to use the configuration file bc_report_config.txt?: Y/N >>>")
 
-        is_config_file = (input ("option: "))
+        use_config_file = (input (">>> Do you want to specify the configuration file?: [Y/N]:"))
 
-        if is_config_file == 'Y' or is_config_file == 'y':
-            print(">>> Please make sure you have updated the file bc_report_config.txt")
-        elif is_config_file == 'N' or is_config_file == 'n':
+        if use_config_file == 'Y' or use_config_file == 'y':
+            config_file = (input (">>> Please specify the configuration file[bc_report_config.txt]: "))
+
+            # If hit return, use the default: bc_report_config.txt.
+            # In either case, see if the file exists.
+            if (config_file == ''):
+                # User pressed return. Use the default file: bc_report_config.txt
+                config_file = "bc_report_config.txt"
+
+            if not os.path.exists(config_file):
+                print(">>> Configuration file %s does not exist. Using default values" %(config_file))
+                use_config_file = "N"
+                
+        elif use_config_file == 'N' or use_config_file == 'n':
             print(">>> You have opted to select the default values for reporting")
         else:
             print(">>> Wrong option. Defaulting")
-            is_config_file = 'N'
+            use_config_file = 'N'
 
-        report = PdfReport(args.outdir, is_config_file)
-        report.be_process_generate_report(args, is_config_file)
+        report = PdfReport(args.outdir, use_config_file)
+        report.be_process_generate_report(args, use_config_file)
 
         # Using the xml file generated by fiwalk, report the following
         # information:
