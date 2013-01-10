@@ -1,0 +1,13 @@
+### Commented entries have reasonable defaults.
+### Uncomment to edit them.
+# Source: <source package name; defaults to package name>
+Section: misc
+Priority: optional
+# Homepage: wiki.bitcurator.net
+Standards-Version: 3.9.2
+
+Package: bitcurator-dep
+Version: 0.1.7
+# Maintainer: BitCurator
+Depends: g++, ant, libcrypto++9, libssl1.0.0, libssl-dev, expat, libexpat1, libexpat1-dev, libfuse2, libfuse-dev, libncurses5-dev, libcurl4-openssl-dev, libreadline-dev, libmagic-dev, flex, gawk, zlib1g-dev, libpthread-stubs0, libpthread-stubs0-dev, libcppunit-1.12-1, libcppunit-dev, libtool, automake, openjdk-6-jdk, libewf1, libewf-dev, ewf-tools, guymager, python3, expect, ghex, gnome-system-tools, gnome-panel, hfsutils, hfsutils-tcltk, hfsplus, hfsprogs, dconf-tools, intltool, libgtk2.0-dev, libgcrypt11-dev 
+Description: the dependency files for BitCurator 0.1.7
