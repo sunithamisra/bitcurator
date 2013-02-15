@@ -25,7 +25,6 @@ def is_comment_line(line):
 def bc_addToReportFileList(pdf_file, PdfReport):
     try:
         reportFileList[PdfReport.reportFiles] = pdf_file
-        ##reportFileList[PdfReport.reportFiles] = pdf_file
         PdfReport.reportFiles += 1
     except IndexError:
         print("Warning: Exceeded generating 100 format files") 
@@ -65,17 +64,19 @@ def match_and_write(of, line, pattern, separator):
             of.write(b"\n") 
 
 def filename_from_path(path):
-    templist = path.split("/")
+    templist = str(path)
+    #templist = path.split("/")
+    templist = templist.split("/")
     length = len(templist)
     return(templist[length-1]) 
 
 def stringfix(strname):
     return(re.sub('_',' ',strname.upper()))
 
-def print_dict(DirReport):
-    print(" LENGTH: ", len(DirReport.myDictList))
-    for index in range(len(DirReport.myDictList)):
-        print("PrintDict: INDEX: filename", DirReport.myDictList[index]['filename'])
+def print_dict(FiwalkReport):
+    print(" LENGTH: ", len(FiwalkReport.fiDictList))
+    for index in range(len(FiwalkReport.fiDictList)):
+        print("PrintDict: INDEX: filename", FiwalkReport.fiDictList[index]['filename'])
         if index == 10:
             break
 
@@ -94,35 +95,35 @@ def normalize(s):
     return s.strip()
 #
 # Function: get_file_info()
-# Parses the line and populates the DirReport class with the info.
+# Parses the line and populates the FiwalkReport class with the info.
 #
-def get_file_info(line, DirReport):
+def get_file_info(line, FiwalkReport):
     if re.match("name_type: ",line):
         line1 = re.split(":", line)
         if "r" in line1[1]:
-            DirReport.numfiles = DirReport.numfiles + 1
+            FiwalkReport.numfiles = FiwalkReport.numfiles + 1
         elif "d" in line1[1]:
-            DirReport.dirs = DirReport.dirs + 1
+            FiwalkReport.dirs = FiwalkReport.dirs + 1
     elif re.match("unalloc", line):
         line1 = re.split(":", line)
         if int(line1[1]) == 1:
-            DirReport.deleted_files = DirReport.deleted_files + 1
+            FiwalkReport.deleted_files = FiwalkReport.deleted_files + 1
     elif re.match("libmagic", line):
         line1 = re.split(":", line)
         fileformat = normalize(line1[1])
 
-        # If mystr is not alrady present in format array, add it
-        DirReport.bcAddToFmtList(DirReport, fileformat)
+        # If fileformat is not alrady present in format array, add it
+        FiwalkReport.bcAddToFmtList(FiwalkReport, fileformat)
 
         ## DEBUG: Print the Format Dict
-        ## DirReport.bcPrintFormatDict()
+        ## FiwalkReport.bcPrintFormatDict()
         ## print("FORMAT DICT ************ ")
-        ## print(DirReport.bcFmtDict)
+        ## print(FiwalkReport.bcFmtDict)
 
     elif re.match("filesize", line):
         line1 = re.split(":", line)
         if int(line1[1]) == 0:
-            DirReport.emptyFiles = DirReport.emptyFiles + 1
+            FiwalkReport.emptyFiles = FiwalkReport.emptyFiles + 1
         if int(line1[1]) > 1024*1024:
-            DirReport.bigFiles = DirReport.bigFiles + 1
+            FiwalkReport.bigFiles = FiwalkReport.bigFiles + 1
 
