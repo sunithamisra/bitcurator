@@ -5,7 +5,7 @@
 # of generate_reports script
 
 from generate_report import PdfReport
-from generate_report import DirReport
+from generate_report import FiwalkReport
 import bc_utils,re
 
 def bc_parse_config_file(PdfReport):
@@ -17,7 +17,7 @@ def bc_parse_config_file(PdfReport):
     # generated, but the user can limit the number of these files by setting
     # S:MAX_FILE_FORMAT_FILES_TO_REPORT:20
 
-    PdfReport.bc_config_filefmt_files = DirReport.dictFileFmtStatic.copy() 
+    PdfReport.bc_config_filefmt_files = FiwalkReport.dictFileFmtStatic.copy() 
 
     # Initialize all the values to 0
     for x, y in PdfReport.bc_config_filefmt_files.items():
