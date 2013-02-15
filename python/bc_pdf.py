@@ -6,16 +6,16 @@
 
 # Checks if the report has reached the end of page and if so, starts
 # a new page. 
-def bc_table_end_page(pdf, DirReport, linenum, header, w):
-    if ((linenum>=DirReport.max_entries_per_page) & 
-        (linenum%DirReport.max_entries_per_page == 0)):
+def bc_table_end_page(pdf, FiwalkReport, linenum, header, w):
+    if ((linenum>=FiwalkReport.max_entries_per_page) & 
+        (linenum%FiwalkReport.max_entries_per_page == 0)):
         # Close the page
         pdf.cell(sum(w),0,'','T')
         pdf.add_page()
         for i in range(0,len(header)):
             pdf.cell(w[i],7,header[i],1,0,'C',1)
         pdf.ln()
-    DirReport.page = pdf.page
+    FiwalkReport.page = pdf.page
 
 def make_header(this, logo, header_text):
     this.set_font('Arial','B',14)
