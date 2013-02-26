@@ -84,7 +84,7 @@ def bc_make_dict(fi, FiwalkReport, fn):
         FiwalkReport.dict_val["alloc"] = True
     else:
         FiwalkReport.dict_val["unalloc"] = True
-        FiwalkReport.deleted_files = FiwalkReport.deleted_files + 1
+        FiwalkReport.deletedFiles = FiwalkReport.deletedFiles + 1
 
     # If not alrady present in format array, add the fileformat
     FiwalkReport.dict_val['libmagic'] = fi.libmagic()
