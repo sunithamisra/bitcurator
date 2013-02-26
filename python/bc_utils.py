@@ -107,7 +107,7 @@ def get_file_info(line, FiwalkReport):
     elif re.match("unalloc", line):
         line1 = re.split(":", line)
         if int(line1[1]) == 1:
-            FiwalkReport.deleted_files = FiwalkReport.deleted_files + 1
+            FiwalkReport.deletedFiles = FiwalkReport.deletedFiles + 1
     elif re.match("libmagic", line):
         line1 = re.split(":", line)
         fileformat = normalize(line1[1])
