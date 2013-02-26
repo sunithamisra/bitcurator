@@ -60,6 +60,7 @@ import bc_utils
 import bc_config
 import bc_pdf
 import bc_graph
+import bc_regress
 from bc_utils import filename_from_path
 from bc_genrep_dfxml import bc_process_xmlfile_using_sax
 from bc_genrep_text import bc_process_textfile
@@ -72,7 +73,6 @@ except ImportError:
 # are actually reported, based on the configuration.
 reportFiles = 0
 
-input_image_name = ''
 image_fileinfo = ['image_filename', 'sectorsize','pagesize','acquisition_seconds', 'partition_offset','block_size','ftype','ftype_str','block_count','first_block','last_block']
 
 image_info = {'image_filename':0, 'sectorsize':0,'pagesize':0,'acquisition_seconds':'', 'partition_offset':0,'block_size':0,'ftype':0,'ftype_str':0,'block_count':0,'first_block':0,'last_block':0}
@@ -396,12 +396,12 @@ class PDF(FPDF):
         fill=not fill
               
         self.cell(w[0],6,"Total Deleted Files",'LR',0,'L',fill)
-        self.cell(w[1],6,str(FiwalkReport.deleted_files),'LR',0,'L',fill)
+        self.cell(w[1],6,str(FiwalkReport.deletedFiles),'LR',0,'L',fill)
         self.ln()
         fill=not fill
               
         self.cell(w[0],6,"Total Unused Files",'LR',0,'L',fill)
-        self.cell(w[1],6,str(FiwalkReport.unused_files),'LR',0,'L',fill)
+        self.cell(w[1],6,str(FiwalkReport.unusedFiles),'LR',0,'L',fill)
         self.ln()
         fill=not fill
               
@@ -795,11 +795,12 @@ class FiwalkReport:
     numfiles = 0
     files = 0
     dirs = 0
-    deleted_files = 0
-    unused_files = 0
+    deletedFiles = 0
+    unusedFiles = 0
     moreNumlinks = 0
     emptyFiles = 0
     bigFiles = 0
+    numFormats = 0
     dict_array = ["filename", "partition", "id", "name_type", "filesize", \
                   "alloc", "unalloc", "used", "inode", "meta_type", "mode", \
                   "nlink", \
@@ -850,10 +851,16 @@ class FiwalkReport:
     max_entries_per_page =30 
     outdir = ''
 
+    regTestExp = \
+         {'numFormats':153, 'numfiles':130, 'dirs':23, \
+          'deletedFiles':0, 'unusedFiles':0, 'emptyFiles':11, 'bigFiles':5, \
+          'image_filename':"charlie-work-usb-2009-12-11.aff", \
+          'partition_offset':512, 'block_count':258559, 'first_block':0, \
+          'last_block':258558, 'ftype':1, 'ftype_str':"ntfs", 'block_size':258559}
+
     def __init__(self,fn):
         import os.path,glob
         self.name = fn
-        ## print("D: FN: ", fn)
         if os.path.isfile(fn):
             ## print("D: YES The Fiwalk Txt file EXISTS ", fn)
             self.dname = fn
@@ -890,6 +897,7 @@ class FiwalkReport:
     # The File-format list is maintained dynamically and is populated as
     # a new file-format is read from the main dictionary.
     def bcAddToFmtList(self, fmt_str):
+        self.numFormats += 1
         # Check if the fmt_str is not in the list already
         for x in self.bcFmtDict:
             shortForm = self.bcFmtDict[x]
@@ -922,6 +930,8 @@ class FiwalkReport:
         self.xmlInput = True
         input_file = fn.fiwalk_xmlfile
         FiwalkReport.outdir = fn.outdir
+        # print("FN: ", fn)
+        # print("input_file: ", input_file)
 
         # Process the xml file with sax
         bc_process_xmlfile_using_sax(FiwalkReport, input_file, image_info)
@@ -1053,14 +1063,21 @@ class FiwalkReport:
 
 if __name__=="__main__":
     import sys, time, re
+    #from optparse import OptionParser
+    #parser = OptionParser()
+    #parser.add_option("-r","--regress",action="store_true")
+    #(options,args) = parser.parse_args()
 
     parser = ArgumentParser(prog='generate_report.py', description='Generate Reports from "bulk_extractor" and "fiwalk" outputs')
+    parser.add_argument('--regress', action='store_true', help='Regression')
     parser.add_argument('--pdf_report', action='store_true',help='PDF report')
     parser.add_argument('--fiwalk_txtfile', action='store', help="Use fiwalk-generated text file ")
     parser.add_argument('--fiwalk_xmlfile', action='store', help="Use fiwalk-generated XML file ")
     parser.add_argument('--annotated_dir', action='store', help="Directory containing annotated files ")
     parser.add_argument('--outdir',action='store',help='Output directory; must not exist')
-    
+
+    #parser.add_option("-r","--regress",action="store_true")
+    #(options,args) = parser.parse_args()
     args = parser.parse_args()
 
     ## print("D: PDF REPORT", args.pdf_report)
@@ -1069,7 +1086,43 @@ if __name__=="__main__":
     ## print("D: OUTDIR", args.outdir)
 
     config_file = "bc_report_config.txt"
-    if args.pdf_report:
+    if args.regress:
+        config_file = "bc_report_config.txt"
+        use_config_file = True
+        args.annotated_dir = "./regress_annotated_charlie_output"
+
+
+        fiwalk_txtfile = None
+        fiwalk_xmlfile = "charlie_fi_F.xml"
+        print("Regression test: Using input XML file ", fiwalk_xmlfile)
+
+        ## print("D: Using Fiwalk TXT file ", fiwalk_xmlfile)
+        if not os.path.exists(fiwalk_xmlfile):
+            print("File %s doesn not exist. Terminating" %(fiwalk_xmlfile))
+            exit(1)
+
+        if not os.path.exists(config_file):
+            print("File %s doesn not exist. Terminating" %(config_file))
+            exit(1)
+
+        if not os.path.exists(args.annotated_dir):
+            print("File %s doesn not exist. Terminating" %(config_file))
+            exit(1)
+
+        args.fiwalk_xmlfile = fiwalk_xmlfile
+        args.outdir = "./regress_outdir"
+        args.pdf_report = True
+        report_fi = FiwalkReport(fiwalk_xmlfile)
+
+        report = PdfReport(args.annotated_dir, args.outdir, use_config_file)
+        report.be_process_generate_report(args, use_config_file)
+
+        report_fi.process_generate_report_fiwalk_from_xml(args)
+        # Test the results
+        print("\n     Starting the regression test: \n")
+        bc_regress.reg_test(FiwalkReport, image_info)
+
+    elif args.pdf_report:
 
         use_config_file = (input (">>> Do you want to specify the configuration file?: [Y/N]:"))
 
@@ -1117,4 +1170,3 @@ if __name__=="__main__":
         exit(1)
     
 
-    
