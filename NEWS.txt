@@ -7,4 +7,6 @@ Real-World Collecting Institutions
 Copyright (C) 2012
 All rights reserved.
 
+January 8, 2012:
+BitCurator 0.1.7 released
 
