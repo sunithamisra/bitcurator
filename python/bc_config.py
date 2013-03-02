@@ -90,3 +90,7 @@ def bc_parse_config_file(PdfReport):
             elif line1[1].rstrip() == 'MAX_FORMATS_FOR_BAR_GRAPH':
                 PdfReport.bc_max_formats_in_bar_graph = int(line1[2])
 
+        # For regression test we keep the max formats to be reported to 20
+        if FiwalkReport.regressionTest == True:
+            PdfReport.bc_max_fmtfiles_to_report = 20
+
