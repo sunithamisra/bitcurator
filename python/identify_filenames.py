@@ -12,7 +12,7 @@ if platform.python_version_tuple() < ('3','2','0'):
     raise RuntimeError('This script now requires Python 3.2 or above')
 
 try:
-    import dfxml, fiwalk, bulk_extractor_reader, generate_report
+    import dfxml, fiwalk, bulk_extractor_reader
 except ImportError:
     raise ImportError('This script requires the dfxml and fiwalk modules for Python.')
 
@@ -21,7 +21,7 @@ try:
 except ImportError:
     raise ImportError("This script requires ArgumentParser which is in Python 2.7 or Python 3.0")
 
-__version__='0.2.1'
+__version__='1.3.0'
 
 import bisect,os
 
@@ -148,21 +148,6 @@ class featuredb:
 def findex(f):
     return f[0]+f[1]
 
-def is_comment_line(line):
-    if len(line)==0: return False
-    if line[0:4]==b'\xef\xbb\xbf#': return True
-    if line[0:1]=='\ufeff':
-        line=line[1:]       # ignore unicode BOM
-    try:
-        if ord(line[0])==65279:
-            line=line[1:]       # ignore unicode BOM
-    except TypeError:
-        pass
-    if line[0:1]==b'#' or line[0:1]=='#':
-        return True
-    return False
-
-
 def process_featurefile(args,report,featurefile):
     # Counters for the summary report
     global file_count
@@ -187,15 +172,8 @@ def process_featurefile(args,report,featurefile):
         for line in report.open(featurefile,mode='rb'):
             # Read the file in binary and convert to unicode if possible
             linenumber += 1
-            #if line[0:1]==b'#':
-            # Sunitha: The first line seems to look like:
-            # \xef\xbb\xbf
-            # 
-            print("FULL_LINE: ", line)
-            #if line[3:4]==b'#' or line[0:1]==b'#':
-            if is_comment_line(line):
-                ##print("Comment Line: linenum: ", linenumber)
-                continue # eliminate comments
+            if bulk_extractor_reader.is_comment_line(line):
+                continue
             try:
                 fset = features.add_featurefile_line(line[0:-1])
                 feature_count += 1
@@ -203,7 +181,7 @@ def process_featurefile(args,report,featurefile):
                     features_compressed += 1
                 del fset
             except ValueError:
-                raise RuntimeError("Line {} in feature file {} is invalid:".format(linenumber,featurefile))
+                raise RuntimeError("Line {} in feature file {} is invalid: {}".format(linenumber,featurefile,line))
     except IOError:
          print("Error: Failed to open feature file '%s'" % fn)
          exit(1)
@@ -232,7 +210,7 @@ def process_featurefile(args,report,featurefile):
                         print("  run={} offset={} fset={} ".format(run,offset,fset))
                     feature2fi[findex(fset)] = fi    # for each of those features, not that it is in this file
             if file_count%1000==0:
-                print("Processed %d files" % file_count)
+                print("Processed %d fileobjects in DFXML file" % file_count)
 
         xmlfile = None
         if args.xmlfile:
@@ -248,7 +226,7 @@ def process_featurefile(args,report,featurefile):
             if os.path.exists(possible_xmlfile):
                 xmlfile = possible_xmlfile
         if xmlfile:
-            ##print("Using XML file "+xmlfile)
+            print("Using XML file "+xmlfile)
             fiwalk.fiwalk_using_sax(xmlfile=open(xmlfile,'rb'),callback=process)
         else:
             print("Running fiwalk on " + imagefile)
@@ -332,50 +310,17 @@ if __name__=="__main__":
     parser.add_argument('--featurefiles', action='store', help='Specific feature file to process; separate with commas')
     parser.add_argument('--imagefile', action='store', help='Overwrite location of image file from bulk_extractor output')
     parser.add_argument('--xmlfile', action='store', help="Don't run fiwalk; use the provided XML file instead")
-    parser.add_argument('--fiwalk_txtfile', action='store', help="run fiwalk txt file; use the provided XML file instead")
     parser.add_argument('--list', action='store_true', help='List feature files in bulk_extractor_output and exit')
     parser.add_argument('-t', dest='terse', action='store_true', help='Terse output')
     parser.add_argument('-v', action='version', version='%(prog)s version '+__version__, help='Print Version and exit')
     parser.add_argument("--verbose",action="store_true",help='Verbose mode')
     parser.add_argument('--debug', action='store_true',help='Debug mode')
-    parser.add_argument('--pdf_report', action='store_true',help='PDF report')
     args = parser.parse_args()
 
     # Start the timer used to calculate the total run time
     t0 = time.time()
 
-    ### Sunitha
-    if args.pdf_report:
-        print(">>> Do you want to configure the Report files?: Y/N >>>")
-         
-        display_option1 = (input ("option: "))
-
-        if display_option1 == 'Y' or display_option1 == 'y':
-            print(">>> Please make sure you have updated the file bc_report_config.txt")       
-        elif display_option1 == 'N' or display_option1 == 'n':
-            print(">>> You have opted to select the default values for reporting")
-        else:
-            print(">>> Wrong option. Defaulting")
-            display_option1 = 'N'
-
-        report = generate_report.PdfReport(args.outdir, display_option1)
-        report.be_process_generate_report(args, display_option1)
-
-        # Using the xml file generated by fiwalk, report the following
-        # information:
-
-        fiwalk_txtfile = None
-        if args.fiwalk_txtfile:
-            fiwalk_txtfile = args.fiwalk_txtfile
-            ## print("D: Using Fiwalk TXT file ", fiwalk_txtfile)
-            #fiwalk.fiwalk_using_sax(xmlfile=open(xmlfile,'rb'),callback=process)
-            report_fi = generate_report.DirReport(args.fiwalk_txtfile)
-
-            report_fi.process_generate_report_fiwalk(args)
-        exit(1)
-
     # Open the report
-    print("Calling bE reader. Bulkport with args : ", args.bulk_extractor_output)
     report = bulk_extractor_reader.BulkReport(args.bulk_extractor_output)
     
     if args.list:
@@ -390,15 +335,12 @@ if __name__=="__main__":
     if not os.path.isdir(args.outdir):
         raise RuntimeError(args.outdir+" must be a directory")
 
+    if not args.featurefiles and not args.all:
+        raise RuntimeError("Please request a specific feature file or --all feature files")
+
     if args.featurefiles:
         for fn in args.featurefiles.split(","):
             process_featurefile(args,report,fn)
-    # Sunitha: This code is missing. This is the reason --xmlfile doesn't
-    # do anything. The for stmt is wrong.
-    ##if args.xmlfile:
-        ##print("XML file", args.xmlfile)
-        ##for fn in report.feature_files():
-            ##process_featurefile(args,report,fn)
 
     if args.all:
         for fn in report.feature_files():

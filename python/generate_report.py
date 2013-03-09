@@ -619,9 +619,6 @@ def be_create_report_file(input_file, annotated_file):
 # Class PdfReport: 
 #
 class PdfReport:
-    domain_list_all = []
-    domain_list = []
-    domain_histo_list = []
     reportFiles = 0
     logo = "FinalBitCuratorLogo-NoText.png" # Default
  
@@ -801,6 +798,7 @@ class FiwalkReport:
     emptyFiles = 0
     bigFiles = 0
     numFormats = 0
+    regressionTest = False
     dict_array = ["filename", "partition", "id", "name_type", "filesize", \
                   "alloc", "unalloc", "used", "inode", "meta_type", "mode", \
                   "nlink", \
@@ -852,7 +850,7 @@ class FiwalkReport:
     outdir = ''
 
     regTestExp = \
-         {'numFormats':153, 'numfiles':130, 'dirs':23, \
+         {'numFormats':153, 'numfiles':132, 'dirs':23, \
           'deletedFiles':0, 'unusedFiles':0, 'emptyFiles':11, 'bigFiles':5, \
           'image_filename':"charlie-work-usb-2009-12-11.aff", \
           'partition_offset':512, 'block_count':258559, 'first_block':0, \
@@ -988,7 +986,7 @@ class FiwalkReport:
                  num_fmt_files >= PdfReport.bc_max_fmtfiles_to_report:
                 ## print("D: FMT files exceeded max limit of %d" %(num_fmt_files))
                 break
-                              
+
         ## Report the bargraph only if the configuration file says so
         outfile = FiwalkReport.outdir + '/bc_format_bargraph.pdf'
         if PdfReport.bc_config_report_files['bc_format_bargraph']:
@@ -1091,7 +1089,6 @@ if __name__=="__main__":
         use_config_file = True
         args.annotated_dir = "./regress_annotated_charlie_output"
 
-
         fiwalk_txtfile = None
         fiwalk_xmlfile = "charlie_fi_F.xml"
         print("Regression test: Using input XML file ", fiwalk_xmlfile)
@@ -1120,7 +1117,7 @@ if __name__=="__main__":
         report_fi.process_generate_report_fiwalk_from_xml(args)
         # Test the results
         print("\n     Starting the regression test: \n")
-        bc_regress.reg_test(FiwalkReport, image_info)
+        bc_regress.reg_test(FiwalkReport, image_info, args.outdir)
 
     elif args.pdf_report:
 
