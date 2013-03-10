@@ -9,7 +9,7 @@ from generate_report import FiwalkReport
 import bc_utils,re
 
 def bc_parse_config_file(PdfReport):
-    ifd = open("bc_report_config.txt","r")
+    ifd = open("/etc/bitcurator/bc_report_config.txt","r")
 
     # Clone the static dictionary of file-formats to start with
     # NOTE: The code is retained for future work on letting the user

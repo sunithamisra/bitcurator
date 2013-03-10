@@ -620,7 +620,7 @@ def be_create_report_file(input_file, annotated_file):
 #
 class PdfReport:
     reportFiles = 0
-    logo = "FinalBitCuratorLogo-NoText.png" # Default
+    logo = "/usr/share/pixmaps/bitcurator/FinalBitCuratorLogo-NoText.png" # Default
  
     default_config = False
     bc_config_feature = {}
@@ -665,7 +665,7 @@ class PdfReport:
             num_features = len(self.files)
             temp_feature_list = list(self.files)
         else:
-            print(">>> File %s doesnot exist" % in_dir) 
+            print(">>> File %s does not exist" % in_dir) 
             return
 
         # outdir should not exist. Flag error if it does
@@ -677,7 +677,7 @@ class PdfReport:
 
         # Open the Configuration File: If it doesn't exist, default 
         if use_config_file == 'Y' or use_config_file == 'y':
-            if (os.path.exists("bc_report_config.txt") == False):
+            if (os.path.exists("/etc/bitcurator/bc_report_config.txt") == False):
                 print("Info: Config file bc_report_config.txt does not exist. Using Default parameters")
                 default_config = True
         else:
@@ -1083,9 +1083,9 @@ if __name__=="__main__":
     ## print("D: Annotated_DIR", args.annotated_dir)
     ## print("D: OUTDIR", args.outdir)
 
-    config_file = "bc_report_config.txt"
+    config_file = "/etc/bitcurator/bc_report_config.txt"
     if args.regress:
-        config_file = "bc_report_config.txt"
+        config_file = "/etc/bitcurator/bc_report_config.txt"
         use_config_file = True
         args.annotated_dir = "./regress_annotated_charlie_output"
 
@@ -1124,13 +1124,13 @@ if __name__=="__main__":
         use_config_file = (input (">>> Do you want to specify the configuration file?: [Y/N]:"))
 
         if use_config_file == 'Y' or use_config_file == 'y':
-            config_file = (input (">>> Please specify the configuration file[bc_report_config.txt]: "))
+            config_file = (input (">>> Please specify the configuration file[/etc/bitcurator/bc_report_config.txt]: "))
 
             # If hit return, use the default: bc_report_config.txt.
             # In either case, see if the file exists.
             if (config_file == ''):
                 # User pressed return. Use the default file: bc_report_config.txt
-                config_file = "bc_report_config.txt"
+                config_file = "/etc/bitcurator/bc_report_config.txt"
 
             if not os.path.exists(config_file):
                 print(">>> Configuration file %s does not exist. Using default values" %(config_file))
