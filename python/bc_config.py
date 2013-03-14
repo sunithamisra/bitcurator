@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # coding=UTF-8
-# 
+#
 # This file has routines related to the configuration information
 # of generate_reports script
 
@@ -8,8 +8,36 @@ from generate_report import PdfReport
 from generate_report import FiwalkReport
 import bc_utils,re
 
-def bc_parse_config_file(PdfReport):
-    ifd = open("bc_report_config.txt","r")
+#
+# This function is called when one invokes the regression test. 
+# The lines start with the letter "G" in the config file to indicate 
+# they are regression test parameters.
+#
+def bc_get_regtest_parameters(FiwalkReport, config_file):
+    ifd = open(config_file,"r")
+    for line in ifd:
+        line1 = re.split(":", line)
+        if (line1[0] != 'G'):
+            continue
+
+        if line1[1] == "REGRESS_ANNOTATED_DIR":
+            FiwalkReport.regress_annotated_dir = line1[2].strip()
+        elif line1[1] == "REGRESS_INPUT_XML_FILE":
+            FiwalkReport.regress_input_xml_file = line1[2].strip()
+        elif line1[1] == "REGRESS_OUTDIR":
+            FiwalkReport.regress_outdir = line1[2].strip()
+        elif line1[1] == "REGRESS_BEINFO_FILE":
+            FiwalkReport.regress_beinfo_file = line1[2].strip()
+            
+    ifd.close()
+    return
+
+#
+# Parse funciton to extract the configurable information out of the 
+# configuration file.
+#
+def bc_parse_config_file(PdfReport, config_file):
+    ifd = open(config_file,"r")
 
     # Clone the static dictionary of file-formats to start with
     # NOTE: The code is retained for future work on letting the user
@@ -17,7 +45,7 @@ def bc_parse_config_file(PdfReport):
     # generated, but the user can limit the number of these files by setting
     # S:MAX_FILE_FORMAT_FILES_TO_REPORT:20
 
-    PdfReport.bc_config_filefmt_files = FiwalkReport.dictFileFmtStatic.copy() 
+    PdfReport.bc_config_filefmt_files = FiwalkReport.dictFileFmtStatic.copy()
 
     # Initialize all the values to 0
     for x, y in PdfReport.bc_config_filefmt_files.items():
@@ -30,7 +58,7 @@ def bc_parse_config_file(PdfReport):
 
     for line in ifd:
         if bc_utils.is_comment_line(line):
-            continue 
+            continue
 
         line1 = re.split(":", line)
     
@@ -52,7 +80,7 @@ def bc_parse_config_file(PdfReport):
                 else:
                     lines = line1[2]
   
-                PdfReport.bc_config_feature_lines[line1[1]] = int(lines) 
+                PdfReport.bc_config_feature_lines[line1[1]] = int(lines)
             else:
                 print("Info: Feature %s does NOT exist" % line1[1])
                           
@@ -89,8 +117,15 @@ def bc_parse_config_file(PdfReport):
                 PdfReport.bc_max_featfiles_to_report = int(line1[2])
             elif line1[1].rstrip() == 'MAX_FORMATS_FOR_BAR_GRAPH':
                 PdfReport.bc_max_formats_in_bar_graph = int(line1[2])
+        elif line1[0] == 'G':
+            # Regression test parameters
+            if line1[1].rstrip() == 'REGRESS_ANNOTATED_DIR':
+                PdfReport.bc_regr_annotated_dir = line1[2]
+            elif line1[1].rstrip() == 'REGRESS_INPUT_XML_FILE':
+                PdfReport.bc_regr_xml_file = line1[2]
+            elif line1[1].rstrip() == 'REGRESS_OUTDIR':
+                PdfReport.bc_regr_xml_file = line1[2]
 
         # For regression test we keep the max formats to be reported to 20
         if FiwalkReport.regressionTest == True:
             PdfReport.bc_max_fmtfiles_to_report = 20
-

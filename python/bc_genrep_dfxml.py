@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Here is some example code for printing stats from a fiwalk DFXML file 
+# Generate report from a fiwalk DFXML file 
 # 
 
 import sys,os,shelve
@@ -86,9 +86,15 @@ def bc_make_dict(fi, FiwalkReport, fn):
         FiwalkReport.dict_val["unalloc"] = True
         FiwalkReport.deletedFiles = FiwalkReport.deletedFiles + 1
 
-    # If not alrady present in format array, add the fileformat
-    FiwalkReport.dict_val['libmagic'] = fi.libmagic()
-    FiwalkReport.bcAddToFmtList(FiwalkReport, fi.libmagic())
+    # If the XML file doesn't have the format information, we cannot
+    # generate reports related to formats.
+    if (fi.libmagic() == None):
+        FiwalkReport.noLibMagic = True
+
+    if FiwalkReport.noLibMagic == False:
+        # If not alrady present in format array, add the fileformat
+        FiwalkReport.dict_val['libmagic'] = fi.libmagic()
+        FiwalkReport.bcAddToFmtList(FiwalkReport, fi.libmagic())
 
     # empty files and big files
     if fi.filesize() == 0:

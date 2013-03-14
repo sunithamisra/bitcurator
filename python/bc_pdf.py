@@ -27,7 +27,6 @@ def make_header(this, logo, header_text):
     this.image(logo,150,5,33)
 
     # Line break
-    #this.ln(20)
     this.ln(10)
 
  #
