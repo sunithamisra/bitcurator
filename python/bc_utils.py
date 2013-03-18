@@ -29,8 +29,11 @@ def bc_addToReportFileList(pdf_file, PdfReport):
     except IndexError:
         print("Warning: Exceeded generating 100 format files") 
 
-def bc_printReportFileList(PdfReport):
-    print("The following Report Files are Generated: ")
+def bc_printReportFileList(PdfReport, FiwalkReport):
+    if (FiwalkReport.noLibMagic == True):
+        print("\n>>>> The XML input file has missing LibMagic information. \n" \
+                ">>>> So the format reports are not generated \n")
+    print("The following report files are generated: ")
     for i in range(0, PdfReport.reportFiles):
         print("%d)  %s" % (i+1, reportFileList[i])) 
 
@@ -65,10 +68,15 @@ def match_and_write(of, line, pattern, separator):
 
 def filename_from_path(path):
     templist = str(path)
-    #templist = path.split("/")
     templist = templist.split("/")
     length = len(templist)
     return(templist[length-1]) 
+
+def dir_from_path(path):
+    templist = str(path)
+    templist = templist.split("/")
+    length = len(templist)
+    return(templist[0:length-1]) 
 
 def stringfix(strname):
     return(re.sub('_',' ',strname.upper()))

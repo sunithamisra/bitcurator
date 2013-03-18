@@ -80,3 +80,6 @@ S:MAX_FEATURE_FILES_TO_REPORT:10
 # overridden by this parameter.
 #S:MAX_FORMATS_FOR_BAR_GRAPH:7
 #
+G:REGRESS_ANNOTATED_DIR:./bc_regress_dir/regress_annotated_charlie_output
+G:INPUT_XML_FILE:./bc_regress_dir/charlie_fi_F.xml
+

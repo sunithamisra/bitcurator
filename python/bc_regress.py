@@ -66,17 +66,18 @@ def reg_fiwalk_metadata_test(FiwalkReport, image_info):
         print("Read: deletedFiles:%s, Expected:%s " %(FiwalkReport.deletedFiles, 
                   FiwalkReport.regTestExp['deletedFiles']))
 
-def reg_be_statistics(outdir):
+def reg_be_statistics(reg_beinfo_file, outdir):
     # check if the file-to-compare exists or not.
-    if not os.path.exists("regress_charlie_beinfo.txt"):
-        print("File regress_charlie_beinfo.txt doesnot exist")
-        print(" FAIL")
+    if not os.path.exists(reg_beinfo_file):
+        print("File %s does not exist" %reg_beinfo_file)
+        print("BULK EXTRACTOR STASTISTICS TEST:FAIL")
+        return
     
     # Now compare the generated file outdir.txt and temporarily
     # generated file outdir.txt which contains the end-of-file parameters
     # that the anotated reports report.
     out_stats_file = outdir + ".txt"
-    if filecmp.cmp(out_stats_file, "regress_charlie_beinfo.txt") == True:
+    if filecmp.cmp(out_stats_file, reg_beinfo_file) == True:
         print("BULK EXTRATOR STASTISTICS TEST:	PASS")
     else:
         print("BULK EXTRACTOR STASTISTICS TEST:	FAIL")
@@ -105,7 +106,7 @@ def reg_fiwalk_format_test(FiwalkReport):
 def reg_test(FiwalkReport, image_info, outdir):
     FiwalkReport.regressionTest = True
     reg_fiwalk_metadata_test(FiwalkReport, image_info)
-    reg_be_statistics(outdir)
+    reg_be_statistics(FiwalkReport.regress_beinfo_file, outdir)
     reg_fiwalk_format_test(FiwalkReport)
     reg_fiwalk_fmt_freq_test(FiwalkReport)
 
