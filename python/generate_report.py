@@ -867,9 +867,6 @@ class FiwalkReport:
         if os.path.isfile(fn):
             self.dname = fn
             self.files = set([os.path.basename(x) for x in glob.glob(os.path.join(fn,"*.txt"))])
-        else:
-            print("File %s doesnot exist" %fn)
-            exit(1)
 
         # Initialize the values of the dict elements
         for ind in range (0, (len(FiwalkReport.dict_array)-1)):
@@ -1083,15 +1080,14 @@ if __name__=="__main__":
 
     args = parser.parse_args()
 
-    #print("D: PDF REPORT", args.pdf_report)
-    #print("D: FIWALK_TXTFILE", args.fiwalk_txtfile)
-    #print("D: FIWALK_XMLFILE", args.fiwalk_xmlfile)
-    #print("D: Annotated_DIR", args.annotated_dir)
-    #print("D: OUTDIR", args.outdir)
-    #print("D: XLS file", args.xls)
+    ## print("D: PDF REPORT", args.pdf_report)
+    ## print("D: FIWALK_TXTFILE", args.fiwalk_txtfile)
+    ## print("D: FIWALK_XMLFILE", args.fiwalk_xmlfile)
+    ## print("D: Annotated_DIR", args.annotated_dir)
+    ## print("D: OUTDIR", args.outdir)
+    ## print("D: XLS file", args.xls)
 
-    # Sanity check: FIXME
-    #print("DIR: ", os.path.dirname(args.fiwalk_xmlfile))
+    ## print("DIR: ", os.path.dirname(args.fiwalk_xmlfile))
     
     config_file = "/etc/bitcurator/bc_report_config.txt"
     if args.regress:
@@ -1109,6 +1105,7 @@ if __name__=="__main__":
                 if (os.path.exists("./bc_report_config.txt")):
                     config_file = "./bc_report_config.txt"
                 else: 
+                    print(">>> Using the configuration file /etc/bitcurator/bc_report_config.txt")
                     config_file = "/etc/bitcurator/bc_report_config.txt"
 
             if not os.path.exists(config_file):
@@ -1162,6 +1159,7 @@ if __name__=="__main__":
                 if (os.path.exists("./bc_report_config.txt")):
                     config_file = "./bc_report_config.txt"
                 else: 
+                    print(">>> Using the configuration file /etc/bitcurator/bc_report_config.txt")
                     config_file = "/etc/bitcurator/bc_report_config.txt"
 
             if not os.path.exists(config_file):
