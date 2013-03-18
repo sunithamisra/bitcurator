@@ -1083,15 +1083,15 @@ if __name__=="__main__":
 
     args = parser.parse_args()
 
-    print("D: PDF REPORT", args.pdf_report)
-    print("D: FIWALK_TXTFILE", args.fiwalk_txtfile)
-    print("D: FIWALK_XMLFILE", args.fiwalk_xmlfile)
-    print("D: Annotated_DIR", args.annotated_dir)
-    print("D: OUTDIR", args.outdir)
+    #print("D: PDF REPORT", args.pdf_report)
+    #print("D: FIWALK_TXTFILE", args.fiwalk_txtfile)
+    #print("D: FIWALK_XMLFILE", args.fiwalk_xmlfile)
+    #print("D: Annotated_DIR", args.annotated_dir)
+    #print("D: OUTDIR", args.outdir)
     #print("D: XLS file", args.xls)
 
     # Sanity check: FIXME
-    print("DIR: ", os.path.dirname(args.fiwalk_xmlfile))
+    #print("DIR: ", os.path.dirname(args.fiwalk_xmlfile))
     
     config_file = "/etc/bitcurator/bc_report_config.txt"
     if args.regress:
@@ -1106,7 +1106,7 @@ if __name__=="__main__":
             # In either case, see if the file exists.
             if (config_file == ''):
                 # User pressed return. Use the default file: bc_report_config.txt
-                if (os.path.exists("./bc_report_config.txt"):
+                if (os.path.exists("./bc_report_config.txt")):
                     config_file = "./bc_report_config.txt"
                 else: 
                     config_file = "/etc/bitcurator/bc_report_config.txt"
@@ -1159,7 +1159,7 @@ if __name__=="__main__":
             # In either case, see if the file exists.
             if (config_file == ''):
                 # User pressed return. Use the default file: bc_report_config.txt
-                if (os.path.exists("./bc_report_config.txt"):
+                if (os.path.exists("./bc_report_config.txt")):
                     config_file = "./bc_report_config.txt"
                 else: 
                     config_file = "/etc/bitcurator/bc_report_config.txt"
