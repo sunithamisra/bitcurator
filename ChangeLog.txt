@@ -7,4 +7,57 @@ Real-World Collecting Institutions
 Copyright (C) 2012
 All rights reserved.
 
+March 10, 2013:
+BitCurator 0.2.0 released
+- BitCurator reporting tool updated, new SAX XML parsing of forensic tool DFXML output
+- BitCurator support graphics and configuration files moved to dedicated install directories in /usr/share and /etc, respectively
+- Patched 1.3.1 Bulk Extractor, resolving regex search issues
+- Updated Guymager to 0.6.13, resolving imaging issues where images produced could not be processed by tools using newer versions of libtsk
+- Updated sdhash to 3.1
+- Updated libewf to current stable version, 20130303
+- Resolved safe mount script bug in 0.1.9
+- Smartmontools and hdparm now included in VM
+- Samba/Winbind now packaged by default for improved Windows network access. Network places icon now visible on desktop.
+- Improved support for floppy disk access
+
+February 12, 2013:
+BitCurator 0.1.9 released
+- Final transitional release prior to 0.2.0
+
+February 9, 2013:
+BitCurator 0.1.8 released
+- Reporting code moved to 'bitcurator', newly-modularized Python scripts.
+- Updated DFXML API and tools
+- Updated Safe Mount script and related modifications to sudoers file.
+- Updates of libewf to libewf-20130128 (built with v1 API backwards-compatibility), The Sleuth Kit to 4.0.1. Now using TSK-integrated fiwalk.
+- Updated tool launchers.
+
+January 8, 2013:
+BitCurator 0.1.7 released
+- Reporting code added in the 'bitcurator-reporting' reporting directory, along with user-editable configuration file and BitCurator logo for optional branding.
+- Update to Bulk Extractor 1.3.1
+- Update to SDHash 2.3
+- Updated DFXML processing scripts
+- Updated support for Nautilus scripts, Scripts -> Find Files now works out of the box.
+- Updated Forensics Tools launchers, now includes command-line launchers for matching bulk extractor features to filenames and fiwalk
+- Metadata Tools desktop folder now links out to updated DFXML tools and BitCurator reporting tools (including a dedicated launcher)
+- Documentation and Help now includes BitCurator Guides (help on running the reporting scripts) and the DFXML tag library
+- Additional statistical and reporting support with existing tools, including matplotlib, numpy, and PDF generation, natively installed for use with Python 3 code.
+
+August 1, 2012:
+BitCurator 0.1.4 released
+- Maintenance release
+
+July 7, 2012:
+BitCurator 0.1.3 released
+- Bugfixes
+- Bulk Extractor 1.3b3 is now included, along with the updated Bulk Extractor Viewer build
+- Updated DFXML tools installed
+- Command-line launcher for Bliss fixed
+
+- ISO now includes all desktop items by default on install
+
+July 3, 2012:
+BitCurator 0.1.2 released
+- Initial public release incorporating BitCurator-specific reporting into Ubuntu VM
 
