@@ -941,7 +941,7 @@ class FiwalkReport:
 
         # Generate Excel report if the option is set.
         if (fiwalk_xlsx != None):
-            bc_generate_xlsx(fiwalk_xmlfile)
+            bc_generate_xlsx(fn)
         
         
     #
