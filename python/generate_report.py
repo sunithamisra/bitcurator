@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # coding=UTF-8
 #
+from __future__ import with_statement
 '''
 File: bc_generate_report.py
 A module for working with bulk_extractor
@@ -19,7 +20,7 @@ Ex: bulk_extractor
 ~/Research/TestData/M57-Scenario/usbflashdrives/jo-work-usb-2009-12-11.aff
 -o ~/Research/TestData/BEOutputs/jow-output
 
-2. Generate the Text output from the fiwalk utility.
+2. Generate the Text and xml outputs from the fiwalk utility.
 Ex: fiwalk -f -X /home/sunitha/Research/TestData/BEOutputs/jo-work-usb-fi.xml
 -T /home/sunitha/Research/TestData/BEOutputs/jo-work-usb-fi_T
 jo-work-usb-2009-12-11.aff
@@ -740,9 +741,16 @@ class PdfReport:
         PdfReport.annotated_dir = fn.annotated_dir
         PdfReport.outdir = fn.outdir
 
-        # Final output will be in pdf form. Text is retained for sometime
-        ofn = fn.outdir + ".txt"
+        # A temporary text file is created to extract some statistics
+        # information from the feature files, before moving this information
+        # into a table. It is named using the output directory name.
 
+        # The annotated file for each feature has its last 7 lines under
+        # comments, four of which have some statistical information
+        # used for reporting. So just these lines are extracted, and
+        # put in a temporary file fn.outdir.txt. 
+
+        ofn = fn.outdir + ".txt"
         of = open(ofn,"wb")
 
         # go through every line of each annotated file, look for
@@ -764,15 +772,24 @@ class PdfReport:
             of.write(bytes(annotated_file, 'UTF-8'))
             of.write(b";")
 
-            for line in ifd:
-                linenumber+=1
-                if bc_utils.is_comment_line(line):
-                    continue # eliminate comments
+            # Extract the last 1K characters which includes the last
+            # seven lines.
+            with open(input_file, "r") as f:
+                f.seek(0,2)          # Seek @ EOF
+                fsize = f.tell()     # Get size
+                f.seek(max(fsize-1024, 0), 0)   # Set pos at last 1024 chars
+                lines = f.readlines()           # Read to end
 
-                bc_utils.match_and_write(of, line, "Total features input", 1)
-                bc_utils.match_and_write(of, line, "Total features located to files", 1)
-                bc_utils.match_and_write(of, line, "Total features in unallocated space" ,1)
-                bc_utils.match_and_write(of, line, "Total features in compressed regions", 0)
+            lines = lines[-7:]       # Get last 7 lines
+
+            for line in lines:
+                linenumber+=1
+
+                ## print("D: Line: ", line[2:])
+                bc_utils.match_and_write(of, line[2:], "Total features input", 1)
+                bc_utils.match_and_write(of, line[2:], "Total features located to files", 1)
+                bc_utils.match_and_write(of, line[2:], "Total features in unallocated space" ,1)
+                bc_utils.match_and_write(of, line[2:], "Total features in compressed regions", 0)
 
                 if ((fnmatch.fnmatch(line, 'Total*') or
                     (fnmatch.fnmatch(line, 'Unicode*')))):
