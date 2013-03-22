@@ -18,9 +18,9 @@ F:json:0
 F:zip:0
 F:windirs:100
 F:domain:0
-F:email:
+F:email:0
 F:exif:0
-F:url
+F:url:0
 F:winpe:0
 F:ccn:0
 F:ether:0

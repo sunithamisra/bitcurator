@@ -139,8 +139,10 @@ class PDF_BE(FPDF):
         self.set_font('Times','',12)
 
         data=[]
-        for line in open(filename):
+        table_file = open(filename)
+        for line in table_file:
             data += [line[:-1].split(';')]
+        table_file.close()
 
         for row in data:
             self.cell(w[0],6,row[0],'LR',0,'L',fill)
@@ -185,7 +187,8 @@ class PDF_BE(FPDF):
 
         data=[]
         linenum = 0
-        for line in open(feature_file):
+        fd = open(feature_file)
+        for line in fd:
             if bc_utils.is_comment_line(line):
                 continue
             linenum+=1
@@ -251,6 +254,7 @@ class PDF_BE(FPDF):
 
         #Closure line
         self.cell(sum(w),0,'','T')
+        fd.close()
         return
 
 #
