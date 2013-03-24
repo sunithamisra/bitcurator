@@ -139,8 +139,10 @@ class PDF_BE(FPDF):
         self.set_font('Times','',12)
 
         data=[]
-        for line in open(filename):
-            data += [line[:-1].split(';')]
+
+        with open(filename) as file_:
+            for line in file_:
+                data += [line[:-1].split(';')]
 
         for row in data:
             self.cell(w[0],6,row[0],'LR',0,'L',fill)
@@ -185,25 +187,27 @@ class PDF_BE(FPDF):
 
         data=[]
         linenum = 0
-        for line in open(feature_file):
-            if bc_utils.is_comment_line(line):
-                continue
-            linenum+=1
 
-            if (re.match("Total",line) or \
-                re.match("Unicode Encode Errors",line) or \
-                re.match("Unicode Decode Errors", line)):
-                continue
+        with open(feature_file) as file_:
+            for line in file_:
+                if bc_utils.is_comment_line(line):
+                    continue
+                linenum+=1
+
+                if (re.match("Total",line) or \
+                    re.match("Unicode Encode Errors",line) or \
+                    re.match("Unicode Decode Errors", line)):
+                    continue
             
-            data += [line[:-1].split('\t')]
-            lendir = len(PdfReport.annotated_dir) + 1 + 10 # Adding /annotated
-            feat_filename = feature_file[lendir:-4]
+                data += [line[:-1].split('\t')]
+                lendir = len(PdfReport.annotated_dir) + 1 + 10 # Adding /annotated
+                feat_filename = feature_file[lendir:-4]
            
-            # Config file sets the maxlines to 0 to report all the lines
-            if (PdfReport.bc_config_feature_lines[feat_filename] != 0):
-                if (linenum >= PdfReport.bc_config_feature_lines[feat_filename]):
-                    # Lines reached max: Breaking
-                    break
+                # Config file sets the maxlines to 0 to report all the lines
+                if (PdfReport.bc_config_feature_lines[feat_filename] != 0):
+                    if (linenum >= PdfReport.bc_config_feature_lines[feat_filename]):
+                        # Lines reached max: Breaking
+                        break
 
         linenum = 0
         for row in data:
@@ -701,16 +705,8 @@ class PdfReport:
 
               
         else:
-            # Default config: Report all the feature files and
+            # Default config: Report none of the feature files and
             # all of the non-feature files
-            report_features = len(temp_feature_list)
-
-            for i in range(0,report_features-1):
-                filename = temp_feature_list[i]
-
-                # ex: annotated_email.txt ==> email
-                filename = filename[10:-4]
-                self.bc_config_feature[filename] = 1
 
             self.bc_config_report_files['bc_format_bargraph'] = 1
             self.bc_config_report_files['FiwalkReport'] = 1
@@ -772,7 +768,7 @@ class PdfReport:
             of.write(bytes(annotated_file, 'UTF-8'))
             of.write(b";")
 
-            # Extract the last 1K characters which includes the last
+            # Extract the last 1K characters block which includes the last
             # seven lines.
             with open(input_file, "r") as f:
                 f.seek(0,2)          # Seek @ EOF
@@ -786,10 +782,10 @@ class PdfReport:
                 linenumber+=1
 
                 ## print("D: Line: ", line[2:])
-                bc_utils.match_and_write(of, line[2:], "Total features input", 1)
-                bc_utils.match_and_write(of, line[2:], "Total features located to files", 1)
-                bc_utils.match_and_write(of, line[2:], "Total features in unallocated space" ,1)
-                bc_utils.match_and_write(of, line[2:], "Total features in compressed regions", 0)
+                bc_utils.match_and_write(of, line, "Total features input", 1)
+                bc_utils.match_and_write(of, line, "Total features located to files", 1)
+                bc_utils.match_and_write(of, line, "Total features in unallocated space" ,1)
+                bc_utils.match_and_write(of, line, "Total features in compressed regions", 0)
 
                 if ((fnmatch.fnmatch(line, 'Total*') or
                     (fnmatch.fnmatch(line, 'Unicode*')))):
