@@ -139,10 +139,10 @@ class PDF_BE(FPDF):
         self.set_font('Times','',12)
 
         data=[]
-        table_file = open(filename)
-        for line in table_file:
-            data += [line[:-1].split(';')]
-        table_file.close()
+
+        with open(filename) as file_:
+            for line in file_:
+                data += [line[:-1].split(';')]
 
         for row in data:
             self.cell(w[0],6,row[0],'LR',0,'L',fill)
@@ -187,26 +187,27 @@ class PDF_BE(FPDF):
 
         data=[]
         linenum = 0
-        fd = open(feature_file)
-        for line in fd:
-            if bc_utils.is_comment_line(line):
-                continue
-            linenum+=1
 
-            if (re.match("Total",line) or \
-                re.match("Unicode Encode Errors",line) or \
-                re.match("Unicode Decode Errors", line)):
-                continue
+        with open(feature_file) as file_:
+            for line in file_:
+                if bc_utils.is_comment_line(line):
+                    continue
+                linenum+=1
+
+                if (re.match("Total",line) or \
+                    re.match("Unicode Encode Errors",line) or \
+                    re.match("Unicode Decode Errors", line)):
+                    continue
             
-            data += [line[:-1].split('\t')]
-            lendir = len(PdfReport.annotated_dir) + 1 + 10 # Adding /annotated
-            feat_filename = feature_file[lendir:-4]
+                data += [line[:-1].split('\t')]
+                lendir = len(PdfReport.annotated_dir) + 1 + 10 # Adding /annotated
+                feat_filename = feature_file[lendir:-4]
            
-            # Config file sets the maxlines to 0 to report all the lines
-            if (PdfReport.bc_config_feature_lines[feat_filename] != 0):
-                if (linenum >= PdfReport.bc_config_feature_lines[feat_filename]):
-                    # Lines reached max: Breaking
-                    break
+                # Config file sets the maxlines to 0 to report all the lines
+                if (PdfReport.bc_config_feature_lines[feat_filename] != 0):
+                    if (linenum >= PdfReport.bc_config_feature_lines[feat_filename]):
+                        # Lines reached max: Breaking
+                        break
 
         linenum = 0
         for row in data:
@@ -776,7 +777,7 @@ class PdfReport:
             of.write(bytes(annotated_file, 'UTF-8'))
             of.write(b";")
 
-            # Extract the last 1K characters which includes the last
+            # Extract the last 1K characters block which includes the last
             # seven lines.
             with open(input_file, "r") as f:
                 f.seek(0,2)          # Seek @ EOF
