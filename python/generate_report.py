@@ -255,7 +255,6 @@ class PDF_BE(FPDF):
 
         #Closure line
         self.cell(sum(w),0,'','T')
-        fd.close()
         return
 
 #
