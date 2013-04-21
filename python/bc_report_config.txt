@@ -79,7 +79,10 @@ S:MAX_FEATURE_FILES_TO_REPORT:10
 # format bar-graph. It is set to 20 by default. It can be
 # overridden by this parameter.
 #S:MAX_FORMATS_FOR_BAR_GRAPH:7
+S:FEATURE_OUTPUTS_IN_PDF:1
 #
 G:REGRESS_ANNOTATED_DIR:./bc_regress_dir/regress_annotated_charlie_output
-G:INPUT_XML_FILE:./bc_regress_dir/charlie_fi_F.xml
-
+G:REGRESS_INPUT_XML_FILE:./bc_regress_dir/regress_charlie_fi_F.xml
+G:REGRESS_OUTDIR:./bc_regress_dir/regress_outdir
+# Bulk Extractor Info file
+G:REGRESS_BEINFO_FILE:./bc_regress_dir/regress_charlie_beinfo.txt
