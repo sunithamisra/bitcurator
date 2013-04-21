@@ -66,6 +66,7 @@ from bc_utils import filename_from_path
 from bc_genrep_dfxml import bc_process_xmlfile_using_sax
 from bc_genrep_text import bc_process_textfile
 from bc_genrep_xls import bc_generate_xlsx
+from bc_gen_feature_rep_xls import bc_generate_feature_xlsx
 try:
     from argparse import ArgumentParser
 except ImportError:
@@ -139,7 +140,6 @@ class PDF_BE(FPDF):
         self.set_font('Times','',12)
 
         data=[]
-
         with open(filename) as file_:
             for line in file_:
                 data += [line[:-1].split(';')]
@@ -160,31 +160,7 @@ class PDF_BE(FPDF):
         text = bc_pdf.bc_adjust_text(cell_text, w)
         self.cell(w,h,text,'LR',0,'L',fill)
 
-    #
-    # make one table per feature
-    #
-    def make_table_feat(self, feature_file, header):
-        self.set_text_color(1)
-        self.set_font('Times','B',12)
-           
-        fill=0
-
-        self.cell(40, 7, 'Feature File: ' + \
-             filename_from_path(feature_file), border=0, ln=1)
-        self.set_font('Times','',8)
-        self.underline = 0
-        self.set_fill_color(224,235,255)
-        self.set_text_color(0)
-        self.set_draw_color(128,0,0)
-        self.set_line_width(.3)
-
-        # Filename; position; feature
-        w=[65,50,75]
-
-        for i in range(0,len(header)):
-            self.cell(w[i],7,header[i],1,0,'C',1)
-        self.ln()
-
+    def bc_get_data_from_feature_file(self, feature_file):
         data=[]
         linenum = 0
 
@@ -208,16 +184,63 @@ class PDF_BE(FPDF):
                     if (linenum >= PdfReport.bc_config_feature_lines[feat_filename]):
                         # Lines reached max: Breaking
                         break
+        return data
 
+
+    #
+    # make one table/xlsx-file per feature
+    #
+    def make_table_feat_xls(self, feature_file):
+
+        # Get the data from the input file
+        data = self.bc_get_data_from_feature_file(feature_file)
+
+        # Now generte the xlsx file for feature file
+        bc_generate_feature_xlsx(PdfReport, data, feature_file)
+
+    #
+    # make one table/pdf-file per feature
+    #
+    def make_table_feat_pdf(self, feature_file, header):
+        # Get the data from the input file
+        data = self.bc_get_data_from_feature_file(feature_file)
+
+        # Now generate the pdf file for the feature file
+        self.bc_generate_feature_reports_in_pdf(PdfReport, data, feature_file)
+
+    def bc_generate_feature_reports_in_pdf(self, PdfReport, data, feature_file):
+ 
+        header = ['Filename', 'Position','Feature ']
+
+        self.set_text_color(1)
+        self.set_font('Times','B',12)
+           
+        fill=0
+
+        self.cell(40, 7, 'Feature File: ' + \
+             filename_from_path(feature_file), border=0, ln=1)
+        self.set_font('Times','',8)
+        self.underline = 0
+        self.set_fill_color(224,235,255)
+        self.set_text_color(0)
+        self.set_draw_color(128,0,0)
+        self.set_line_width(.3)
+
+        # Filename; position; feature
+        w=[65,50,75]
+
+        for i in range(0,len(header)):
+            self.cell(w[i],7,header[i],1,0,'C',1)
+        self.ln()
         linenum = 0
         for row in data:
             # Skip the lines with known text lines to be eliminated
             if (re.match("Total features",str(row))):
                 continue
 
-            filename = "Unkown"
-            feature = "Unkown"
-            position = "Unkown"
+            filename = "Unknown"
+            feature = "Unknown"
+            position = "Unknown"
            
             # Some lines in the annotated_xxx.txt have less than three
             # columns where filename or feature may be missing.
@@ -544,7 +567,7 @@ class PDF(FPDF):
     
         fill=0
 
-        ## Warn the user if the length of a feature file is > max lines
+        # Warn the user if the length of a feature file is > max lines
         if PdfReport.bc_max_lines_to_report and \
              FiwalkReport.array_ind > PdfReport.bc_config_report_lines['FiwalkReport']:
             print("### WARNING ### Feature Report file has exceeded "\
@@ -605,21 +628,30 @@ class PDF(FPDF):
 # This function creates a report file for the feature specified
 # by the annotated_file.
 #
-def be_create_report_file(input_file, annotated_file):
+def be_create_pdf_report_file(input_file, annotated_file):
     # Table column headers
     tab_header_feat = ['Filename', 'Position','Feature ']
 
     pdf = PDF_BE()
     pdf.compress = False
     pdf.add_page()
-    pdf.make_table_feat(input_file,tab_header_feat)
+    pdf.make_table_feat_pdf(input_file,tab_header_feat)
 
     # Name the pdf file: Remove the first 10 characters: "annotated_"
     # and the last 4 characters: ".txt" and add :.pdf" in the suffix.
-    pdf_file = PdfReport.outdir +'/' + annotated_file[10:-3] + 'pdf'
+    # First create a new directory
+    pdf_file = PdfReport.featuredir +'/' + annotated_file[10:-3] + 'pdf'
     pdf.output(pdf_file,'F')
     bc_utils.bc_addToReportFileList(pdf_file, PdfReport)
     return(pdf_file)
+
+def be_create_xlsx_report_file(input_file, annotated_file):
+
+    pdf = PDF_BE()
+    pdf.compress = False
+    pdf.add_page()
+    
+    pdf.make_table_feat_xls(input_file)
 
 #
 # Class PdfReport:
@@ -633,9 +665,10 @@ class PdfReport:
     bc_config_feature_lines = {}
     bc_config_report_special_files = True
     bc_max_featfiles_to_report = 10
-    bc_max_fmtfiles_to_report = 20
+    bc_max_fmtfiles_to_report = 0
     bc_max_lines_to_report = 0
     bc_max_formats_in_bar_graph = 20
+    bc_feature_output_in_pdf = 0 # Feature file outputs are in xlsx by default
     
     # Feature file reports: Two separeate sets are maintained - one for
     # feature report files (bc_config_feature) and one for all the
@@ -701,12 +734,21 @@ class PdfReport:
             self.bc_config_feature_lines[filename] = 0
 
         if default_config == False:
-            bc_config.bc_parse_config_file(self, config_file)
+            #bc_config.bc_parse_config_file(self, config_file)
+            bc_config.bc_parse_config_file(PdfReport, config_file)
 
               
         else:
-            # Default config: Report none of the feature files and
+            # Default config: Report all the feature files and
             # all of the non-feature files
+            report_features = len(temp_feature_list)
+
+            for i in range(0,report_features-1):
+                filename = temp_feature_list[i]
+
+                # ex: annotated_email.txt ==> email
+                filename = filename[10:-4]
+                self.bc_config_feature[filename] = 1
 
             self.bc_config_report_files['bc_format_bargraph'] = 1
             self.bc_config_report_files['FiwalkReport'] = 1
@@ -736,6 +778,10 @@ class PdfReport:
     def be_process_generate_report(self, fn, display_option1):
         PdfReport.annotated_dir = fn.annotated_dir
         PdfReport.outdir = fn.outdir
+
+        # Put the feature files under a separate folder under outdir
+        os.mkdir(PdfReport.outdir + '/features')
+        PdfReport.featuredir = PdfReport.outdir + '/features'
 
         # A temporary text file is created to extract some statistics
         # information from the feature files, before moving this information
@@ -782,20 +828,25 @@ class PdfReport:
                 linenumber+=1
 
                 ## print("D: Line: ", line[2:])
-                bc_utils.match_and_write(of, line, "Total features input", 1)
-                bc_utils.match_and_write(of, line, "Total features located to files", 1)
-                bc_utils.match_and_write(of, line, "Total features in unallocated space" ,1)
-                bc_utils.match_and_write(of, line, "Total features in compressed regions", 0)
+                bc_utils.match_and_write(of, line[2:], "Total features input", 1)
+                bc_utils.match_and_write(of, line[2:], "Total features located to files", 1)
+                bc_utils.match_and_write(of, line[2:], "Total features in unallocated space" ,1)
+                bc_utils.match_and_write(of, line[2:], "Total features in compressed regions", 0)
 
                 if ((fnmatch.fnmatch(line, 'Total*') or
                     (fnmatch.fnmatch(line, 'Unicode*')))):
                     continue
 
-            # Create a report file for this feature
-            pdf_file = be_create_report_file(input_file, annotated_file)
-
+            # Create a report file in xls form (by default) for this feature
+            be_create_xlsx_report_file(input_file, annotated_file)
+            
+            # Create the same report in PDF only if requested by the user.
+            if PdfReport.bc_feature_output_in_pdf == True:
+                pdf_file = be_create_pdf_report_file(input_file, annotated_file)
+                
         of.close()
         return
+
 
 #
 # This class is used to report information from the output file created
@@ -866,6 +917,7 @@ class FiwalkReport:
     page = 0
     max_entries_per_page =30
     outdir = ''
+    featuredir = ''
 
     regTestExp = \
          {'numFormats':153, 'numfiles':130, 'dirs':23, \
@@ -952,9 +1004,8 @@ class FiwalkReport:
         # Now generate the reports
         self.bc_generate_fiwalk_reports(fn)
 
-        # Generate Excel report if the option is set.
-        if (fiwalk_xlsx != None):
-            bc_generate_xlsx(fiwalk_xmlfile)
+        # Generate Excel report by default
+        bc_generate_xlsx(fn)
         
         
     #
@@ -984,7 +1035,8 @@ class FiwalkReport:
         # We calculate the number of files in each file format here.
 
         num_fmt_files = 0
-        for x in self.bcFmtDict:
+        if (PdfReport.bc_max_fmtfiles_to_report):
+          for x in self.bcFmtDict:
             file_format = x
             short_fmt_name = self.bcFmtDict[x]
             pdf=PDF()
@@ -1156,7 +1208,7 @@ if __name__=="__main__":
         print("\n Starting the regression test: \n")
         bc_regress.reg_test(FiwalkReport, image_info, args.outdir)
 
-    elif args.pdf_report:
+    else:
 
         use_config_file = (input (">>> Do you want to specify the" \
                                   " configuration file?: [Y/N]:"))
@@ -1194,9 +1246,7 @@ if __name__=="__main__":
 
         fiwalk_txtfile = None
         fiwalk_xmlfile = None
-        fiwalk_xlsx = None
-        if args.xlsx:
-            fiwalk_xlsx = args.xlsx
+        fiwalk_xlsx = True  # By default, xlsx files are generated
         
         if args.fiwalk_txtfile:
             fiwalk_txtfile = args.fiwalk_txtfile
