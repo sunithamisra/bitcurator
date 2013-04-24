@@ -37,6 +37,7 @@ def bc_get_regtest_parameters(FiwalkReport, config_file):
 # configuration file.
 #
 def bc_parse_config_file(PdfReport, config_file):
+
     ifd = open(config_file,"r")
 
     # Clone the static dictionary of file-formats to start with
@@ -117,6 +118,8 @@ def bc_parse_config_file(PdfReport, config_file):
                 PdfReport.bc_max_featfiles_to_report = int(line1[2])
             elif line1[1].rstrip() == 'MAX_FORMATS_FOR_BAR_GRAPH':
                 PdfReport.bc_max_formats_in_bar_graph = int(line1[2])
+            elif line1[1].rstrip() == 'FEATURE_OUTPUTS_IN_PDF':
+                PdfReport.bc_feature_output_in_pdf = int(line1[2])
         elif line1[0] == 'G':
             # Regression test parameters
             if line1[1].rstrip() == 'REGRESS_ANNOTATED_DIR':
