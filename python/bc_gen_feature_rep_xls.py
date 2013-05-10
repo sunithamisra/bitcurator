@@ -21,8 +21,8 @@ def bc_generate_feature_xlsx(PdfReport, data, feature_file):
     ws.title = "File Feature Information"
 
     ws.cell('%s%s'%('A', '1')).value = '%s' % "Filename"
-    ws.cell('%s%s'%('B', '1')).value = '%s' % "Position"
-    ws.cell('%s%s'%('C', '1')).value = '%s' % "Feature"
+    ws.cell('%s%s'%('B', '1')).value = '%s' % "Feature"
+    ws.cell('%s%s'%('C', '1')).value = '%s' % "Position"
 
     linenum=0
     for row in data:

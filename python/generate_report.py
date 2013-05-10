@@ -1136,10 +1136,10 @@ if __name__=="__main__":
 
     parser = ArgumentParser(prog='generate_report.py', description='Generate Reports from "bulk_extractor" and "fiwalk" outputs')
     parser.add_argument('--regress', action='store_true', help='Regression')
-    parser.add_argument('--pdf_report', action='store_true',help='PDF report')
+    #parser.add_argument('--pdf_report', action='store_true',help='PDF report')
     parser.add_argument('--fiwalk_txtfile', action='store', help="Use fiwalk-generated text file ")
     parser.add_argument('--fiwalk_xmlfile', action='store', help="Use fiwalk-generated XML file ")
-    parser.add_argument('--xlsx', action='store_true', help="output XLS file ")
+    #parser.add_argument('--xlsx', action='store_true', help="output XLS file ")
     parser.add_argument('--annotated_dir', action='store', help="Directory containing annotated files ")
     parser.add_argument('--outdir',action='store',help='Output directory; must not exist')
 
