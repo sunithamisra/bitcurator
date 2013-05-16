@@ -6,6 +6,7 @@
 import sys,os,shelve
 import re,dfxml,fiwalk
 from bc_utils import filename_from_path
+from bc_utils import is_special_file
 
 from openpyxl.workbook import Workbook
 from openpyxl.writer.excel import ExcelWriter
