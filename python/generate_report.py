@@ -399,7 +399,11 @@ class PDF(FPDF):
         self.cell(0, 6, 'Technical Metadata', ln=1)
         self.set_font('Times','I',11)
         self.underline = 0
-        self.cell(0, 6, 'Found '+ str(FiwalkReport.numPartitions) + ' Partitions in this disk', ln=1)
+        if (FiwalkReport.numPartitions == 1):
+            prtn = 'Partition'
+        else:
+            prtn = 'Partitions'
+        self.cell(0, 6, 'Found '+ str(FiwalkReport.numPartitions) + ' ' + prtn + ' in this disk', ln=1)
               
         self.set_font('Times','',10)
         imgname = 'image_filename: ' + str(image_info['image_filename'])
@@ -483,7 +487,7 @@ class PDF(FPDF):
           fill=not fill
 
         # Closure line
-        self.cell(sum(w),0,'','T')
+        #self.cell(sum(w),0,'','T')
 
     #
     # Make a Table of all the Deleted Files
@@ -1143,11 +1147,14 @@ class FiwalkReport:
             # Print the statistics first
             pdf.set_font('Arial','',10)
             pdf.add_page()
+
             pdf.make_table_stat(tab_header_statistics)
   
-            pdf.set_font('Arial','',10)
-            pdf.add_page()
-            pdf.make_table(header_files)
+            # If configured as -1, the table of files is not generated.
+            if (PdfReport.bc_config_report_lines['FiwalkReport'] != -1):
+                pdf.set_font('Arial','',10)
+                pdf.add_page()
+                pdf.make_table(header_files)
             pdf_file = fn.outdir + '/FiwalkReport.pdf'
             pdf.output(pdf_file,'F')
             bc_utils.bc_addToReportFileList(pdf_file, PdfReport)
