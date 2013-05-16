@@ -31,9 +31,11 @@ F:winprefetch:0
 #######################################
 # Fiwalk and Bulk Extractor Report files
 R:bc_format_bargraph:0
-R:FiwalkReport:600
+#R:FiwalkReport:600
+R:FiwalkReport:-1
 R:FiwalkDeletedFiles:0
 R:BeReport:0
+R:
 #
 #######################################
 # File Format: List all the files with the following file formats
