@@ -64,6 +64,7 @@ import bc_graph
 import bc_regress
 from bc_utils import filename_from_path
 from bc_genrep_dfxml import bc_process_xmlfile_using_sax
+from bc_genrep_dfxml import bc_get_volume_info_from_sax
 from bc_genrep_text import bc_process_textfile
 from bc_genrep_xls import bc_generate_xlsx
 from bc_gen_feature_rep_xls import bc_generate_feature_xlsx
@@ -76,9 +77,19 @@ except ImportError:
 # are actually reported, based on the configuration.
 reportFiles = 0
 
-image_fileinfo = ['image_filename', 'sectorsize','pagesize','acquisition_seconds', 'partition_offset','block_size','ftype','ftype_str','block_count','first_block','last_block']
+'''
+image_fileinfo = ['image_filename', 'partition', 'sectorsize','pagesize','acquisition_seconds', 'partition_offset','block_size','ftype','ftype_str','block_count','first_block','last_block']
 
-image_info = {'image_filename':0, 'sectorsize':0,'pagesize':0,'acquisition_seconds':'', 'partition_offset':0,'block_size':0,'ftype':0,'ftype_str':0,'block_count':0,'first_block':0,'last_block':0}
+image_info = {'image_filename':0, 'partition':0, 'sectorsize':0,'pagesize':0,'acquisition_seconds':'', 'partition_offset':0,'block_size':0,'ftype':0,'ftype_str':0,'block_count':0,'first_block':0,'last_block':0}
+'''
+# Info about the complete image
+image_fileinfo = ['image_filename', 'partitions'] 
+image_info = {'image_filename':0, 'partitions':0} 
+prtn_info_items = ['partition_offset','block_count','first_block','last_block', 'block_size','ftype','ftype_str']
+prtn_info = {'partition_offset':0,'block_count':0,'first_block':0,'last_block':0, 'block_size':0,'ftype':0,'ftype_str':0}
+
+# A list of individual partition information.
+glb_image_info = []
 
 #
 # Class PDF_BE to write the report to a PDF file.
@@ -259,7 +270,7 @@ class PDF_BE(FPDF):
             # If it is a special file, check if the user wants it to
             # be repoted. If not, exclude this from the table.
             if (PdfReport.bc_config_report_special_files == False) and \
-                            (is_special_file(filename)):
+                            (bc_utils.is_special_file(filename)):
                 ## print("D: File %s is special. So skipping" %(filename))
                 continue
             self.bc_write_column(w[0],6,filename,fill)
@@ -386,71 +397,97 @@ class PDF(FPDF):
         self.set_font('Times','B',12)
         self.underline = 1
         self.cell(0, 6, 'Technical Metadata', ln=1)
+        self.set_font('Times','I',11)
+        self.underline = 0
+        if (FiwalkReport.numPartitions == 1):
+            prtn = 'Partition'
+        else:
+            prtn = 'Partitions'
+        self.cell(0, 6, 'Found '+ str(FiwalkReport.numPartitions) + ' ' + prtn + ' in this disk', ln=1)
               
         self.set_font('Times','',10)
         imgname = 'image_filename: ' + str(image_info['image_filename'])
 
         self.cell(0, 6, 'Disk Image: '+filename_from_path(imgname), ln=1)
 
-        #Colors, line width and bold font
+        # Colors, line width and bold font
         self.set_table_hdr_attributes(w, header)
 
-        #Color and font restoration
+        # Color and font restoration
         self.set_table_body_attributes()
 
-        fill=0
-        self.set_font('Times','',10)
-        for key in image_info:
-            # Display just the file name for the "image_filename" key
-            if (key == 'image_filename'):
-                cell_text = filename_from_path(image_info[key])
-            else:
-                cell_text = image_info[key]
-                if (cell_text == 0):
-                    continue
-            
+        # Per partition info now:
+        for i in range(0, FiwalkReport.numPartitions):
+          fill=0
+          self.set_font('Times','',12)
+          self.cell(w[0], 6, 'Partition','LR',0,'L',fill) 
+          self.cell(w[1], 6, str(i+1), 'LR',0,'L',fill) 
+          self.ln()
+          fill=not fill
+
+          ## First write all the information from glb_image_info
+          self.set_font('Times','',10)
+          current_prtn = glb_image_info[i]
+
+          # Display just the file name for the "image_filename" key
+          for j in range(0, len(prtn_info_items)):
+            key = prtn_info_items[j]
+            cell_text = current_prtn[key]
+            if (cell_text == 0):
+              continue
+
             self.cell(w[0],6,bc_utils.stringfix(key),'LR',0,'L',fill)
             self.cell(w[1],6,cell_text,'LR',0,'L',fill)
             self.ln()
             fill=not fill
-  
-        self.cell(w[0],6,"Number of Files",'LR',0,'L',fill)
-        self.cell(w[1],6,str(FiwalkReport.numfiles),'LR',0,'L',fill)
-        self.ln()
-        fill=not fill
 
-        self.cell(w[0],6,"Total Directories",'LR',0,'L',fill)
-        self.cell(w[1],6,str(FiwalkReport.dirs),'LR',0,'L',fill)
-        self.ln()
-        fill=not fill
+          self.cell(w[0],6,"Number of Files",'LR',0,'L',fill)
+          self.cell(w[1],6,str(FiwalkReport.numfiles[i]),'LR',0,'L',fill)
+          self.ln()
+          fill=not fill
+
+          self.cell(w[0],6,"Total Directories",'LR',0,'L',fill)
+          self.cell(w[1],6,str(FiwalkReport.dirs[i]),'LR',0,'L',fill)
+          self.ln()
+          fill=not fill
               
-        self.cell(w[0],6,"Total Deleted Files",'LR',0,'L',fill)
-        self.cell(w[1],6,str(FiwalkReport.deletedFiles),'LR',0,'L',fill)
-        self.ln()
-        fill=not fill
+          self.cell(w[0],6,"Total Deleted Files",'LR',0,'L',fill)
+          self.cell(w[1],6,str(FiwalkReport.deletedFiles[i]),'LR',0,'L',fill)
+          self.ln()
+          fill=not fill
               
-        self.cell(w[0],6,"Total Unused Files",'LR',0,'L',fill)
-        self.cell(w[1],6,str(FiwalkReport.unusedFiles),'LR',0,'L',fill)
-        self.ln()
-        fill=not fill
+          self.cell(w[0],6,"Total Unused Files",'LR',0,'L',fill)
+          self.cell(w[1],6,str(FiwalkReport.unusedFiles[i]),'LR',0,'L',fill)
+          self.ln()
+          fill=not fill
               
-        self.cell(w[0],6,"Files with Nlinks > 1",'LR',0,'L',fill)
-        self.cell(w[1],6,str(FiwalkReport.moreNumlinks),'LR',0,'L',fill)
-        self.ln()
-        fill=not fill
+          self.cell(w[0],6,"Files with Nlinks > 1",'LR',0,'L',fill)
+          self.cell(w[1],6,str(FiwalkReport.moreNumlinks[i]),'LR',0,'L',fill)
+          self.ln()
+          fill=not fill
               
-        self.cell(w[0],6,"Empty Files ",'LR',0,'L',fill)
-        self.cell(w[1],6,str(FiwalkReport.emptyFiles),'LR',0,'L',fill)
-        self.ln()
-        fill=not fill
+          self.cell(w[0],6,"Empty Files ",'LR',0,'L',fill)
+          self.cell(w[1],6,str(FiwalkReport.emptyFiles[i]),'LR',0,'L',fill)
+          self.ln()
+          fill=not fill
               
-        self.cell(w[0],6,"Big Files(> 1 MB) ",'LR',0,'L',fill)
-        self.cell(w[1],6,str(FiwalkReport.bigFiles),'LR',0,'L',fill)
-        self.ln()
-        fill=not fill
+          self.cell(w[0],6,"Big Files(> 1 MB) ",'LR',0,'L',fill)
+          self.cell(w[1],6,str(FiwalkReport.bigFiles[i]),'LR',0,'L',fill)
+          self.ln()
+          fill=not fill
+          self.cell(sum(w),0,'','T')
+
+          ## Go to the next page and set up the header if this is not
+          ## the last page
+          if i < FiwalkReport.numPartitions-1:
+            self.add_page()
+            for j in range(0,len(header)):
+              self.cell(w[j],7,header[j],1,0,'C',1)
+            self.ln()
+          fill=not fill
 
         # Closure line
-        self.cell(sum(w),0,'','T')
+        #self.cell(sum(w),0,'','T')
 
     #
     # Make a Table of all the Deleted Files
@@ -481,14 +518,16 @@ class PDF(FPDF):
                 num_deleted_files+=1
                 ## print("D: Deleted File: ",
                 ## num_deleted_files,FiwalkReport.fiDictList[i]['filename'])
-                self.cell(w[0],6,str(num_deleted_files),'LR',0,'L',fill)
+                ##self.cell(w[0],6,str(num_deleted_files),'LR',0,'L',fill)
+                partition = FiwalkReport.fiDictList[i]['partition']
+                self.cell(w[0],6,str(partition),'LR',0,'L',fill)
                 mystr = (FiwalkReport.fiDictList[i]['filename'])
                 text = bc_pdf.bc_adjust_text(mystr, w[1])
                 self.cell(w[1],6,text,'LR',0,'L',fill)
                 self.ln()
                 fill=not fill
                 bc_pdf.bc_table_end_page(self, FiwalkReport, num_deleted_files, header, w)
-
+             
         #Closure line
         self.cell(sum(w),0,'','T')
     
@@ -496,6 +535,7 @@ class PDF(FPDF):
     # Make a Table of all the files with the given format type
     # Full format is what appears in the image file.
     #
+    #def make_table_fmtfiles(self, header, file_format):
     def make_table_fmtfiles(self, header, file_format):
         imgname = 'image_filename: ' + str(image_info['image_filename'])
         format_heading = 'Format: '+file_format
@@ -508,7 +548,7 @@ class PDF(FPDF):
         self.underline = 0
 
         # Set Colimn width
-        w = [12,150]
+        w = [16,150]
 
         #Colors, line width and bold font
         self.set_table_hdr_attributes(w, header)
@@ -527,7 +567,8 @@ class PDF(FPDF):
 
             if mystr == file_format:
                 num_files+=1
-                self.cell(w[0],6,str(num_files),'LR',0,'L',fill)
+                ###self.cell(w[0],6,str(num_files),'LR',0,'L',fill)
+                self.cell(w[0],6,str(FiwalkReport.fiDictList[i]['partition']),'LR',0,'L',fill)
                 mystr = (FiwalkReport.fiDictList[i]['filename'])
                 text = bc_pdf.bc_adjust_text(mystr, w[1])
                 self.cell(w[1],6,text,'LR',0,'L',fill)
@@ -582,7 +623,7 @@ class PDF(FPDF):
 
             # Check if config file is set to not report special files
             if (PdfReport.bc_config_report_special_files == False) \
-                and (is_special_file(cell_text)):
+                and (bc_utils.is_special_file(cell_text)):
                 ## print("D: File %s is special. Skipping" %(cell_text))
                 continue
  
@@ -591,7 +632,7 @@ class PDF(FPDF):
             if (PdfReport.bc_config_report_lines['FiwalkReport'] != 0):
                 if (linenum >= PdfReport.bc_config_report_lines['FiwalkReport']):
                     # Lines reached max: Breaking
-                    ## print("FiwalkReport: Exceeded Maxlines: ", linenum)
+                    print("FiwalkReport: Exceeded Maxlines: ", linenum)
                     break
                     
             linenum += 1
@@ -853,15 +894,22 @@ class PdfReport:
 # by fiwalk program with -T option.
 #
 class FiwalkReport:
-    numfiles = 0
+    ###numfiles = 0
+    numfiles = []
     files = 0
-    dirs = 0
-    deletedFiles = 0
-    unusedFiles = 0
+    ###dirs = 0
+    dirs = []
+    ###deletedFiles = 0
+    deletedFiles = []
+    ###unusedFiles = 0
+    unusedFiles = []
     moreNumlinks = 0
-    emptyFiles = 0
-    bigFiles = 0
+    ###emptyFiles = 0
+    emptyFiles = []
+    ###bigFiles = 0
+    bigFiles = []
     numFormats = 0
+    ###numFormats = []
     dict_array = ["filename", "partition", "id", "name_type", "filesize", \
                   "alloc", "unalloc", "used", "inode", "meta_type", "mode", \
                   "nlink", \
@@ -878,6 +926,8 @@ class FiwalkReport:
     regress_input_xml_file = []
     regress_outdir = []
     regress_beinfo_file = []
+    numPartitions = 0
+    prevPartition = 1
 
     # The file format names are very lengthy and hence using these names
     # as they are from the fiwalk output files makes the barchart look ugly.
@@ -976,7 +1026,7 @@ class FiwalkReport:
         else:
             # This format is not found in the dict.
             # Look for this format string in the static array to get
-            # the short string. If not found, make up one using the first
+            # the short string. If not found, make up one using the firs4t
             # 3 and last 3 characters. Then add the format to the dict.
 
             shortFmt = self.bcGetShortNameForFmt(self, fmt_str)
@@ -995,11 +1045,21 @@ class FiwalkReport:
         self.xmlInput = True
         input_file = fn.fiwalk_xmlfile
         FiwalkReport.outdir = fn.outdir
-        ## print("FN: ", fn)
-        ## print("input_file: ", input_file)
+
+        # First get the partition information.
+        bc_get_volume_info_from_sax(FiwalkReport, input_file, image_info, prtn_info_items, glb_image_info)
+
+        # Now initialize the arrays that depend on the number of partitions.
+        FiwalkReport.numfiles = [0] * FiwalkReport.numPartitions
+        FiwalkReport.dirs = [0] * FiwalkReport.numPartitions
+        FiwalkReport.deletedFiles = [0] * FiwalkReport.numPartitions
+        FiwalkReport.unusedFiles = [0] * FiwalkReport.numPartitions
+        FiwalkReport.moreNumlinks = [0] * FiwalkReport.numPartitions
+        FiwalkReport.emptyFiles = [0] * FiwalkReport.numPartitions
+        FiwalkReport.bigFiles = [0] * FiwalkReport.numPartitions
 
         # Process the xml file with sax
-        bc_process_xmlfile_using_sax(FiwalkReport, input_file, image_info)
+        bc_process_xmlfile_using_sax(FiwalkReport, input_file, prtn_info, glb_image_info, image_info)
 
         # Now generate the reports
         self.bc_generate_fiwalk_reports(fn)
@@ -1020,13 +1080,14 @@ class FiwalkReport:
         # We will use this text file to populate the pdf report
         ofn_be = fn.outdir + ".txt"
         FiwalkReport.outdir = fn.outdir
+        prtn = FiwalkReport.numPartitions
 
         # Table headers
         header_be = ['Bulk Extractor Report Files','Feature Instances','FLTF','FUTF','FICR']
         header_files = ['Filename','Partition','DIR','Size','Deleted','Filetype']
         
-        tab_header_delfiles = [' # ', 'Deleted File']
-        tab_header_file_fmts = [' # ', 'File']
+        tab_header_delfiles = [' Partition ', 'Deleted File']
+        tab_header_file_fmts = ['Partition', 'File']
         tab_header_statistics = ['Feature', 'Value']
         tab_header_bargraph = ['Format', 'Short Form', 'Files']
 
@@ -1036,35 +1097,35 @@ class FiwalkReport:
 
         num_fmt_files = 0
         if (PdfReport.bc_max_fmtfiles_to_report):
-          for x in self.bcFmtDict:
-            file_format = x
-            short_fmt_name = self.bcFmtDict[x]
-            pdf=PDF()
-            pdf.compress = False
-            pdf.set_font('Arial','',10)
-            pdf.add_page()
-            pdf.make_table_fmtfiles(tab_header_file_fmts, file_format)
-            pdf_file = fn.outdir + '/format_' + short_fmt_name + '.pdf'
-                
-            pdf.output(pdf_file,'F')
-            bc_utils.bc_addToReportFileList(pdf_file, PdfReport)
+            for x in self.bcFmtDict:
+              file_format = x
+              short_fmt_name = self.bcFmtDict[x]
+              pdf=PDF()
+              pdf.compress = False
+              pdf.set_font('Arial','',10)
+              pdf.add_page()
+              pdf.make_table_fmtfiles(tab_header_file_fmts, file_format)
+              pdf_file = fn.outdir + '/format_' + short_fmt_name + '.pdf'
+                  
+              pdf.output(pdf_file,'F')
+              bc_utils.bc_addToReportFileList(pdf_file, PdfReport)
           
-            num_fmt_files += 1
-
-            # if the configured value for nax fmtfiles is 0, it reports all.
-            # else it uses the number specified in the config file.
-            # If the number not configured, it uses the hardcoded default:20
-            if PdfReport.bc_max_fmtfiles_to_report and \
-                 num_fmt_files >= PdfReport.bc_max_fmtfiles_to_report:
-                ## print("D: FMT files exceeded max limit of %d" %(num_fmt_files))
-                break
+              num_fmt_files += 1
+  
+              # if the configured value for max fmtfiles is 0, it reports all.
+              # else it uses the number specified in the config file.
+              # If the number not configured, it uses the hardcoded default:20
+              if PdfReport.bc_max_fmtfiles_to_report and \
+                   num_fmt_files >= PdfReport.bc_max_fmtfiles_to_report:
+                  ## print("D: FMT files exceeded max limit of %d" %(num_fmt_files))
+                  break
 
         ## Report the bargraph only if the configuration file says so
         outfile = FiwalkReport.outdir + '/bc_format_bargraph.pdf'
         if PdfReport.bc_config_report_files['bc_format_bargraph']:
             bc_graph.bc_draw_histogram_fileformat(PdfReport, image_info, \
                                                   outfile, self.dictFileFmtVal)
-
+  
             # Also make a table of the same information
             pdf=PDF()
             pdf.compress = False
@@ -1075,8 +1136,8 @@ class FiwalkReport:
             pdf_file = fn.outdir + '/format_table.pdf'
             pdf.output(pdf_file,'F')
             bc_utils.bc_addToReportFileList(pdf_file, PdfReport)
-
-
+  
+  
         ## Report the Fiwalk Report file only if the config file says so
         if PdfReport.bc_config_report_files['FiwalkReport'] == 1:
             pdf=PDF()
@@ -1086,17 +1147,20 @@ class FiwalkReport:
             # Print the statistics first
             pdf.set_font('Arial','',10)
             pdf.add_page()
-            pdf.make_table_stat(tab_header_statistics)
 
-            pdf.set_font('Arial','',10)
-            pdf.add_page()
-            pdf.make_table(header_files)
+            pdf.make_table_stat(tab_header_statistics)
+  
+            # If configured as -1, the table of files is not generated.
+            if (PdfReport.bc_config_report_lines['FiwalkReport'] != -1):
+                pdf.set_font('Arial','',10)
+                pdf.add_page()
+                pdf.make_table(header_files)
             pdf_file = fn.outdir + '/FiwalkReport.pdf'
             pdf.output(pdf_file,'F')
             bc_utils.bc_addToReportFileList(pdf_file, PdfReport)
-        
+          
         # Generate the Report of deleted files
-
+  
         ## Report the Deleted Files only if the config file says so
         if PdfReport.bc_config_report_files['FiwalkDeletedFiles'] == 1:
             ## print("D: Generating Deleted Files Report")
@@ -1108,25 +1172,26 @@ class FiwalkReport:
             pdf.set_y(y+10)
             pdf.make_table_delfiles(tab_header_delfiles)
             pdf_file = fn.outdir + '/FiwalkDeletedFiles.pdf'
+            print("Generating ", pdf_file)
             pdf.output(pdf_file, 'F')
             bc_utils.bc_addToReportFileList(pdf_file, PdfReport)
-
+  
         ## Now add the info from bulk-extractor output (be_ofn)
         ## Report the BE Report file only if the config file says so
         if PdfReport.bc_config_report_files['BeReport'] == 1:
-            pdf=PDF_BE()
-            pdf.compress = False
-
-            pdf.set_font('Arial','B',10)
-            pdf.add_page()
-            y = pdf.get_y()
-            pdf.set_y(y+10)
-            pdf.set_text_color(128)
-            pdf.make_table_be(header_be, ofn_be)
-
-            pdf_file = fn.outdir + '/BeReport.pdf'
-            pdf.output(pdf_file,'F')
-            bc_utils.bc_addToReportFileList(pdf_file, PdfReport)
+              pdf=PDF_BE()
+              pdf.compress = False
+  
+              pdf.set_font('Arial','B',10)
+              pdf.add_page()
+              y = pdf.get_y()
+              pdf.set_y(y+10)
+              pdf.set_text_color(128)
+              pdf.make_table_be(header_be, ofn_be)
+  
+              pdf_file = fn.outdir + '/BeReport.pdf'
+              pdf.output(pdf_file,'F')
+              bc_utils.bc_addToReportFileList(pdf_file, PdfReport)
 
         ## print("Printing the Generated PDF files ")
         bc_utils.bc_printReportFileList(PdfReport, FiwalkReport)

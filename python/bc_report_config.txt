@@ -17,8 +17,8 @@ F:aes_keys.txt:0
 F:json:0
 F:zip:0
 F:windirs:100
-F:domain:0
-F:email:0
+F:domain:100
+F:email:
 F:exif:0
 F:url:0
 F:winpe:0
@@ -31,9 +31,11 @@ F:winprefetch:0
 #######################################
 # Fiwalk and Bulk Extractor Report files
 R:bc_format_bargraph:0
-R:FiwalkReport:200
+#R:FiwalkReport:600
+R:FiwalkReport:-1
 R:FiwalkDeletedFiles:0
 R:BeReport:0
+R:
 #
 #######################################
 # File Format: List all the files with the following file formats
@@ -56,7 +58,7 @@ M:PDF1.4
 ####################################################
 # Miscellaneous optoins
 # Don't display special files - those starting from "."
-S:REPORT_SPECIAL_FILES:YES
+S:REPORT_SPECIAL_FILES:NO
 #
 # User can set the maximum lines to report for the PDF file.
 S:MAX_LINES_TO_REPORT:500
@@ -66,6 +68,7 @@ S:MAX_LINES_TO_REPORT:500
 # of formats is huge, the number of files generated could be
 # very large. So user can specify the number here to control
 # the number of files generated.
+# Default configuration will not report any format files
 S:MAX_FILE_FORMAT_FILES_TO_REPORT:0
 #
 # Maximum feature files to report: For each annotated file, there
@@ -79,7 +82,7 @@ S:MAX_FEATURE_FILES_TO_REPORT:10
 # format bar-graph. It is set to 20 by default. It can be
 # overridden by this parameter.
 #S:MAX_FORMATS_FOR_BAR_GRAPH:7
-S:FEATURE_OUTPUTS_IN_PDF:1
+S:FEATURE_OUTPUTS_IN_PDF:0
 #
 G:REGRESS_ANNOTATED_DIR:./bc_regress_dir/regress_annotated_charlie_output
 G:REGRESS_INPUT_XML_FILE:./bc_regress_dir/regress_charlie_fi_F.xml

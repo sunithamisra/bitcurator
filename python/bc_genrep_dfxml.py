@@ -5,6 +5,47 @@
 
 import sys,os,shelve
 import re,dfxml,fiwalk
+#from generate_report import glb_image_info
+
+t_image_info = {'partition_offset':0,'block_count':0, 'first_block':0,'last_block':0, 'block_size':0, 'ftype':0,'ftype_str':0 }
+
+def bc_get_volume_info_from_sax(FiwalkReport, fn, image_info, prtn_info_items, glb_image_info):
+
+    #
+    # Callback function to process the SAX stream for volume object
+    #
+    def cbv(fv):
+        t_image_info['partition_offset'] = fv.partition_offset()
+        t_image_info['block_count'] = fv.block_count()
+        t_image_info['last_block'] = fv.last_block()
+        t_image_info['first_block'] = fv.first_block()
+        t_image_info['block_size'] = fv.block_count()
+        t_image_info['ftype'] = fv.ftype()
+        t_image_info['ftype_str'] = fv.ftype_str()
+
+        FiwalkReport.numPartitions +=1;
+
+        glb_image_info.append({
+                  prtn_info_items[0]:t_image_info['partition_offset'],\
+                  prtn_info_items[1]:t_image_info['block_count'], \
+                  prtn_info_items[2]:t_image_info['first_block'], \
+                  prtn_info_items[3]:t_image_info['last_block'], \
+                  prtn_info_items[4]:t_image_info['block_size'], \
+                  prtn_info_items[5]:t_image_info['ftype'],  \
+                  prtn_info_items[6]:t_image_info['ftype_str']}) 
+
+    xmlfile = open(fn, 'rb')
+
+    # Currently we support taking only xml file as input. The following
+    # check is for future enhancement.
+    if fn.endswith('xml'):
+        r = fiwalk.fiwalk_vobj_using_sax(xmlfile=open(fn, 'rb'),callback=cbv)
+        image_info['image_filename'] = r.imageobject._tags['image_filename']
+        image_info['partitions'] = str(FiwalkReport.numPartitions)
+      
+    else:
+        # We use this call if we're processing a disk image
+        print("Expected an XML File for now ")
 
 #
 # From dfxml utilities, Get the file and volume objects extracted 
@@ -12,22 +53,33 @@ import re,dfxml,fiwalk
 # populate the array of dictionaries, fiwalkDictList, using the
 # objects.  
 #
-def bc_process_xmlfile_using_sax(FiwalkReport, fn, image_info):
+def bc_process_xmlfile_using_sax(FiwalkReport, fn, prtn_info, glb_image_info, image_info):
 
+    '''
     #
     # Callback function to process the SAX stream for volume object
     #
     def cbv(fv):
-        image_info['partition_offset'] = fv.partition_offset()
-        image_info['block_count'] = fv.block_count()
-        image_info['last_block'] = fv.last_block()
-        image_info['first_block'] = fv.first_block()
-        image_info['block_size'] = fv.block_count()
-        image_info['ftype'] = fv.ftype()
-        image_info['ftype_str'] = fv.ftype_str()
-        
+        prtn_info['partition_offset'] = fv.partition_offset()
+        prtn_info['block_count'] = fv.block_count()
+        prtn_info['last_block'] = fv.last_block()
+        prtn_info['first_block'] = fv.first_block()
+        prtn_info['block_size'] = fv.block_count()
+        prtn_info['ftype'] = fv.ftype()
+        prtn_info['ftype_str'] = fv.ftype_str()
+
+        # glb_image_info.append(prtn_info)
+        # NOTE: The above will overwrite the list with the new element as
+        # every list element! Dumb!
+
+        glb_image_info.append({prtn_info['partition_offset'], \
+            prtn_info['block_count'], prtn_info['last_block'], \
+            prtn_info['first_block'],  prtn_info['block_size'], \
+            prtn_info['ftype'],  prtn_info['ftype_str']}) 
+        ## print("DEBUG:", glb_image_info)
         ## print("DEBUG: VolumeObject:", fv)    
-        ## print("DEBUG: Image Fileinfo: ", image_info)
+        ## print("DEBUG: Image Fileinfo: ", prtn_info)
+    '''
 
     #
     # Callback function to process the SAX stream for file object
@@ -45,8 +97,6 @@ def bc_process_xmlfile_using_sax(FiwalkReport, fn, image_info):
     if fn.endswith('xml'):
         # We use this call if we're processing a fiwalk XML fle
         fiwalk.fiwalk_using_sax(xmlfile=open(fn, 'rb'),callback=cb)
-        r = fiwalk.fiwalk_vobj_using_sax(xmlfile=open(fn, 'rb'),callback=cbv)
-        image_info['image_filename'] = r.imageobject._tags['image_filename']
     else:
         # We use this call if we're processing a disk image
         fiwalk.fiwalk_using_sax(imagefile=open(fn, 'rb'),callback=cb)
@@ -60,18 +110,28 @@ def bc_make_dict(fi, FiwalkReport, fn):
     FiwalkReport.array_ind += 1
 
     # Populate the bc_dict with the info from fi
+    prtn = int(fi.partition()) - 1
+
+    # Debug
+    ## if (FiwalkReport.prevPartition != fi.partition()):
+          ## Time for a new report
+          ##print("Partition Change")
+
+    # 
+    # FiwalkReport.prevPartition = fi.partition()
 
     for i in FiwalkReport.dict_array:
         FiwalkReport.dict_val[i] = 0
 
+    # Save the file attributes per partition
     FiwalkReport.dict_val["filename"] = fi.filename()
     FiwalkReport.dict_val['partition'] = fi.partition()
     if fi.is_dir():
         FiwalkReport.dict_val['name_type'] = 'd' 
-        FiwalkReport.dirs = FiwalkReport.dirs + 1
+        FiwalkReport.dirs[prtn] += 1
     elif fi.is_file():
         FiwalkReport.dict_val['name_type'] = 'r' 
-        FiwalkReport.numfiles = FiwalkReport.numfiles + 1
+        FiwalkReport.numfiles[prtn] += 1
     else:
         FiwalkReport.dict_val['name_type'] = 'x' 
     
@@ -84,7 +144,7 @@ def bc_make_dict(fi, FiwalkReport, fn):
         FiwalkReport.dict_val["alloc"] = True
     else:
         FiwalkReport.dict_val["unalloc"] = True
-        FiwalkReport.deletedFiles = FiwalkReport.deletedFiles + 1
+        FiwalkReport.deletedFiles[prtn] += 1
 
     # If the XML file doesn't have the format information, we cannot
     # generate reports related to formats.
@@ -98,9 +158,9 @@ def bc_make_dict(fi, FiwalkReport, fn):
 
     # empty files and big files
     if fi.filesize() == 0:
-        FiwalkReport.emptyFiles = FiwalkReport.emptyFiles + 1
+        FiwalkReport.emptyFiles[prtn] += 1
     if fi.filesize() > 1024*1024:
-        FiwalkReport.bigFiles = FiwalkReport.bigFiles + 1
+        FiwalkReport.bigFiles[prtn] += 1
 
     # Now append this dictionary to the array FiwalkReport.fiDictList
     # which is an array of dictionaries.

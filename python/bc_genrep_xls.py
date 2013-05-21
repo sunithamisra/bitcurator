@@ -13,16 +13,17 @@ from openpyxl.writer.excel import ExcelWriter
 from openpyxl.cell import get_column_letter
 
 def build_local_wb(ws, fi, row_idx):
-    ws.cell('%s%s'%('A', row_idx)).value = '%s' % fi.filename()
-    ws.cell('%s%s'%('B', row_idx)).value = '%s' % fi.ext()
-    ws.cell('%s%s'%('C', row_idx)).value = '%s' % str(fi.filesize())
+    ws.cell('%s%s'%('A', row_idx)).value = '%s' % fi.partition()
+    ws.cell('%s%s'%('B', row_idx)).value = '%s' % fi.filename()
+    ws.cell('%s%s'%('C', row_idx)).value = '%s' % fi.ext()
+    ws.cell('%s%s'%('D', row_idx)).value = '%s' % str(fi.filesize())
     #ws.cell('%s%s'%('D', row_idx)).value = '%s' % str(fi.mode())
-    ws.cell('%s%s'%('D', row_idx)).value = '%s' % str(fi.ctime())
-    ws.cell('%s%s'%('E', row_idx)).value = '%s' % str(fi.atime())
-    ws.cell('%s%s'%('F', row_idx)).value = '%s' % str(fi.crtime())
-    ws.cell('%s%s'%('G', row_idx)).value = '%s' % str(fi.mtime())
-    ws.cell('%s%s'%('H', row_idx)).value = '%s' % str(fi.md5())
-    ws.cell('%s%s'%('I', row_idx)).value = '%s' % str(fi.sha1())
+    ws.cell('%s%s'%('E', row_idx)).value = '%s' % str(fi.ctime())
+    ws.cell('%s%s'%('F', row_idx)).value = '%s' % str(fi.atime())
+    ws.cell('%s%s'%('G', row_idx)).value = '%s' % str(fi.crtime())
+    ws.cell('%s%s'%('H', row_idx)).value = '%s' % str(fi.mtime())
+    ws.cell('%s%s'%('I', row_idx)).value = '%s' % str(fi.md5())
+    ws.cell('%s%s'%('J', row_idx)).value = '%s' % str(fi.sha1())
 
 def process_files(fn, ws):
 
@@ -53,16 +54,17 @@ def bc_generate_xlsx(fn):
     ws = wb.worksheets[0]
     ws.title = "File Object Information"
 
-    ws.cell('%s%s'%('A', '1')).value = '%s' % "Filename"
-    ws.cell('%s%s'%('B', '1')).value = '%s' % "Extension"
-    ws.cell('%s%s'%('C', '1')).value = '%s' % "Filesize"
+    ws.cell('%s%s'%('A', '1')).value = '%s' % "Partition"
+    ws.cell('%s%s'%('B', '1')).value = '%s' % "Filename"
+    ws.cell('%s%s'%('C', '1')).value = '%s' % "Extension"
+    ws.cell('%s%s'%('D', '1')).value = '%s' % "Filesize"
     #ws.cell('%s%s'%('D', '1')).value = '%s' % "Mode"
-    ws.cell('%s%s'%('D', '1')).value = '%s' % "Change time"
-    ws.cell('%s%s'%('E', '1')).value = '%s' % "Access time"
-    ws.cell('%s%s'%('F', '1')).value = '%s' % "Create time"
-    ws.cell('%s%s'%('G', '1')).value = '%s' % "Modification time"
-    ws.cell('%s%s'%('H', '1')).value = '%s' % "MD5 Hash" 
-    ws.cell('%s%s'%('I', '1')).value = '%s' % "SHA1 Hash"
+    ws.cell('%s%s'%('E', '1')).value = '%s' % "Change time"
+    ws.cell('%s%s'%('F', '1')).value = '%s' % "Access time"
+    ws.cell('%s%s'%('G', '1')).value = '%s' % "Create time"
+    ws.cell('%s%s'%('H', '1')).value = '%s' % "Modification time"
+    ws.cell('%s%s'%('I', '1')).value = '%s' % "MD5 Hash" 
+    ws.cell('%s%s'%('J', '1')).value = '%s' % "SHA1 Hash"
 
     process_files(fn.fiwalk_xmlfile, ws)
 
