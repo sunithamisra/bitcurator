@@ -15,15 +15,16 @@ from openpyxl.cell import get_column_letter
 
 def bc_generate_feature_xlsx(PdfReport, data, feature_file):
 
-    wb = Workbook()
+    wb = Workbook(optimized_write = True)
     dest_filename = PdfReport.featuredir +'/'+ (filename_from_path(feature_file))[10:-3] + "xlsx"
     row_idx = [2]
-    ws = wb.worksheets[0]
+    ##ws = wb.worksheets[0]
+    ws = wb.create_sheet()
     ws.title = "File Feature Information"
 
     ws.cell('%s%s'%('A', '1')).value = '%s' % "Filename"
-    ws.cell('%s%s'%('B', '1')).value = '%s' % "Position"
-    ws.cell('%s%s'%('C', '1')).value = '%s' % "Feature"
+    ws.cell('%s%s'%('B', '1')).value = '%s' % "Feature"
+    ws.cell('%s%s'%('C', '1')).value = '%s' % "Position"
 
     linenum=0
     for row in data:
