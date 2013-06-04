@@ -7,6 +7,22 @@ Real-World Collecting Institutions
 Copyright (C) 2012
 All rights reserved.
 
+June 3, 2013:
+BitCurator 0.2.6 released
+- Report generation updates
+- Various bugfixes, configuration files updated
+
+May 10, 2013:
+BitCurator 0.2.4 released
+- Report generation updates; extraneous PDF generation eliminated
+- Switched to alternate repo for Guymager
+
+March 22, 2013:
+BitCurator 0.2.3 released
+- Bug fixes
+- Software updates
+- Report generation fixes
+
 March 10, 2013:
 BitCurator 0.2.0 released
 - BitCurator reporting tool updated, new SAX XML parsing of forensic tool DFXML output

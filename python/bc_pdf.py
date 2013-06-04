@@ -1,5 +1,13 @@
 #!/usr/bin/python
 # coding=UTF-8
+#
+# BitCurator
+# Copyright (C) 2012
+# All rights reserved.
+# 
+# This code is distributed under the terms of the GNU General Public 
+# License, Version 3. See the text file "COPYING" for further details 
+# about the terms of this license.
 # 
 # This is a python file containing some utility functions related to fpdf for
 # generate_reports script
