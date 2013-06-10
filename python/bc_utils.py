@@ -135,3 +135,44 @@ def get_file_info(line, FiwalkReport):
         if int(line1[1]) > 1024*1024:
             FiwalkReport.bigFiles = FiwalkReport.bigFiles + 1
 
+# bc_get_reports: Since the report-generating functions expect parameters in the "args" form,
+# the data is converted into an artificially creted args list. this is done so the command-line
+# option of running the reports is intact.
+
+from collections import namedtuple
+def bc_get_reports(PdfReport, FiwalkReport, fiwalk_xmlfile, annotated_dir, outdir, config_file):
+
+        fiwalk_txtfile = "null"
+        fiwalk_xlsx = True  # By default, xlsx files are generated
+
+        argStruct = namedtuple("argStruct", "outdir fiwalk_xmlfile annotated_dir")
+        args = argStruct(outdir=outdir, fiwalk_xmlfile=fiwalk_xmlfile, annotated_dir=annotated_dir)
+
+        use_config_file = True
+        fiwalk_txtfile = None
+
+        print("bc_get_reports: Gui Option: config_file: ", config_file)
+        print("bc_get_reports: fiwalk_xmlfile: ", args.fiwalk_xmlfile)
+        print("bc_get_reports: annotated Directory: ", args.annotated_dir)
+        print("bc_get_reports: Output Directory: ", args.outdir)
+
+        report = PdfReport(args.annotated_dir, args.outdir, use_config_file, config_file)
+        report.be_process_generate_report(args, use_config_file)
+
+        if fiwalk_txtfile:
+            ###fiwalk_txtfile = args.fiwalk_txtfile
+            ## print("D: Using Fiwalk TXT file ", fiwalk_txtfile)
+
+            report_fi = FiwalkReport(fiwalk_txtfile)
+            report_fi.process_generate_report_fiwalk_from_text(args)
+        elif args.fiwalk_xmlfile:
+            print("XML FILE:", args.fiwalk_xmlfile)
+            fiwalk_xmlfile = args.fiwalk_xmlfile
+
+            ## print("D: Using Fiwalk XML file ", fiwalk_xmlfile)
+
+            report_fi = FiwalkReport(args.fiwalk_xmlfile)
+            report_fi.process_generate_report_fiwalk_from_xml(args)
+
+        ##exit(1)
+
