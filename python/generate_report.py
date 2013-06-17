@@ -250,7 +250,7 @@ class PDF_BE(FPDF):
 
             # Start from a new page with header names once
             # reached max_entries allowed per page.
-            if ((linenum>=FiwalkReport.max_entries_per_page) &
+            if ((linenum >= FiwalkReport.max_entries_per_page) &
                     (linenum%FiwalkReport.max_entries_per_page == 0)):
             
                 bc_pdf.bc_table_end_page(self, FiwalkReport, linenum, header, w)
@@ -723,16 +723,15 @@ class PdfReport:
             exit(1)
         else:
             os.mkdir(out_dir)
-        
 
         # Open the Configuration File: If it doesn't exist, default
-        if use_config_file == 'Y' or use_config_file == 'y':
-            if (os.path.exists(config_file) == False):
-                print("Info: Config file %s does not exist. Using Default parameters" %config_file)
-                default_config = True
-        else:
-            # Config file not specified
+        ####if use_config_file == 'Y' or use_config_file == 'y':
+        #### NOTE: We no longer ask the user to provide or not the config file
+        if (os.path.exists(config_file) == False):
+            print("Info: Config file %s does not exist. Using Default parameters" %config_file)
             default_config = True
+        else:
+            default_config = False
 
         # Initialize the array now that we know the number of elements
         for i in range(0,len(self.files)):
@@ -745,12 +744,11 @@ class PdfReport:
 
         if default_config == False:
             #bc_config.bc_parse_config_file(self, config_file)
-            bc_config.bc_parse_config_file(PdfReport, config_file)
-
-              
+            bc_config.bc_parse_config_file(PdfReport, FiwalkReport, config_file)
         else:
             # Default config: Report all the feature files and
             # all of the non-feature files
+            print("Info: Config file %s does not exist. Using default configuration " %config_file)
             report_features = len(temp_feature_list)
 
             for i in range(0,report_features-1):
@@ -863,22 +861,15 @@ class PdfReport:
 # by fiwalk program with -T option.
 #
 class FiwalkReport:
-    ###numfiles = 0
     numfiles = []
     files = 0
-    ###dirs = 0
     dirs = []
-    ###deletedFiles = 0
     deletedFiles = []
-    ###unusedFiles = 0
     unusedFiles = []
     moreNumlinks = 0
-    ###emptyFiles = 0
     emptyFiles = []
-    ###bigFiles = 0
     bigFiles = []
     numFormats = 0
-    ###numFormats = []
     dict_array = ["filename", "partition", "id", "name_type", "filesize", \
                   "alloc", "unalloc", "used", "inode", "meta_type", "mode", \
                   "nlink", \
