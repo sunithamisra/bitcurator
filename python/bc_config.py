@@ -4,8 +4,9 @@
 # This file has routines related to the configuration information
 # of generate_reports script
 
-from generate_report import PdfReport
-from generate_report import FiwalkReport
+#from generate_report import PdfReport
+#from generate_report import FiwalkReport
+from bc_genrep_gui import *
 import bc_utils,re
 
 #
@@ -36,7 +37,7 @@ def bc_get_regtest_parameters(FiwalkReport, config_file):
 # Parse funciton to extract the configurable information out of the 
 # configuration file.
 #
-def bc_parse_config_file(PdfReport, config_file):
+def bc_parse_config_file(PdfReport, FiwalkReport, config_file):
 
     ifd = open(config_file,"r")
 
