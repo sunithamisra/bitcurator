@@ -55,12 +55,13 @@ def process_files(fn, ws):
 
 def bc_generate_xlsx(fn):
 
-    wb = Workbook(optimized_write = True)
+    wb = Workbook()
+    #wb = Workbook(optimized_write = True)
     #dest_filename = r'test_book.xlsx'
     dest_filename = fn.outdir + "/" + filename_from_path(fn.fiwalk_xmlfile) + ".xlsx"
     print("Generating Excel report ", dest_filename)
-    #ws = wb.worksheets[0]
-    ws = wb.create_sheet()
+    ws = wb.worksheets[0]
+    #ws = wb.create_sheet()
     ws.title = "File Object Information"
 
     ws.cell('%s%s'%('A', '1')).value = '%s' % "Partition"
