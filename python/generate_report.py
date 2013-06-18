@@ -835,11 +835,11 @@ class PdfReport:
             for line in lines:
                 linenumber+=1
 
-                ## print("D: Line: ", line[2:])
-                bc_utils.match_and_write(of, line[2:], "Total features input", 1)
-                bc_utils.match_and_write(of, line[2:], "Total features located to files", 1)
-                bc_utils.match_and_write(of, line[2:], "Total features in unallocated space" ,1)
-                bc_utils.match_and_write(of, line[2:], "Total features in compressed regions", 0)
+                ##print("D: Line: ", line[2:])
+                bc_utils.match_and_write(of, line[:], "Total features input", 1)
+                bc_utils.match_and_write(of, line[:], "Total features located to files", 1)
+                bc_utils.match_and_write(of, line[:], "Total features in unallocated space" ,1)
+                bc_utils.match_and_write(of, line[:], "Total features in compressed regions", 0)
 
                 if ((fnmatch.fnmatch(line, 'Total*') or
                     (fnmatch.fnmatch(line, 'Unicode*')))):
