@@ -1271,7 +1271,6 @@ if __name__=="__main__":
         print("\n Starting the regression test: \n")
         bc_regress.reg_test(FiwalkReport, image_info, args.outdir)
     elif args.gui:
-        print("AAAAAAAAAARGV: ", sys.argv)
         app = QtGui.QApplication(sys.argv)
         Form =  QtGui.QWidget()
         ui = bc_genrep_gui.Ui_Form()
