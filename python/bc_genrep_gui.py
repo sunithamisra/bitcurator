@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 # coding=UTF-8
 
-# Form implementation generated from reading ui file 'bc_genrep_gui.ui'
 #
 # Created: Sun May 26 15:35:39 2013
 #      by: PyQt4 UI code generator 4.9.1, modified manually
@@ -20,6 +19,11 @@ from generate_report import *
 from bc_utils import *
 
 try:
+    from io import StringIO
+except ImportError:
+    from cStringIO import StringIO
+
+try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
     _fromUtf8 = lambda s: s
@@ -33,6 +37,7 @@ class Ui_Form(object):
     # DEBUG: The below lines are for bypassing gui - for test purposes only.
     # Comment out the above 4 lines for testing
     '''
+    ### Uncomment for debugging only
     fiwalkXmlFileName = "/home/sunitha/Research/TestData/BEO_master/charlie_fi_F.xml"
     beAnnotatedDirName = "/home/sunitha/Research/TestData/BEO_master/annotated_charlie_output"
     outputDirName = "/home/sunitha/Research/TestData/BEO_master/charlie_xml_outdir"
@@ -40,7 +45,7 @@ class Ui_Form(object):
     '''
  
     def setupUi(self, Form):
-        Form.setObjectName(_fromUtf8("Form"))
+        Form.setObjectName(_fromUtf8("Generate Report"))
         Form.resize(436, 511)
         self.label_configFile = QtGui.QLabel(Form)
         self.label_configFile.setGeometry(QtCore.QRect(10, 200, 211, 17))
@@ -69,16 +74,21 @@ class Ui_Form(object):
         self.lineEdit_xmlFile.setContextMenuPolicy(QtCore.Qt.ActionsContextMenu)
         self.lineEdit_xmlFile.setText(_fromUtf8(""))
         self.lineEdit_xmlFile.setObjectName(_fromUtf8("lineEdit_xmlFile"))
+
+
         self.buttonBox = QtGui.QDialogButtonBox(Form)
         self.buttonBox.setGeometry(QtCore.QRect(210, 470, 221, 32))
         self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
-        self.buttonBox.setStandardButtons(QtGui.QDialogButtonBox.Cancel|QtGui.QDialogButtonBox.Ok)
+        self.buttonBox.setStandardButtons(QtGui.QDialogButtonBox.Cancel|QtGui.QDialogButtonBox.Ok|QtGui.QDialogButtonBox.Close)
         self.buttonBox.setObjectName(_fromUtf8("buttonBox"))
+
+        QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL(_fromUtf8("accepted()")), self.buttonClickedOk)
+        QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL(_fromUtf8("rejected()")), self.buttonClickedCancel)
+
         self.toolButton = QtGui.QToolButton(Form)
         self.toolButton.setGeometry(QtCore.QRect(290, 40, 23, 25))
         self.toolButton.setObjectName(_fromUtf8("toolButton"))
 
-        ret = self.buttonBox.clicked.connect(self.buttonClicked)
 
         self.toolButton_2 = QtGui.QToolButton(Form)
         self.toolButton_2.setGeometry(QtCore.QRect(290, 100, 23, 25))
@@ -101,26 +111,12 @@ class Ui_Form(object):
         self.retranslateUi(Form)
 
         QtCore.QObject.connect(self.toolButton, QtCore.SIGNAL(_fromUtf8("clicked()")), self.getFiwalkXmlFileName)
-        # If file not selected through menu, see if it is typed in the box
-        if self.fiwalkXmlFileName == "null":
-            self.fiwalkXmlFileName  = ui.lineEdit_xmlFile.text()
-            print("Fiwalk XML FIle Selected from the box: ", self.fiwalkXmlFileName)
 
         QtCore.QObject.connect(self.toolButton_2, QtCore.SIGNAL(_fromUtf8("clicked()")), self.getBeAnnotatedDir)
 
-        if self.beAnnotatedDirName == "null":
-            self.beAnnotatedDirName = ui.lineEdit_annDir.text()
-            print("Annotated Directory Selected fron the box: ", self.beAnnotatedDirName)
         QtCore.QObject.connect(self.toolButton_3, QtCore.SIGNAL(_fromUtf8("clicked()")), self.getOutputDir)
 
-        if self.outputDirName == "null":
-            self.outputDirName = ui.lineEdit_outdir.text()
-            print("Output Directory selected from the box: ", self.outputDirName)
-
         QtCore.QObject.connect(self.toolButton_4, QtCore.SIGNAL(_fromUtf8("clicked()")), self.getConfigFile)
-        if self.configFileName == '':
-            self.configFileName  = ui.lineEdit_configFile.text()
-            print("Config File selected from the box: ", self.configFileName)
         
         QtCore.QMetaObject.connectSlotsByName(Form)
 
@@ -128,95 +124,149 @@ class Ui_Form(object):
         self.textBrowser2.append(QString(self.process.readStdout()))
         if self.process.isRunning()==False:
             self.textBrowser2.append("\n Completed Successfully")
-        
-    def buttonClicked(self, button):
-        print("(delete me): CLICKED", self, button)
 
-        # Use the default config file if not provided
-        if (self.configFileName == "null"):
+    # bc_check_parameters: Check if the selected files exist. Also
+    # if the text entered in the boxes doesn't match what was selected
+    # by navigating through directory structure, use the text in the
+    # box as the final selection.
+    def bc_check_parameters(self):
+        # If XML file not selected through menu, see if it is typed in the box:
+
+        if ui.lineEdit_xmlFile.text() != self.fiwalkXmlFileName:
+            self.fiwalkXmlFileName  = ui.lineEdit_xmlFile.text()
+            # print("D:Fiwalk XML FIle Selected from the box: ", self.fiwalkXmlFileName)
+        if not os.path.exists(self.fiwalkXmlFileName):
+            print("XML File %s does not exist. Aborting" %self.fiwalkXmlFileName)
+            return (-1)         
+
+        # If Annotated file is not selected through menu, see if it is
+        # typed in the text box: 
+        if ui.lineEdit_annDir.text() != self.beAnnotatedDirName:
+            self.beAnnotatedDirName = ui.lineEdit_annDir.text()
+            # print("D: Annotated Directory Selected from the box: ", self.beAnnotatedDirName)
+
+        if not os.path.exists(self.beAnnotatedDirName):
+            print("BE Annotated Directory %s does not exist. Aborting" %self.beAnnotatedDirName)
+            return (-1)         
+
+        # If Outdir is not selected through menu, see if it is typed 
+        # in the text box: 
+        if ui.lineEdit_outdir.text() != self.outputDirName:
+            self.outputDirName = ui.lineEdit_outdir.text()
+            # print("D: Output Directory selected from the box: ", self.outputDirName)
+        # The directory is not supposed to exist. Return -1 if it does. 
+        if (os.path.exists(self.outputDirName)):
+            print(">> Error: Output Directory %s exists. " %self.outputDirName)
+            return (-1)         
+
+        if ui.lineEdit_configFile.text() != self.configFileName:
+            self.configFileName  = ui.lineEdit_configFile.text()
+            # print("D: Config File selected from the box: ", self.configFileName)
+
+        # If config file is not provided by the user, user the default one
+        if not os.path.exists(self.configFileName):
+            print(">> Using the default config file: /etc/bitcurator/bc_report_config.txt")
             self.configFileName = "/etc/bitcurator/bc_report_config.txt"
+
+        return (0)
+
+    # buttonClickCancel: This called by any click that represents the
+    # "Reject" role - Cancel and Close here. It just terminates the Gui.
+    def buttonClickedCancel(self):
+        QtCore.QCoreApplication.instance().quit()
         
-        print("Generating Reports: config_file: ", self.configFileName)
-        print("Fiwalk XML File : ", self.fiwalkXmlFileName)
-        print("Annotated Dir: ", self.beAnnotatedDirName)
-        print("outdir: ", self.outputDirName)
-        use_config_file = True  ## FIXME
+    # buttonClickedOk: Routine invoked when the OK button is clicked.
+    # Using StringIO (equivalent to cStringIO in Python-2.x), the stdio is
+    # redirected into an in-memory buffer, which is displayed in the 
+    # text window at the end.
+    def buttonClickedOk(self):
+
+        use_config_file = True
+
+        # The standard output from this point is placed by an in-memory 
+        # buffer.
+        self.oldstdout = sys.stdout
+        sys.stdout = StringIO()
             
+        # Check if the indicated files exist. If not, return after 
+        # printing the error. Also terminate the redirecting of the 
+        # stdout to the in-memory buffer.
+        if self.bc_check_parameters() == -1:
+            print(">> Report Generation is Aborted ")
+            self.textEdit.setText( sys.stdout.getvalue() )
+            sys.stdout = self.oldstdout
+            return
+
+        # All fine. Generate the reports now.
         bc_get_reports(PdfReport, FiwalkReport, self.fiwalkXmlFileName, \
                                  self.beAnnotatedDirName, \
                                  self.outputDirName, \
                                  self.configFileName)              
 
-        QtCore.QCoreApplication.instance().quit()
-   
-    def getFiwalkXmlFileName(self):
-        xml_file = QtGui.QFileDialog.getOpenFileName()
+        # Terminate the redirecting of the stdout to the in-memory buffer.
+        self.textEdit.setText( sys.stdout.getvalue() )
+        sys.stdout = self.oldstdout
 
-        print("Fiwalk XML File Selected: ", xml_file)
+        # We will not quit from the Gui window until the user clicks
+        # on Close.
+        # QtCore.QCoreApplication.instance().quit()
+   
+    # getFiralkXmlFileName: Routine to let the user choose the XML file -
+    # by navigating trough the directories
+    def getFiwalkXmlFileName(self):
+
+        # Navigation
+        xml_file = QtGui.QFileDialog.getOpenFileName()
+        # print("D: Fiwalk XML File Selected: ", xml_file)
 
         self.lineEdit_xmlFile.setText(xml_file)
-
-        # If file not selected through menu, see if it is typed in the box
-        if xml_file == '':
-            xml_file = ui.lineEdit_xmlFile.text()
-            print("FFFFFiwalk XML FIle Selected from the box: ", xml_file)
 
         self.fiwalkXmlFileName = xml_file
         return xml_file
 
+    # getBeAnnotatedDir: Routine to let the user choose the Directory name 
+    # containing the annotated files by navigating 
     def getBeAnnotatedDir(self):
         ann_dir = QtGui.QFileDialog.getExistingDirectory()
-        print("Annotated Directory Selected: ", ann_dir)
-        ####if ann_dir == '':
-            ####ann_dir = ui.lineEdit_annDir.text()
-            ####print("Annotated Directory Selected fron the box: ", ann_dir)
+        # print("D: Annotated Directory Selected by navigating: ", ann_dir)
  
         self.lineEdit_annDir.setText(ann_dir)
         self.beAnnotatedDirName = ann_dir
         return ann_dir
 
+    # getOutputDir: Routine to let the user choose the Directory name 
+    # to output the reports by navigating 
     def getOutputDir(self):
         # Since This directory should not exist, use getSaveFileName
         # to let the user create a new directory.
         outdir = QtGui.QFileDialog.getSaveFileName()
-        print("Output Directory Selected: ", outdir)
 
-        if outdir == '':
-            outdir = ui.lineEdit_outdir.text()
-            print("Output Directory selected from the box: ", outdir)
+        # print("D: Output Directory Selected by navigating: ", outdir)
+
         self.lineEdit_outdir.setText(outdir)
         self.outputDirName = outdir
         return outdir
 
+    # getConfigFile: Select the config file from the directory structure.
     def getConfigFile(self):
         config_file = QtGui.QFileDialog.getOpenFileName()
-        print("Config File Selected: ", config_file)
+        print("D: Config File Selected by navigating: ", config_file)
 
         self.lineEdit_configFile.setText(config_file)
         self.configFileName = config_file
         return config_file
 
-    def getFileName1(self, le):
-        fileDialog = QtGui.QFileDialog()
-        QtCore.QObject.connect(self.toolButton, QtCore.SIGNAL(_fromUtf8("clicked()")), fileDialog.show)
-        return (fileDialog)
-
-    def selectFile():
-        lineEdit.setText(QFileDialog.getOpenFileName())
-
-    #pushButton.clicked.connect(selectFile)
-
     def retranslateUi(self, Form):
-        Form.setWindowTitle(QtGui.QApplication.translate("Form", "Form", None, QtGui.QApplication.UnicodeUTF8))
+        Form.setWindowTitle(QtGui.QApplication.translate("Generate Report", "Bitcurator Generate Report", None, QtGui.QApplication.UnicodeUTF8))
         self.label_configFile.setText(QtGui.QApplication.translate("Form", "Config File (optional):", None, QtGui.QApplication.UnicodeUTF8))
-        self.lineEdit_configFile.setText(QtGui.QApplication.translate("Form", "/home/sunitha/BC/bitcurator-master/t", None, QtGui.QApplication.UnicodeUTF8))
-        self.lineEdit_configFile.setPlaceholderText(QtGui.QApplication.translate("Form", "~/BC/bitcurator-master/python", None, QtGui.QApplication.UnicodeUTF8))
+        self.lineEdit_configFile.setPlaceholderText(QtGui.QApplication.translate("Form", "/Path/To/File", None, QtGui.QApplication.UnicodeUTF8))
+        self.lineEdit_configFile.setPlaceholderText(QtGui.QApplication.translate("Form", "/Path/To/File", None, QtGui.QApplication.UnicodeUTF8))
         self.label_outdir.setText(QtGui.QApplication.translate("Form", "Output directory for reports:", None, QtGui.QApplication.UnicodeUTF8))
-        self.lineEdit_outdir.setPlaceholderText(QtGui.QApplication.translate("Form", "/home/sunitha/Research/TestData/charlie_xml_outdir", None, QtGui.QApplication.UnicodeUTF8))
+        self.lineEdit_outdir.setPlaceholderText(QtGui.QApplication.translate("Form", "/Path/To/New Directory", None, QtGui.QApplication.UnicodeUTF8))
         self.label_annDir.setText(QtGui.QApplication.translate("Form", "Annotated Bulk Extractor output directory:", None, QtGui.QApplication.UnicodeUTF8))
-        self.lineEdit_annDir.setPlaceholderText(QtGui.QApplication.translate("Form", "/home/sunitha/Research/TestData/BEO_master/annotated_charlie_output", None, QtGui.QApplication.UnicodeUTF8))
+        self.lineEdit_annDir.setPlaceholderText(QtGui.QApplication.translate("Form", "/Path/To/Directory", None, QtGui.QApplication.UnicodeUTF8))
         self.label_xmlfile.setText(QtGui.QApplication.translate("Form", "Fiwalk XML file:", None, QtGui.QApplication.UnicodeUTF8))
-        self.lineEdit_xmlFile.setPlaceholderText(QtGui.QApplication.translate("Form", "/home/sunitha/Research/TestData/BEO_master/charlie.xml", None, QtGui.QApplication.UnicodeUTF8))
+        self.lineEdit_xmlFile.setPlaceholderText(QtGui.QApplication.translate("Form", "/Path/to/File", None, QtGui.QApplication.UnicodeUTF8))
         self.toolButton.setText(QtGui.QApplication.translate("Form", "...", None, QtGui.QApplication.UnicodeUTF8))
         self.toolButton_2.setText(QtGui.QApplication.translate("Form", "...", None, QtGui.QApplication.UnicodeUTF8))
         self.toolButton_3.setText(QtGui.QApplication.translate("Form", "...", None, QtGui.QApplication.UnicodeUTF8))

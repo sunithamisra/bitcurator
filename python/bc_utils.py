@@ -159,10 +159,10 @@ def bc_get_reports(PdfReport, FiwalkReport, fiwalk_xmlfile, annotated_dir, outdi
         use_config_file = True
         fiwalk_txtfile = None
 
-        print("bc_get_reports: Gui Option: config_file: ", config_file)
-        print("bc_get_reports: fiwalk_xmlfile: ", args.fiwalk_xmlfile)
-        print("bc_get_reports: annotated Directory: ", args.annotated_dir)
-        print("bc_get_reports: Output Directory: ", args.outdir)
+        print(">> config_file: ", config_file)
+        print(">> fiwalk_xmlfile: ", args.fiwalk_xmlfile)
+        print(">> annotated Directory: ", args.annotated_dir)
+        print(">> Output Directory: ", args.outdir)
 
         report = PdfReport(args.annotated_dir, args.outdir, use_config_file, config_file)
         report.be_process_generate_report(args, use_config_file)
@@ -174,7 +174,6 @@ def bc_get_reports(PdfReport, FiwalkReport, fiwalk_xmlfile, annotated_dir, outdi
             report_fi = FiwalkReport(fiwalk_txtfile)
             report_fi.process_generate_report_fiwalk_from_text(args)
         elif args.fiwalk_xmlfile:
-            print("XML FILE:", args.fiwalk_xmlfile)
             fiwalk_xmlfile = args.fiwalk_xmlfile
 
             ## print("D: Using Fiwalk XML file ", fiwalk_xmlfile)
