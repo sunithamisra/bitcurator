@@ -1198,18 +1198,16 @@ if __name__=="__main__":
 
     parser = ArgumentParser(prog='generate_report.py', description='Generate Reports from "bulk_extractor" and "fiwalk" outputs')
     parser.add_argument('--regress', action='store_true', help='Regression')
-    ##parser.add_argument('--pdf_report', action='store_true',help='PDF report')
-    parser.add_argument('--fiwalk_txtfile', action='store', help="Use fiwalk-generated text file ")
+    ###parser.add_argument('--fiwalk_txtfile', action='store', help="Use fiwalk-generated text file ")
     parser.add_argument('--fiwalk_xmlfile', action='store', help="Use fiwalk-generated XML file ")
     ##parser.add_argument('--xlsx', action='store_true', help="output XLS file ")
     parser.add_argument('--annotated_dir', action='store', help="Directory containing annotated files ")
     parser.add_argument('--outdir',action='store',help='Output directory; must not exist')
-    parser.add_argument('--gui',action='store_true',help='Use GUI')
+    ###parser.add_argument('--gui',action='store_true',help='Use GUI')
 
     args = parser.parse_args()
 
     ## print("D: PDF REPORT", args.pdf_report)
-    ## print("D: FIWALK_TXTFILE", args.fiwalk_txtfile)
     ## print("D: FIWALK_XMLFILE", args.fiwalk_xmlfile)
     ## print("D: Annotated_DIR", args.annotated_dir)
     ## print("D: OUTDIR", args.outdir)
@@ -1219,6 +1217,10 @@ if __name__=="__main__":
     
     config_file = "/etc/bitcurator/bc_report_config.txt"
     if args.regress:
+        print("\n >> Regression test not supported at this time \n ")
+        exit(1)
+
+        # FIXME: Fix the regression test
         use_config_file = (input (">>> Do you want to specify the" \
                                    "configuration file?: [Y/N]:"))
 
@@ -1270,60 +1272,6 @@ if __name__=="__main__":
         # Test the results
         print("\n Starting the regression test: \n")
         bc_regress.reg_test(FiwalkReport, image_info, args.outdir)
-    elif args.gui:
-        app = QtGui.QApplication(sys.argv)
-        Form =  QtGui.QWidget()
-        ui = bc_genrep_gui.Ui_Form()
-        ui.setupUi(Form)
-        Form.show()
-
-        Form.show()
-        ##sys.exit(app.exec_())
-        result = app.exec_()
-        print("RESULT: ", result)
-        ##if (result == 1):
-        text = ui.lineEdit.text()
-        text2 = ui.lineEdit_2.text()
-        text3 = ui.lineEdit_3.text()
-        text4 = ui.lineEdit_4.text()
-        ##QMessageBox.information(self.iface.mainWindow(),"test", "%s" %(text), QMessageBox.Ok)
-        ###print("label: %s label2:%s, label3:%s label4:%s " %(ui.label, ui.label_2, ui.label_3, ui.label_4))
-        print("text: %s text2:%s, text3:%s text4:%s " %(text, text2, text3, text4))
-        fiwalk_txtfile = None 
-        fiwalk_xmlfile = ui.lineEdit.text() 
-        fiwalk_xlsx = True  # By default, xlsx files are generated
-
-        args.outdir = ui.lineEdit_3.text()
-        args.fiwalk_xmlfile = ui.lineEdit.text()
-        args.annotated_dir = ui.lineEdit_2.text()
-        use_config_file = True
-        config_file = ui.lineEdit_4.text()
-
-        print("Gui Option: config_file: %s", config_file)
-        print("fiwalk_xmlfile: %s", fiwalk_xmlfile)
-        print("annotated Directory: %s", args.annotated_dir)
-        print("Output Directory: %s", args.outdir)
-
-        report = PdfReport(args.annotated_dir, args.outdir, use_config_file, config_file)
-        report.be_process_generate_report(args, use_config_file)
-
-
-        if fiwalk_txtfile:
-            ###fiwalk_txtfile = args.fiwalk_txtfile
-
-            ## print("D: Using Fiwalk TXT file ", fiwalk_txtfile)
-
-            report_fi = FiwalkReport(fiwalk_txtfile)
-            report_fi.process_generate_report_fiwalk_from_text(args)
-        elif args.fiwalk_xmlfile:
-            fiwalk_xmlfile = args.fiwalk_xmlfile
-
-            ## print("D: Using Fiwalk XML file ", fiwalk_xmlfile)
-
-            report_fi = FiwalkReport(args.fiwalk_xmlfile)
-            report_fi.process_generate_report_fiwalk_from_xml(args)
-
-        exit(1)
 
     else:
 
@@ -1365,14 +1313,7 @@ if __name__=="__main__":
         fiwalk_xmlfile = None
         fiwalk_xlsx = True  # By default, xlsx files are generated
         
-        if args.fiwalk_txtfile:
-            fiwalk_txtfile = args.fiwalk_txtfile
-
-            ## print("D: Using Fiwalk TXT file ", fiwalk_txtfile)
-
-            report_fi = FiwalkReport(args.fiwalk_txtfile)
-            report_fi.process_generate_report_fiwalk_from_text(args)
-        elif args.fiwalk_xmlfile:
+        if args.fiwalk_xmlfile:
             fiwalk_xmlfile = args.fiwalk_xmlfile
 
             ## print("D: Using Fiwalk XML file ", fiwalk_xmlfile)
