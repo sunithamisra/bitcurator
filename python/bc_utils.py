@@ -151,10 +151,12 @@ def bc_get_reports(PdfReport, FiwalkReport, fiwalk_xmlfile, annotated_dir, outdi
         use_config_file = True
         fiwalk_txtfile = None
 
+        print("\n")
         print(">> config_file: ", config_file)
         print(">> fiwalk_xmlfile: ", args.fiwalk_xmlfile)
         print(">> annotated Directory: ", args.annotated_dir)
         print(">> Output Directory: ", args.outdir)
+        print("\n")
 
         report = PdfReport(args.annotated_dir, args.outdir, use_config_file, config_file)
         report.be_process_generate_report(args, use_config_file)
