@@ -38,64 +38,102 @@ class Ui_bc_Form(object):
     configFileName = "null"
     ReoirtsDir = "null"
     def setupUi(self, bc_Form):
+
         bc_Form.setObjectName(_fromUtf8("bc_Form"))
         bc_Form.resize(705, 723)
         self.tabWidget = QtGui.QTabWidget(bc_Form)
-        self.tabWidget.setGeometry(QtCore.QRect(40, 60, 631, 571))
+        self.tabWidget.setGeometry(QtCore.QRect(50, 60, 631, 641))
         self.tabWidget.setObjectName(_fromUtf8("tabWidget"))
         self.tab = QtGui.QWidget()
         self.tab.setObjectName(_fromUtf8("tab"))
         self.lineEdit_image = QtGui.QLineEdit(self.tab)
-        self.lineEdit_image.setGeometry(QtCore.QRect(210, 60, 151, 21))
+        self.lineEdit_image.setGeometry(QtCore.QRect(60, 60, 151, 21))
         self.lineEdit_image.setContextMenuPolicy(QtCore.Qt.ActionsContextMenu)
         self.lineEdit_image.setText(_fromUtf8(""))
         self.lineEdit_image.setObjectName(_fromUtf8("lineEdit_image"))
         self.toolButton_image = QtGui.QToolButton(self.tab)
-        self.toolButton_image.setGeometry(QtCore.QRect(400, 60, 23, 25))
+        self.toolButton_image.setGeometry(QtCore.QRect(260, 60, 23, 25))
         self.toolButton_image.setObjectName(_fromUtf8("toolButton_image"))
         self.label_image = QtGui.QLabel(self.tab)
-        self.label_image.setGeometry(QtCore.QRect(120, 60, 81, 21))
+        self.label_image.setGeometry(QtCore.QRect(70, 40, 81, 21))
         self.label_image.setObjectName(_fromUtf8("label_image"))
         self.label_outdir = QtGui.QLabel(self.tab)
-        self.label_outdir.setGeometry(QtCore.QRect(0, 150, 201, 17))
+        self.label_outdir.setGeometry(QtCore.QRect(60, 150, 201, 17))
         self.label_outdir.setObjectName(_fromUtf8("label_outdir"))
         self.lineEdit_outdir = QtGui.QLineEdit(self.tab)
-        self.lineEdit_outdir.setGeometry(QtCore.QRect(210, 150, 151, 21))
+        self.lineEdit_outdir.setGeometry(QtCore.QRect(60, 170, 151, 21))
         self.lineEdit_outdir.setObjectName(_fromUtf8("lineEdit_outdir"))
         self.toolButton_outdir = QtGui.QToolButton(self.tab)
-        self.toolButton_outdir.setGeometry(QtCore.QRect(400, 150, 23, 25))
+        self.toolButton_outdir.setGeometry(QtCore.QRect(260, 170, 23, 25))
         self.toolButton_outdir.setObjectName(_fromUtf8("toolButton_outdir"))
         self.label_config = QtGui.QLabel(self.tab)
-        self.label_config.setGeometry(QtCore.QRect(50, 190, 151, 20))
+        self.label_config.setGeometry(QtCore.QRect(60, 200, 151, 20))
         self.label_config.setObjectName(_fromUtf8("label_config"))
         self.lineEdit_confile = QtGui.QLineEdit(self.tab)
-        self.lineEdit_confile.setGeometry(QtCore.QRect(210, 190, 151, 21))
+        self.lineEdit_confile.setGeometry(QtCore.QRect(60, 220, 151, 21))
         self.lineEdit_confile.setText(_fromUtf8(""))
         self.lineEdit_confile.setObjectName(_fromUtf8("lineEdit_confile"))
         self.toolButton_confile = QtGui.QToolButton(self.tab)
-        self.toolButton_confile.setGeometry(QtCore.QRect(400, 190, 23, 25))
+        self.toolButton_confile.setGeometry(QtCore.QRect(260, 220, 23, 25))
         self.toolButton_confile.setObjectName(_fromUtf8("toolButton_confile"))
         self.label_cmdlineoutput = QtGui.QLabel(self.tab)
-        self.label_cmdlineoutput.setGeometry(QtCore.QRect(20, 240, 171, 17))
+        self.label_cmdlineoutput.setGeometry(QtCore.QRect(20, 280, 171, 17))
         self.label_cmdlineoutput.setObjectName(_fromUtf8("label_cmdlineoutput"))
         self.textEdit = QtGui.QTextEdit(self.tab)
-        self.textEdit.setGeometry(QtCore.QRect(20, 270, 571, 211))
+        self.textEdit.setGeometry(QtCore.QRect(20, 300, 571, 211))
         self.textEdit.setObjectName(_fromUtf8("textEdit"))
         self.buttonBox = QtGui.QDialogButtonBox(self.tab)
-        self.buttonBox.setGeometry(QtCore.QRect(370, 490, 231, 31))
+        self.buttonBox.setGeometry(QtCore.QRect(350, 520, 231, 31))
         self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
-        self.buttonBox.setStandardButtons(QtGui.QDialogButtonBox.Cancel|QtGui.QDialogButtonBox.Ok|QtGui.QDialogButtonBox.Close)
+        self.buttonBox.setStandardButtons(QtGui.QDialogButtonBox.Cancel|QtGui.QDialogButtonBox.Ok)
         self.buttonBox.setObjectName(_fromUtf8("buttonBox"))
         self.label_bcpydir = QtGui.QLabel(self.tab)
-        self.label_bcpydir.setGeometry(QtCore.QRect(5, 101, 201, 21))
+        self.label_bcpydir.setGeometry(QtCore.QRect(60, 100, 201, 21))
         self.label_bcpydir.setObjectName(_fromUtf8("label_bcpydir"))
         self.lineEdit_bcpydir = QtGui.QLineEdit(self.tab)
-        self.lineEdit_bcpydir.setGeometry(QtCore.QRect(210, 106, 151, 21))
+        self.lineEdit_bcpydir.setGeometry(QtCore.QRect(60, 120, 151, 21))
         self.lineEdit_bcpydir.setObjectName(_fromUtf8("lineEdit_bcpydir"))
         self.toolButton_bcpydir = QtGui.QToolButton(self.tab)
-        self.toolButton_bcpydir.setGeometry(QtCore.QRect(400, 100, 23, 25))
+        self.toolButton_bcpydir.setGeometry(QtCore.QRect(260, 120, 23, 25))
         self.toolButton_bcpydir.setObjectName(_fromUtf8("toolButton_bcpydir"))
         self.tabWidget.addTab(self.tab, _fromUtf8(""))
+        self.tab_2 = QtGui.QWidget()
+        self.tab_2.setObjectName(_fromUtf8("tab_2"))
+        self.lineEdit_fw_image = QtGui.QLineEdit(self.tab_2)
+        self.lineEdit_fw_image.setGeometry(QtCore.QRect(70, 90, 131, 21))
+        self.lineEdit_fw_image.setText(_fromUtf8(""))
+        self.lineEdit_fw_image.setObjectName(_fromUtf8("lineEdit_fw_image"))
+        self.label_fw_image = QtGui.QLabel(self.tab_2)
+        self.label_fw_image.setGeometry(QtCore.QRect(70, 60, 81, 31))
+        self.label_fw_image.setObjectName(_fromUtf8("label_fw_image"))
+        self.label_fw_xmlFile = QtGui.QLabel(self.tab_2)
+        self.label_fw_xmlFile.setGeometry(QtCore.QRect(70, 140, 121, 21))
+        self.label_fw_xmlFile.setObjectName(_fromUtf8("label_fw_xmlFile"))
+        self.lineEdit_fw_xmlFile = QtGui.QLineEdit(self.tab_2)
+        self.lineEdit_fw_xmlFile.setGeometry(QtCore.QRect(70, 160, 131, 21))
+        self.lineEdit_fw_xmlFile.setText(_fromUtf8(""))
+        self.lineEdit_fw_xmlFile.setObjectName(_fromUtf8("lineEdit_fw_xmlFile"))
+        self.toolButton_fw_image = QtGui.QToolButton(self.tab_2)
+        self.toolButton_fw_image.setGeometry(QtCore.QRect(220, 90, 23, 25))
+        self.toolButton_fw_image.setObjectName(_fromUtf8("toolButton_fw_image"))
+        self.toolButton_fw_xmlFile = QtGui.QToolButton(self.tab_2)
+        self.toolButton_fw_xmlFile.setGeometry(QtCore.QRect(220, 160, 23, 25))
+        self.toolButton_fw_xmlFile.setObjectName(_fromUtf8("toolButton_fw_xmlFile"))
+        # fw buttonBox (ok/close/cancel)
+        self.buttonBox_fw = QtGui.QDialogButtonBox(self.tab_2)
+        self.buttonBox_fw.setGeometry(QtCore.QRect(140, 330, 176, 27))
+        self.buttonBox_fw.setStandardButtons(QtGui.QDialogButtonBox.Cancel|QtGui.QDialogButtonBox.Ok|QtGui.QDialogButtonBox.Close)
+        self.buttonBox_fw.setObjectName(_fromUtf8("buttonBox_fw"))
+
+        # fw cmdline output box:
+        self.textEdit_fw = QtGui.QTextEdit(self.tab_2)
+        self.textEdit_fw.setGeometry(QtCore.QRect(70, 237, 271, 71))
+        self.textEdit_fw.setObjectName(_fromUtf8("textEdit_fw"))
+        self.label_fwcmdlineoutput = QtGui.QLabel(self.tab_2)
+        self.label_fwcmdlineoutput.setGeometry(QtCore.QRect(70, 210, 161, 21))
+        self.label_fwcmdlineoutput.setObjectName(_fromUtf8("label_fwcmdlineoutput"))
+        # Now tab_2 is ready. Add it.
+        self.tabWidget.addTab(self.tab_2, _fromUtf8(""))
 
         # The standard output from this point is placed by an in-memory 
         # buffer.
@@ -110,15 +148,17 @@ class Ui_bc_Form(object):
 
         QtCore.QObject.connect(self.toolButton_confile, QtCore.SIGNAL(_fromUtf8("clicked()")), self.getConfigFile)
 
-        QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL(_fromUtf8("accepted()")), self.buttonClickedOk)
+        QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL(_fromUtf8("accepted()")), self.buttonClickedOkAllReports)
 
         QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL(_fromUtf8("rejected()")), self.buttonClickedCancel)
-        
-        ### 2nd Tab
-        self.tab_2 = QtGui.QWidget()
-        self.tab_2.setObjectName(_fromUtf8("tab_2"))
 
-        self.tabWidget.addTab(self.tab_2, _fromUtf8(""))
+        # Tab-2: Fiwalk XML Generation
+        
+        QtCore.QObject.connect(self.toolButton_fw_image, QtCore.SIGNAL(_fromUtf8("clicked()")), self.getFwImageFileName)
+
+        QtCore.QObject.connect(self.toolButton_fw_xmlFile, QtCore.SIGNAL(_fromUtf8("clicked()")), self.getFwOutputXmlFilePath)
+        QtCore.QObject.connect(self.buttonBox_fw, QtCore.SIGNAL(_fromUtf8("accepted()")), self.buttonClickedOkFw)
+        QtCore.QObject.connect(self.buttonBox_fw, QtCore.SIGNAL(_fromUtf8("rejected()")), self.buttonClickedCancel)
 
         ### 3rd Tab
         ##self.tabWidget.addTab(self.tab_2, _fromUtf8(""))
@@ -188,11 +228,46 @@ class Ui_bc_Form(object):
 
         os.mkdir(self.outputDirName)
 
-    # buttonClickedOk: Routine invoked when the OK button is clicked.
+    '''
+    # getFiwalkXmlFileName: Routine to let the user choose the XML file -
+    # by navigating trough the directories
+    def getFiwalkXmlFileName(self):
+
+        # Navigation
+        xml_file = QtGui.QFileDialog.getOpenFileName()
+        # print("D: Fiwalk XML File Selected: ", xml_file)
+
+        self.lineEdit_xmlFile.setText(xml_file)
+
+        self.fiwalkXmlFileName = xml_file
+        return xml_file
+    '''
+
+    def getFwImageFileName(self):
+        # Navigation
+        image_file = QtGui.QFileDialog.getOpenFileName()
+        print(">> Image File Selected: ", image_file)
+
+        self.lineEdit_fw_image.setText(image_file)
+        
+        self.fwimageFileName = image_file
+
+    def getFwOutputXmlFilePath(self):
+        # Navigation
+        xml_output_file = QtGui.QFileDialog.getSaveFileName()
+        ## print("D: Fiwalk XML File Selected: ", xml_output_file)
+
+        self.lineEdit_fw_xmlFile.setText(xml_output_file)
+        
+        self.xmlFileName = xml_output_file
+        self.TextFileName = xml_output_file + '.txt'
+
+
+    # buttonClickedOkAllReports: Routine invoked when the OK button is clicked.
     # Using StringIO (equivalent to cStringIO in Python-2.x), the stdio is
     # redirected into an in-memory buffer, which is displayed in the 
     # text window at the end.
-    def buttonClickedOk(self):
+    def buttonClickedOkAllReports(self):
         # First create a directory for storing bulk-extractor files and
         # another for storing the annotated files.
         ## FIXME: Trying to imitate c/c++'s static local varaible
@@ -295,6 +370,47 @@ class Ui_bc_Form(object):
         self.textEdit.setText( sys.stdout.getvalue() )
         sys.stdout = self.oldstdout
 
+    def buttonClickedOkFw(self):
+
+        # The standard output from this point is placed by an in-memory 
+        # buffer.
+        self.oldstdout = sys.stdout
+        sys.stdout = StringIO()
+
+        # If Image file is not selected through menu, see if it is
+        # typed in the text box: 
+        if ui.lineEdit_fw_image.text() != self.imageFileName:
+            self.imageFileName = ui.lineEdit_fw_image.text()
+            ## print("D: Image File Selected from the box: ", self.imageFileName)
+
+        # If output XML file is not selected through menu, see if it is
+        # typed in the text box: 
+        if ui.lineEdit_fw_xmlFile.text() != self.xmlFileName:
+            self.xmlFileName = ui.lineEdit_fw_xmlFile.text()
+            self.TextFileName = self.xmlFileName + '.txt'
+            ## print("D: XML File Selected from the box: ", self.xmlFileName)
+
+        cmd = ['fiwalk', '-f', '-X', self.xmlFileName, '-T', self.TextFileName, self.imageFileName]
+        print(">> Command Executed for Fiwalk = ", cmd)
+
+        (data, err) = Popen(cmd, stdout=PIPE, stderr=PIPE).communicate()
+
+        if len(err) > 0 :
+           #sys.stderr.write("Debug: type(err) = %r.\n" % type(err))
+           # Terminate the redirecting of the stdout to the in-memory buffer.
+           print(">> ERROR!!! Fiwalk terminated with error: \n", err)
+           self.textEdit.setText( sys.stdout.getvalue() )
+           sys.stdout = self.oldstdout
+           raise ValueError("fiwalk error (" + str(err).strip() + "): "+" ".join(cmd))
+        else:
+           print("\n>>  Success!!! Fiwalk crated the following files: \n")
+           print("    o ", self.xmlFileName)
+           print("    o ", self.TextFileName)
+        
+        # Terminate the redirecting of the stdout to the in-memory buffer.
+        self.textEdit_fw.setText( sys.stdout.getvalue() )
+        sys.stdout = self.oldstdout
+
     def bcRunCmd(self, cmd):
         ## print("D: >> Executing Unix Cmd : ", cmd)
 
@@ -375,11 +491,19 @@ class Ui_bc_Form(object):
         self.lineEdit_bcpydir.setPlaceholderText(QtGui.QApplication.translate("bc_Form", "/Path/To/Directory", None, QtGui.QApplication.UnicodeUTF8))
         self.toolButton_bcpydir.setText(QtGui.QApplication.translate("bc_Form", "...", None, QtGui.QApplication.UnicodeUTF8))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), QtGui.QApplication.translate("bc_Form", "All Reports", None, QtGui.QApplication.UnicodeUTF8))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), QtGui.QApplication.translate("bc_Form", "Bulk Extractor", None, QtGui.QApplication.UnicodeUTF8))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), QtGui.QApplication.translate("bc_Form", "Fiwalk XML", None, QtGui.QApplication.UnicodeUTF8))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_3), QtGui.QApplication.translate("bc_Form", "Annotated Features", None, QtGui.QApplication.UnicodeUTF8))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_4), QtGui.QApplication.translate("bc_Form", "Fiwalk XML", None, QtGui.QApplication.UnicodeUTF8))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_4), QtGui.QApplication.translate("bc_Form", "Bulk Extractor", None, QtGui.QApplication.UnicodeUTF8))
 
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_5), QtGui.QApplication.translate("bc_Form", "Reports", None, QtGui.QApplication.UnicodeUTF8))
+        
+        self.lineEdit_fw_image.setPlaceholderText(QtGui.QApplication.translate("bc_Form", "/Path/To/File", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_fw_image.setText(QtGui.QApplication.translate("bc_Form", "Image File", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_fw_xmlFile.setText(QtGui.QApplication.translate("bc_Form", "Output XML File", None, QtGui.QApplication.UnicodeUTF8))
+        self.lineEdit_fw_xmlFile.setPlaceholderText(QtGui.QApplication.translate("bc_Form", "/Path/To/File", None, QtGui.QApplication.UnicodeUTF8))
+        self.toolButton_fw_image.setText(QtGui.QApplication.translate("bc_Form", "...", None, QtGui.QApplication.UnicodeUTF8))
+        self.toolButton_fw_xmlFile.setText(QtGui.QApplication.translate("bc_Form", "...", None, QtGui.QApplication.UnicodeUTF8))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), QtGui.QApplication.translate("bc_Form", "Fiwalk XML", None, QtGui.QApplication.UnicodeUTF8))
 
 
 if __name__ == "__main__":
