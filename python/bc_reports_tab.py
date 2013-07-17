@@ -279,7 +279,8 @@ class Ui_bc_Form(object):
         self.label_behdr.setObjectName(_fromUtf8("label_behdr"))
 
         # Add the tab now
-        self.tabWidget.addTab(self.tab_be, _fromUtf8(""))
+        # NOTE: Bulk Extractor ta bis commented out for now.
+        ## self.tabWidget.addTab(self.tab_be, _fromUtf8(""))
         
 
         # Tab - ann: Annotated Files directory
@@ -369,14 +370,10 @@ class Ui_bc_Form(object):
         self.label_annhdr.setObjectName(_fromUtf8("label_ann"))
         self.tabWidget.addTab(self.tab_ann, _fromUtf8(""))
 
-        ## Tab for All Reports (FIXME: To be hidden)
+        ## Tab for All Reports (NOTE: To be hidden)
 
-        '''
         bc_Form.setObjectName(_fromUtf8("bc_Form"))
         bc_Form.resize(705, 723)
-        ###self.tabWidget = QtGui.QTabWidget(bc_Form)
-        ###self.tabWidget.setGeometry(QtCore.QRect(50, 60, 631, 641))
-        ###self.tabWidget.setObjectName(_fromUtf8("tabWidget"))
         self.tab = QtGui.QWidget()
         self.tab.setObjectName(_fromUtf8("tab"))
         self.lineEdit_image = QtGui.QLineEdit(self.tab)
@@ -431,26 +428,18 @@ class Ui_bc_Form(object):
         self.toolButton_bcpydir = QtGui.QToolButton(self.tab)
         self.toolButton_bcpydir.setGeometry(QtCore.QRect(260, 120, 23, 25))
         self.toolButton_bcpydir.setObjectName(_fromUtf8("toolButton_bcpydir"))
-        self.tabWidget.addTab(self.tab, _fromUtf8(""))
 
-        # Common buttonBox: FIXME: May not be necessary. Remove
-        ###self.buttonBox_Global = QtGui.QDialogButtonBox(bc_Form)
-        ###self.buttonBox_Global.setGeometry(QtCore.QRect(440, 610, 176, 27))
-        #self.buttonBox_Global.setStandardButtons(QtGui.QDialogButtonBox.Cancel|QtGui.QDialogButtonBox.Ok)
-        ###self.buttonBox_Global.setStandardButtons(QtGui.QDialogButtonBox.Close)
-        ###self.buttonBox_Global.setObjectName(_fromUtf8("buttonBox_Global"))
-        '''
-        
+        # NOTE: All reports tab is commented out for now.
+        ## self.tabWidget.addTab(self.tab, _fromUtf8(""))
+
+        # File navigation through toolButton:
 
         # The standard output from this point is placed by an in-memory 
         # buffer. 
         self.oldstdout = sys.stdout
         sys.stdout = StringIO()
 
-        # The common Cancel button quits the application
-        ###QtCore.QObject.connect(self.buttonBox_Global, QtCore.SIGNAL(_fromUtf8("rejected()")), self.buttonClickedCancel)
-
-        '''
+        ## File navigation for All Reports
         QtCore.QObject.connect(self.toolButton_image, QtCore.SIGNAL(_fromUtf8("clicked()")), self.getImageFileName)
 
         QtCore.QObject.connect(self.toolButton_bcpydir, QtCore.SIGNAL(_fromUtf8("clicked()")), self.getbcpyDir)
@@ -462,9 +451,8 @@ class Ui_bc_Form(object):
         QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL(_fromUtf8("accepted()")), self.buttonClickedOkAllReports)
 
         QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL(_fromUtf8("rejected()")), self.buttonClickedCancel)
-        '''
 
-        # Fiwalk XML Generation tab
+        # File navigation for Fiwalk XML Generation tab
         
         QtCore.QObject.connect(self.toolButton_fw_image, QtCore.SIGNAL(_fromUtf8("clicked()")), self.getFwImageFileName)
 
@@ -472,14 +460,14 @@ class Ui_bc_Form(object):
         QtCore.QObject.connect(self.buttonBox_fw, QtCore.SIGNAL(_fromUtf8("accepted()")), self.buttonClickedOkFw)
         QtCore.QObject.connect(self.buttonBox_fw, QtCore.SIGNAL(_fromUtf8("rejected()")), self.buttonClickedCancel)
 
-        ## BE Tab
+        # File navigation for BE 
         QtCore.QObject.connect(self.toolButton_be_image, QtCore.SIGNAL(_fromUtf8("clicked()")), self.getBeImageFileName)
 
         QtCore.QObject.connect(self.toolButton_be_outDir, QtCore.SIGNAL(_fromUtf8("clicked()")), self.getBeOutputDir)
         QtCore.QObject.connect(self.buttonBox_be, QtCore.SIGNAL(_fromUtf8("accepted()")), self.buttonClickedOkBe)
         QtCore.QObject.connect(self.buttonBox_be, QtCore.SIGNAL(_fromUtf8("rejected()")), self.buttonClickedCancel)
 
-        ## Annotated files Tab
+        #  File navigation for Annotated files Tab
         QtCore.QObject.connect(self.toolButton_ann_image, QtCore.SIGNAL(_fromUtf8("clicked()")), self.getAnnImageFileName)
 
         QtCore.QObject.connect(self.toolButton_ann_beFeatDir, QtCore.SIGNAL(_fromUtf8("clicked()")), self.getBeFeatDir)
@@ -488,7 +476,7 @@ class Ui_bc_Form(object):
         QtCore.QObject.connect(self.buttonBox_ann, QtCore.SIGNAL(_fromUtf8("accepted()")), self.buttonClickedOkAnn)
         QtCore.QObject.connect(self.buttonBox_ann, QtCore.SIGNAL(_fromUtf8("rejected()")), self.buttonClickedCancel)
 
-        ## Reports Tab
+        # File navigation for Reports Tab
         QtCore.QObject.connect(self.toolButton_rep_fwxmlfile, QtCore.SIGNAL(_fromUtf8("clicked()")), self.getRepFwXmlFileName)
         QtCore.QObject.connect(self.toolButton_rep_outdir, QtCore.SIGNAL(_fromUtf8("clicked()")), self.getRepOutputDir)
         QtCore.QObject.connect(self.toolButton_rep_confile, QtCore.SIGNAL(_fromUtf8("clicked()")), self.getRepConfigFile)
@@ -509,7 +497,7 @@ class Ui_bc_Form(object):
     def getImageFileName(self):
         # Navigation
         image_file = QtGui.QFileDialog.getOpenFileName()
-        print(">> 1. Image File Selected: ", image_file)
+        print(">> Image File Selected: ", image_file)
 
         self.lineEdit_image.setText(image_file)
         
@@ -518,7 +506,7 @@ class Ui_bc_Form(object):
     def getFwImageFileName(self):
         # Navigation
         image_file = QtGui.QFileDialog.getOpenFileName()
-        print(">> 2. Image File Selected: ", image_file)
+        print(">> Image File Selected: ", image_file)
 
         self.lineEdit_fw_image.setText(image_file)
         
@@ -527,7 +515,7 @@ class Ui_bc_Form(object):
     def getBeImageFileName(self):
         # Navigation
         image_file = QtGui.QFileDialog.getOpenFileName()
-        print(">> 3. Image File Selected: ", image_file)
+        print(">> Image File Selected: ", image_file)
 
         self.lineEdit_be_image.setText(image_file)
         
@@ -536,7 +524,7 @@ class Ui_bc_Form(object):
     def getAnnImageFileName(self):
         # Navigation
         image_file = QtGui.QFileDialog.getOpenFileName()
-        print(">> 4. Image File Selected: ", image_file)
+        print(">> Image File Selected: ", image_file)
 
         self.lineEdit_ann_image.setText(image_file)
         
@@ -551,7 +539,7 @@ class Ui_bc_Form(object):
         
         self.bcpyDir = bcpyDir
 
-    '''
+    ##'''
     ## All reports
     def getOutputDir(self):
         # Since This directory should not exist, use getSaveFileName
@@ -573,7 +561,7 @@ class Ui_bc_Form(object):
             exit(1)
 
         os.mkdir(self.outputDirName)
-    '''
+    ##'''
 
     def getBeOutputDir(self):
         # Since This directory should not exist, use getSaveFileName
@@ -1052,7 +1040,7 @@ class Ui_bc_Form(object):
 
     def retranslateUi(self, bc_Form):
         bc_Form.setWindowTitle(QtGui.QApplication.translate("bc_Form", "Bitcurator Reports", None, QtGui.QApplication.UnicodeUTF8))
-        '''
+        ###'''
         self.lineEdit_image.setPlaceholderText(QtGui.QApplication.translate("bc_Form", "/Path/To/File", None, QtGui.QApplication.UnicodeUTF8))
         #self.tn.translate("bc_Form", "Config File (optional):", None, QtGui.QApplication.UnicodeUTF8))
         self.label_image.setText(QtGui.QApplication.translate("bc_Form", "Image File:", None, QtGui.QApplication.UnicodeUTF8))
@@ -1070,7 +1058,7 @@ class Ui_bc_Form(object):
         self.lineEdit_bcpydir.setPlaceholderText(QtGui.QApplication.translate("bc_Form", "/Path/To/Directory", None, QtGui.QApplication.UnicodeUTF8))
         self.toolButton_bcpydir.setText(QtGui.QApplication.translate("bc_Form", "...", None, QtGui.QApplication.UnicodeUTF8))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), QtGui.QApplication.translate("bc_Form", "All Reports", None, QtGui.QApplication.UnicodeUTF8))
-        '''
+        ###'''
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_fw), QtGui.QApplication.translate("bc_Form", "Fiwalk XML", None, QtGui.QApplication.UnicodeUTF8))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_ann), QtGui.QApplication.translate("bc_Form", "Annotated Features", None, QtGui.QApplication.UnicodeUTF8))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_be), QtGui.QApplication.translate("bc_Form", "Bulk Extractor", None, QtGui.QApplication.UnicodeUTF8))
