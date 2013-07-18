@@ -54,10 +54,12 @@ class Ui_bc_Form(object):
         os.chdir(os.environ["HOME"])
 
         bc_Form.setObjectName(_fromUtf8("bc_Form"))
-        bc_Form.resize(512, 605)
+        #bc_Form.resize(512, 605)
+        bc_Form.resize(512, 630)
         self.tabWidget = QtGui.QTabWidget(bc_Form)
         #self.tabWidget.setGeometry(QtCore.QRect(30, 10, 481, 581))
-        self.tabWidget.setGeometry(QtCore.QRect(20, 20, 471, 561))
+        #self.tabWidget.setGeometry(QtCore.QRect(20, 20, 471, 561))
+        self.tabWidget.setGeometry(QtCore.QRect(20, 20, 471, 581))
         self.tabWidget.setObjectName(_fromUtf8("tabWidget"))
 
 
@@ -1117,13 +1119,13 @@ class Ui_bc_Form(object):
         # Tab-4: Annotated Files
         self.label_ann_image.setText(QtGui.QApplication.translate("bc_Form", "Image File", None, QtGui.QApplication.UnicodeUTF8))
         self.label_ann_beFeatDir.setText(QtGui.QApplication.translate("bc_Form", "Bulk Extractor Feature Directory", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_ann_annDir.setText(QtGui.QApplication.translate("bc_Form", "Annotated Files Directory(Output)", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_ann_annDir.setText(QtGui.QApplication.translate("bc_Form", "Annotated Files Directory (Output)", None, QtGui.QApplication.UnicodeUTF8))
         self.label_ann_bcpyDir.setText(QtGui.QApplication.translate("bc_Form", "Bulk Extractor Python Directory", None, QtGui.QApplication.UnicodeUTF8))
 
         self.lineEdit_ann_image.setPlaceholderText(QtGui.QApplication.translate("bc_Form", "/Path/To/File", None, QtGui.QApplication.UnicodeUTF8))
         self.lineEdit_ann_beFeatDir.setPlaceholderText(QtGui.QApplication.translate("bc_Form", "/Path/To/Directory", None, QtGui.QApplication.UnicodeUTF8))
         self.lineEdit_ann_annDir.setPlaceholderText(QtGui.QApplication.translate("bc_Form", "/Path/To/Directory", None, QtGui.QApplication.UnicodeUTF8))
-        self.lineEdit_ann_bcpyDir.setPlaceholderText(QtGui.QApplication.translate("bc_Form", "/Path/To/Directory", None, QtGui.QApplication.UnicodeUTF8))
+        self.lineEdit_ann_bcpyDir.setPlaceholderText(QtGui.QApplication.translate("bc_Form", "/home/bcadmin/Tools/bulk_extractor/python", None, QtGui.QApplication.UnicodeUTF8))
 
         self.toolButton_ann_image.setText(QtGui.QApplication.translate("bc_Form", "...", None, QtGui.QApplication.UnicodeUTF8))
         self.toolButton_ann_beFeatDir.setText(QtGui.QApplication.translate("bc_Form", "...", None, QtGui.QApplication.UnicodeUTF8))
