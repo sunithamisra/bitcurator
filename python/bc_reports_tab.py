@@ -804,7 +804,7 @@ class Ui_bc_Form(object):
             self.fwTextFileName = self.fwXmlFileName + '.txt'
             ## print("D: XML File Selected from the box: ", self.xmlFileName)
 
-        cmd = ['fiwalk', '-f', '-X', self.fwXmlFileName, '-T', self.fwTextFileName, self.imageFileName]
+        cmd = ['fiwalk', '-f', '-X', self.fwXmlFileName, '-T', self.fwTextFileName, self.fwImageFileName]
         print(">> Command Executed for Fiwalk = ", cmd)
 
         (data, err) = Popen(cmd, stdout=PIPE, stderr=PIPE).communicate()
