@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 # bc_reports_tab5.py
@@ -7,8 +8,8 @@
 # Form implementation generated from reading ui file 'bc_reports_tab7*.ui'
 # Heavily modified manually
 #
-# Created: Sat Jul  6 20:33:35 2013
-#      by: PyQt4 UI code generator 4.9.1
+# Created: Sat Jul 6 20:33:35 2013
+# by: PyQt4 UI code generator 4.9.1
 #
 
 import os
@@ -31,13 +32,14 @@ class Ui_bc_Form(object):
     imageFileName = "null"
     fwImageFileName = "null"
     beImageFileName = "null"
+    annImageFileName = "null"
     xmlFileName = "null"
     fwXmlFileName = "null"
     TextFileName = "null"
     beDir = "null"
-    annDir = "null" 
-    bcpyDir = "null" 
-    annBcpyDir = "null" 
+    annDir = "null"
+    bcpyDir = "null"
+    annBcpyDir = "null"
     outputDirName = "null"
     beOutputDirName = "null"
     configFileName = "null"
@@ -54,14 +56,10 @@ class Ui_bc_Form(object):
         os.chdir(os.environ["HOME"])
 
         bc_Form.setObjectName(_fromUtf8("bc_Form"))
-        #bc_Form.resize(512, 605)
         bc_Form.resize(512, 630)
         self.tabWidget = QtGui.QTabWidget(bc_Form)
-        #self.tabWidget.setGeometry(QtCore.QRect(30, 10, 481, 581))
-        #self.tabWidget.setGeometry(QtCore.QRect(20, 20, 471, 561))
         self.tabWidget.setGeometry(QtCore.QRect(20, 20, 471, 581))
         self.tabWidget.setObjectName(_fromUtf8("tabWidget"))
-
 
         # Tab-2: Fiwalk XML Generation
 
@@ -86,6 +84,7 @@ class Ui_bc_Form(object):
         self.label_fwhdr = QtGui.QLabel(self.tab_fw)
         self.label_fwhdr.setGeometry(QtCore.QRect(10, 10, 451, 41))
         font = QtGui.QFont()
+        font.setItalic(True)
         font.setPointSize(10)
         self.label_fwhdr.setFont(font)
         self.label_fwhdr.setWordWrap(True)
@@ -248,7 +247,7 @@ class Ui_bc_Form(object):
         self.label_anncmdlineoutput.setFont(font)
         self.label_anncmdlineoutput.setObjectName(_fromUtf8("label_anncmdlineoutput"))
         self.label_ann_annDir = QtGui.QLabel(self.tab_ann)
-        self.label_ann_annDir.setGeometry(QtCore.QRect(20, 220, 271, 20))
+        self.label_ann_annDir.setGeometry(QtCore.QRect(20, 215, 320, 20))
         font = QtGui.QFont()
         font.setPointSize(10)
         font.setBold(True)
@@ -262,7 +261,7 @@ class Ui_bc_Form(object):
         self.toolButton_ann_annDir.setGeometry(QtCore.QRect(410, 240, 23, 25))
         self.toolButton_ann_annDir.setObjectName(_fromUtf8("toolButton_ann_annDir"))
         self.label_ann_bcpyDir = QtGui.QLabel(self.tab_ann)
-        self.label_ann_bcpyDir.setGeometry(QtCore.QRect(20, 280, 231, 31))
+        self.label_ann_bcpyDir.setGeometry(QtCore.QRect(20, 280, 281, 31))
         font = QtGui.QFont()
         font.setPointSize(10)
         font.setBold(True)
@@ -436,8 +435,8 @@ class Ui_bc_Form(object):
 
         # File navigation through toolButton:
 
-        # The standard output from this point is placed by an in-memory 
-        # buffer. 
+        # The standard output from this point is placed by an in-memory
+        # buffer.
         self.oldstdout = sys.stdout
         sys.stdout = StringIO()
 
@@ -462,14 +461,14 @@ class Ui_bc_Form(object):
         QtCore.QObject.connect(self.buttonBox_fw, QtCore.SIGNAL(_fromUtf8("accepted()")), self.buttonClickedOkFw)
         QtCore.QObject.connect(self.buttonBox_fw, QtCore.SIGNAL(_fromUtf8("rejected()")), self.buttonClickedCancel)
 
-        # File navigation for BE 
+        # File navigation for BE
         QtCore.QObject.connect(self.toolButton_be_image, QtCore.SIGNAL(_fromUtf8("clicked()")), self.getBeImageFileName)
 
         QtCore.QObject.connect(self.toolButton_be_outDir, QtCore.SIGNAL(_fromUtf8("clicked()")), self.getBeOutputDir)
         QtCore.QObject.connect(self.buttonBox_be, QtCore.SIGNAL(_fromUtf8("accepted()")), self.buttonClickedOkBe)
         QtCore.QObject.connect(self.buttonBox_be, QtCore.SIGNAL(_fromUtf8("rejected()")), self.buttonClickedCancel)
 
-        #  File navigation for Annotated files Tab
+        # File navigation for Annotated files Tab
         QtCore.QObject.connect(self.toolButton_ann_image, QtCore.SIGNAL(_fromUtf8("clicked()")), self.getAnnImageFileName)
 
         QtCore.QObject.connect(self.toolButton_ann_beFeatDir, QtCore.SIGNAL(_fromUtf8("clicked()")), self.getBeFeatDir)
@@ -644,8 +643,8 @@ class Ui_bc_Form(object):
         self.repFwXmlFileName = xml_file
         return xml_file
     
-    # getRepBeAnnotatedDir: Routine to let the user choose the Directory name 
-    # containing the annotated files by navigating 
+    # getRepBeAnnotatedDir: Routine to let the user choose the Directory name
+    # containing the annotated files by navigating
     def getRepBeAnnotatedDir(self):
         ann_dir = QtGui.QFileDialog.getExistingDirectory()
         # print("D: Annotated Directory Selected by navigating: ", ann_dir)
@@ -654,8 +653,8 @@ class Ui_bc_Form(object):
         self.repAnnDir = ann_dir
         return ann_dir
 
-    # getOutputDir: Routine to let the user choose the Directory name 
-    # to output the reports by navigating 
+    # getOutputDir: Routine to let the user choose the Directory name
+    # to output the reports by navigating
     def getRepOutputDir(self):
         # Since This directory should not exist, use getSaveFileName
         # to let the user create a new directory.
@@ -679,7 +678,7 @@ class Ui_bc_Form(object):
 
     # buttonClickedOkAllReports: Routine invoked when the OK button is clicked.
     # Using StringIO (equivalent to cStringIO in Python-2.x), the stdio is
-    # redirected into an in-memory buffer, which is displayed in the 
+    # redirected into an in-memory buffer, which is displayed in the
     # text window at the end.
     def buttonClickedOkAllReports(self):
         # First create a directory for storing bulk-extractor files and
@@ -710,12 +709,13 @@ class Ui_bc_Form(object):
             sys.stdout = self.oldstdout
             exit(1)
         else:
-            print("\n>>  Success!!! Bulk-extractor created feature files in Directory ", self.beDir)
+            print("\n>> Success!!! Bulk-extractor created feature files in Directory ", self.beDir)
 
         # Now create the XML file using fiwalk
         self.xmlFileName = self.outputDirName + '/fiwalkXmlFile.xml'
         self.TextFileName = self.outputDirName + '/fiwalkXmlFile.txt'
-        cmd = ['fiwalk', '-f', '-X', self.xmlFileName, '-T', self.TextFileName, self.imageFileName]
+        #cmd = ['fiwalk', '-f', '-X', self.xmlFileName, '-T', self.TextFileName, self.imageFileName]
+        cmd = ['fiwalk', '-f', '-X', self.xmlFileName, self.imageFileName]
         print(">> Command Executed for Fiwalk = ", cmd)
         (data, err) = Popen(cmd, stdout=PIPE, stderr=PIPE).communicate()
 
@@ -728,9 +728,9 @@ class Ui_bc_Form(object):
             raise ValueError("fiwalk error (" + str(err).strip() + "): "+" ".join(cmd))
             exit(1)
         else:
-            print("\n>>  Success!!! Fiwalk created the following files: \n")
-            print("    o ", self.xmlFileName)
-            print("    o ", self.TextFileName)
+            print("\n>> Success!!! Fiwalk created the following file(s): \n")
+            print(" o ", self.xmlFileName)
+            #print(" o ", self.TextFileName)
 
         # Now create the directory for Annotated files and run the python
         # script identify_filenames to crate the annotated files in that directory.
@@ -760,7 +760,7 @@ class Ui_bc_Form(object):
            raise ValueError("fiwalk error (" + str(err).strip() + "): "+" ".join(cmd))
            exit(1)
 
-        print("\n>>  Success!!! Annotated files created the directory: ", self.annDir)
+        print("\n>> Success!!! Annotated files created the directory: ", self.annDir)
 
         # To generate reports, create a 'reports' directory in outdir
         self.reportsDir = self.outputDirName + '/reportsDir'
@@ -786,25 +786,26 @@ class Ui_bc_Form(object):
 
     def buttonClickedOkFw(self):
 
-        # The standard output from this point is placed by an in-memory 
+        # The standard output from this point is placed by an in-memory
         # buffer.
         self.oldstdout = sys.stdout
         sys.stdout = StringIO()
 
         # If Image file is not selected through menu, see if it is
-        # typed in the text box: 
+        # typed in the text box:
         if ui.lineEdit_fw_image.text() != self.fwImageFileName:
             self.fwImageFileName = ui.lineEdit_fw_image.text()
             ## print("D: Image File Selected from the box: ", self.imageFileName)
 
         # If output XML file is not selected through menu, see if it is
-        # typed in the text box: 
+        # typed in the text box:
         if ui.lineEdit_fw_xmlFile.text() != self.fwXmlFileName:
             self.fwXmlFileName = ui.lineEdit_fw_xmlFile.text()
             self.fwTextFileName = self.fwXmlFileName + '.txt'
             ## print("D: XML File Selected from the box: ", self.xmlFileName)
 
-        cmd = ['fiwalk', '-f', '-X', self.fwXmlFileName, '-T', self.fwTextFileName, self.fwImageFileName]
+        #cmd = ['fiwalk', '-f', '-X', self.fwXmlFileName, '-T', self.fwTextFileName, self.fwImageFileName]
+        cmd = ['fiwalk', '-f', '-X', self.fwXmlFileName, self.fwImageFileName]
         print(">> Command Executed for Fiwalk = ", cmd)
 
         (data, err) = Popen(cmd, stdout=PIPE, stderr=PIPE).communicate()
@@ -817,9 +818,9 @@ class Ui_bc_Form(object):
            sys.stdout = self.oldstdout
            raise ValueError("fiwalk error (" + str(err).strip() + "): "+" ".join(cmd))
         else:
-           print("\n>>  Success!!! Fiwalk crated the following files: \n")
-           print("    o ", self.fwXmlFileName)
-           print("    o ", self.fwTextFileName)
+           print("\n>> Success!!! Fiwalk crated the following file(s): \n")
+           print(" o ", self.fwXmlFileName)
+           #print(" o ", self.fwTextFileName)
         
         # Terminate the redirecting of the stdout to the in-memory buffer.
         #self.textEdit_fw.setText( sys.stdout.getvalue() )
@@ -827,7 +828,7 @@ class Ui_bc_Form(object):
         sys.stdout = self.oldstdout
 
     def buttonClickedOkBe(self):
-        # The standard output from this point is placed by an in-memory 
+        # The standard output from this point is placed by an in-memory
         # buffer.
         ## FIXME: Redirecting the stdout seems to make the code hang
         ## here. So commenting it out for now. Need to be fixed.
@@ -835,13 +836,13 @@ class Ui_bc_Form(object):
         ## sys.stdout = StringIO()
 
         # If Image file is not selected through menu, see if it is
-        # typed in the text box: 
+        # typed in the text box:
         if ui.lineEdit_be_image.text() != self.beImageFileName:
             self.beImageFileName = ui.lineEdit_be_image.text()
             # print("D: Image File Selected from the box: ", self.beimageFileName)
 
         # If output Dir is not selected through menu, see if it is
-        # typed in the text box: 
+        # typed in the text box:
         if ui.lineEdit_be_outDir.text() != self.beOutputDirName:
             self.beOutputDirName = ui.lineEdit_be_outDir.text()
             print("D: Output Dir fir Bulk Extractor Selected from the box: ", self.beOutputDirName)
@@ -859,7 +860,7 @@ class Ui_bc_Form(object):
            sys.stdout = self.oldstdout
            raise ValueError("bulk_extractor error (" + str(err).strip() + "): "+" ".join(cmd))
         else:
-           print("\n>>  Success!!! Bulk_extractor created the feature files in the Directory: ", self.beOutputDirName)
+           print("\n>> Success!!! Bulk_extractor created the feature files in the Directory: ", self.beOutputDirName)
            print("\n")
         
         # Terminate the redirecting of the stdout to the in-memory buffer.
@@ -868,32 +869,38 @@ class Ui_bc_Form(object):
 
     def buttonClickedOkAnn(self):
         # If Image file is not selected through menu, see if it is
-        # typed in the text box: 
+        # typed in the text box:
         if ui.lineEdit_ann_image.text() != self.annImageFileName:
             self.annImageFileName = ui.lineEdit_ann_image.text()
             # print("D: Image File Selected from the box: ", self.annimageFileName)
 
         # If beFeature Dir is not selected through menu, see if it is
-        # typed in the text box: 
+        # typed in the text box:
         if ui.lineEdit_ann_beFeatDir.text() != self.annBeFeatDir:
             self.annBeFeatDir = ui.lineEdit_ann_beFeatDir.text()
             # print("D: Output Dir fir Bulk Extractor Selected from the box: ", self.annBeFeatDir)
 
         # If annOutputDir Dir is not selected through menu, see if it is
-        # typed in the text box: 
+        # typed in the text box:
         if ui.lineEdit_ann_annDir.text() != self.annOutputDirName:
             self.annOutputDirName = ui.lineEdit_ann_annDir.text()
-            # print("D: Ann Output Dir  Selected from the box: ", self.annOutputDirName)
+            # print("D: Ann Output Dir Selected from the box: ", self.annOutputDirName)
 
-        # If bcpyDir doesn't exist, default it to 
+        # If annBcpyDir Dir is not selected through menu, see if it is
+        # typed in the text box:
+        if ui.lineEdit_ann_bcpyDir.text() != self.annBcpyDir:
+            self.annBcpyDir = ui.lineEdit_ann_bcpyDir.text()
+            # print("D: Ann Bcpy Dir Selected from the box: ", self.annBcpyDir)
+
+        # If bcpyDir doesn't exist, default it to
         # /home/bcadmin/Tools/bulk_extractor/python
 
         if not os.path.exists(self.annBcpyDir):
-            # print("D: Setting default directory for BC python directory") 
+            # print("D: Setting default directory for BC python directory")
             self.annBcpyDir = "/home/bcadmin/Tools/bulk_extractor/python"
 
         identify_cmd = self.annBcpyDir + '/' + 'identify_filenames.py'
-        print("bcpyDir: ", self.annBcpyDir)
+        print("annBcpyDir: ", self.annBcpyDir)
 
         cmd = ['python3',identify_cmd,'--all','--imagefile',\
           self.annImageFileName, self.annBeFeatDir, self.annOutputDirName]
@@ -907,7 +914,7 @@ class Ui_bc_Form(object):
             raise ValueError("identify_filenames error (" + str(err).strip() + "): "+" ".join(cmd))
             exit(1)
 
-        print("\n>>  Success!!! Annotated files created in the directory: ", self.annOutputDirName)
+        print("\n>> Success!!! Annotated feature files created in the directory: ", self.annOutputDirName)
         self.textEdit_ann.setText( sys.stdout.getvalue() )
         sys.stdout = self.oldstdout
 
@@ -915,13 +922,13 @@ class Ui_bc_Form(object):
         use_config_file = True
 
         ### FIXME: self.setEnabled(False)
-        # The standard output from this point is placed by an in-memory 
+        # The standard output from this point is placed by an in-memory
         # buffer.
         self.oldstdout = sys.stdout
         sys.stdout = StringIO()
 
-        # Check if the indicated files exist. If not, return after 
-        # printing the error. Also terminate the redirecting of the 
+        # Check if the indicated files exist. If not, return after
+        # printing the error. Also terminate the redirecting of the
         # stdout to the in-memory buffer.
         if self.bc_rep_check_parameters() == -1:
             print(">> Report Generation is Aborted ")
@@ -957,7 +964,7 @@ class Ui_bc_Form(object):
     # getConfigFile: Select the config file from the directory structure.
     def getConfigFile(self):
         config_file = QtGui.QFileDialog.getOpenFileName()
-        ## print(">> [D] Config File Selected  navigating: ", config_file)
+        ## print(">> [D] Config File Selected navigating: ", config_file)
         print(">> Config File Selected: ", config_file)
 
         self.lineEdit_confile.setText(config_file)
@@ -968,14 +975,14 @@ class Ui_bc_Form(object):
         # If XML file not selected through menu, see if it is typed in the box:
 
         if ui.lineEdit_rep_fwxmlfile.text() != self.repFwXmlFileName:
-            self.repFwXmlFileName  = ui.lineEdit_rep_fwxmlfile.text()
+            self.repFwXmlFileName = ui.lineEdit_rep_fwxmlfile.text()
             # print("D:Fiwalk XML FIle Selected from the box: ", self.repFwXmlFileName)
         if not os.path.exists(self.repFwXmlFileName):
             print("XML File %s does not exist. Aborting" %self.repFwXmlFileName)
             return (-1)
 
         # If Annotated file is not selected through menu, see if it is
-        # typed in the text box: 
+        # typed in the text box:
         if ui.lineEdit_rep_annDir.text() != self.repAnnDir:
             self.repAnnDir = ui.lineEdit_rep_annDir.text()
             # print("D: Annotated Directory Selected from the box: ", self.repAnnDir)
@@ -984,18 +991,18 @@ class Ui_bc_Form(object):
             print("BE Annotated Directory %s does not exist. Aborting" %self.repAnnDir)
             return (-1)
 
-        # If Outdir is not selected through menu, see if it is typed 
-        # in the text box: 
+        # If Outdir is not selected through menu, see if it is typed
+        # in the text box:
         if ui.lineEdit_rep_outdir.text() != self.repOutDir:
             self.repOutDir = ui.lineEdit_rep_outdir.text()
             # print("D: Output Directory selected from the box: ", self.repOutDir)
-        # The directory is not supposed to exist. Return -1 if it does. 
+        # The directory is not supposed to exist. Return -1 if it does.
         if (os.path.exists(self.repOutDir)):
             print(">> Error: Output Directory %s exists. " %self.repOutDir)
             return (-1)
 
         if ui.lineEdit_rep_confile.text() != self.repConfile:
-            self.repConfile  = ui.lineEdit_rep_confile.text()
+            self.repConfile = ui.lineEdit_rep_confile.text()
             # print("D: Config File selected from the box: ", self.repConfile)
 
         # If config file is not provided by the user, user the default one
@@ -1014,31 +1021,31 @@ class Ui_bc_Form(object):
         # If Image file not selected through menu, see if it is typed in the box:
 
         if ui.lineEdit_image.text() != self.imageFileName:
-            self.imageFileName  = ui.lineEdit_image.text()
+            self.imageFileName = ui.lineEdit_image.text()
             # print("D:Image FIle Selected from the box: ", self.imageFileName)
         if not os.path.exists(self.imageFileName):
             print("Image File %s does not exist. Aborting" %self.imageFileName)
-            return (-1)         
+            return (-1)
 
         # If Bitcurator Python dir is not selected through menu, see if it is
-        # typed in the text box: 
+        # typed in the text box:
         if ui.lineEdit_bcpydir.text() != self.bcpyDir:
             self.bcDir = ui.lineEdit_bcpydir.text()
             # print("D: BC Python Directory Selected from the box: ", self.bcpyDir)
 
         if not os.path.exists(self.bcpyDir):
             print("BC Python Directory %s does not exist. Aborting" %self.bcpyDir)
-            return (-1)         
+            return (-1)
 
-        # If Outdir is not selected through menu, see if it is typed 
-        # in the text box: 
+        # If Outdir is not selected through menu, see if it is typed
+        # in the text box:
         if ui.lineEdit_outdir.text() != self.outputDirName:
             self.outputDirName = ui.lineEdit_outdir.text()
             # print("D: Output Directory selected from the box: ", self.outputDirName)
         # Check for outdir is already done earlier. So no need to do it here.
 
         if ui.lineEdit_confile.text() != self.configFileName:
-            self.configFileName  = ui.lineEdit_configFile.text()
+            self.configFileName = ui.lineEdit_configFile.text()
             # print("D: Config File selected from the box: ", self.configFileName)
 
         # If config file is not provided by the user, user the default one
@@ -1086,7 +1093,7 @@ class Ui_bc_Form(object):
         self.lineEdit_rep_confile.setPlaceholderText(QtGui.QApplication.translate("bc_Form", "/Path/To/file", None, QtGui.QApplication.UnicodeUTF8))
         self.toolButton_rep_confile.setText(QtGui.QApplication.translate("bc_Form", "...", None, QtGui.QApplication.UnicodeUTF8))
         self.label_rep_cmdlineoutput.setText(QtGui.QApplication.translate("bc_Form", "Command Line Output:", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_rep_annDir.setText(QtGui.QApplication.translate("bc_Form", "Annotated Bulk Extractor Output Directory", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_rep_annDir.setText(QtGui.QApplication.translate("bc_Form", "Annotated Feature Files Directory", None, QtGui.QApplication.UnicodeUTF8))
         self.lineEdit_rep_annDir.setPlaceholderText(QtGui.QApplication.translate("bc_Form", "/Path/To/Directory", None, QtGui.QApplication.UnicodeUTF8))
         self.toolButton_rep_annDir.setText(QtGui.QApplication.translate("bc_Form", "...", None, QtGui.QApplication.UnicodeUTF8))
         self.label_rephdr.setText(QtGui.QApplication.translate("bc_Form", "Produces Office Open XML and PDF reports to assist in image analysis", None, QtGui.QApplication.UnicodeUTF8))
@@ -1119,8 +1126,8 @@ class Ui_bc_Form(object):
         # Tab-4: Annotated Files
         self.label_ann_image.setText(QtGui.QApplication.translate("bc_Form", "Image File", None, QtGui.QApplication.UnicodeUTF8))
         self.label_ann_beFeatDir.setText(QtGui.QApplication.translate("bc_Form", "Bulk Extractor Feature Directory", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_ann_annDir.setText(QtGui.QApplication.translate("bc_Form", "Annotated Files Directory (Output)", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_ann_bcpyDir.setText(QtGui.QApplication.translate("bc_Form", "Bulk Extractor Python Directory", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_ann_annDir.setText(QtGui.QApplication.translate("bc_Form", "Annotated Feature Files Directory (new)", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_ann_bcpyDir.setText(QtGui.QApplication.translate("bc_Form", "Bulk Extractor Python Directory (optional)", None, QtGui.QApplication.UnicodeUTF8))
 
         self.lineEdit_ann_image.setPlaceholderText(QtGui.QApplication.translate("bc_Form", "/Path/To/File", None, QtGui.QApplication.UnicodeUTF8))
         self.lineEdit_ann_beFeatDir.setPlaceholderText(QtGui.QApplication.translate("bc_Form", "/Path/To/Directory", None, QtGui.QApplication.UnicodeUTF8))
@@ -1144,4 +1151,3 @@ if __name__ == "__main__":
     ui.setupUi(bc_Form)
     bc_Form.show()
     sys.exit(app.exec_())
-
