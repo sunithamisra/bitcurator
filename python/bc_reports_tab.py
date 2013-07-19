@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 # bc_reports_tab5.py
@@ -248,7 +249,7 @@ class Ui_bc_Form(object):
         self.label_anncmdlineoutput.setFont(font)
         self.label_anncmdlineoutput.setObjectName(_fromUtf8("label_anncmdlineoutput"))
         self.label_ann_annDir = QtGui.QLabel(self.tab_ann)
-        self.label_ann_annDir.setGeometry(QtCore.QRect(20, 220, 271, 20))
+        self.label_ann_annDir.setGeometry(QtCore.QRect(20, 215, 320, 20))
         font = QtGui.QFont()
         font.setPointSize(10)
         font.setBold(True)
@@ -262,7 +263,7 @@ class Ui_bc_Form(object):
         self.toolButton_ann_annDir.setGeometry(QtCore.QRect(410, 240, 23, 25))
         self.toolButton_ann_annDir.setObjectName(_fromUtf8("toolButton_ann_annDir"))
         self.label_ann_bcpyDir = QtGui.QLabel(self.tab_ann)
-        self.label_ann_bcpyDir.setGeometry(QtCore.QRect(20, 280, 231, 31))
+        self.label_ann_bcpyDir.setGeometry(QtCore.QRect(20, 280, 281, 31))
         font = QtGui.QFont()
         font.setPointSize(10)
         font.setBold(True)
@@ -715,7 +716,8 @@ class Ui_bc_Form(object):
         # Now create the XML file using fiwalk
         self.xmlFileName = self.outputDirName + '/fiwalkXmlFile.xml'
         self.TextFileName = self.outputDirName + '/fiwalkXmlFile.txt'
-        cmd = ['fiwalk', '-f', '-X', self.xmlFileName, '-T', self.TextFileName, self.imageFileName]
+        #cmd = ['fiwalk', '-f', '-X', self.xmlFileName, '-T', self.TextFileName, self.imageFileName]
+        cmd = ['fiwalk', '-f', '-X', self.xmlFileName, self.imageFileName]
         print(">> Command Executed for Fiwalk = ", cmd)
         (data, err) = Popen(cmd, stdout=PIPE, stderr=PIPE).communicate()
 
@@ -728,9 +730,9 @@ class Ui_bc_Form(object):
             raise ValueError("fiwalk error (" + str(err).strip() + "): "+" ".join(cmd))
             exit(1)
         else:
-            print("\n>>  Success!!! Fiwalk created the following files: \n")
+            print("\n>>  Success!!! Fiwalk created the following file(s): \n")
             print("    o ", self.xmlFileName)
-            print("    o ", self.TextFileName)
+            #print("    o ", self.TextFileName)
 
         # Now create the directory for Annotated files and run the python
         # script identify_filenames to crate the annotated files in that directory.
@@ -804,7 +806,8 @@ class Ui_bc_Form(object):
             self.fwTextFileName = self.fwXmlFileName + '.txt'
             ## print("D: XML File Selected from the box: ", self.xmlFileName)
 
-        cmd = ['fiwalk', '-f', '-X', self.fwXmlFileName, '-T', self.fwTextFileName, self.fwImageFileName]
+        #cmd = ['fiwalk', '-f', '-X', self.fwXmlFileName, '-T', self.fwTextFileName, self.fwImageFileName]
+        cmd = ['fiwalk', '-f', '-X', self.fwXmlFileName, self.fwImageFileName]
         print(">> Command Executed for Fiwalk = ", cmd)
 
         (data, err) = Popen(cmd, stdout=PIPE, stderr=PIPE).communicate()
@@ -817,9 +820,9 @@ class Ui_bc_Form(object):
            sys.stdout = self.oldstdout
            raise ValueError("fiwalk error (" + str(err).strip() + "): "+" ".join(cmd))
         else:
-           print("\n>>  Success!!! Fiwalk crated the following files: \n")
+           print("\n>>  Success!!! Fiwalk crated the following file(s): \n")
            print("    o ", self.fwXmlFileName)
-           print("    o ", self.fwTextFileName)
+           #print("    o ", self.fwTextFileName)
         
         # Terminate the redirecting of the stdout to the in-memory buffer.
         #self.textEdit_fw.setText( sys.stdout.getvalue() )
@@ -907,7 +910,7 @@ class Ui_bc_Form(object):
             raise ValueError("identify_filenames error (" + str(err).strip() + "): "+" ".join(cmd))
             exit(1)
 
-        print("\n>>  Success!!! Annotated files created in the directory: ", self.annOutputDirName)
+        print("\n>>  Success!!! Annotated feature files created in the directory: ", self.annOutputDirName)
         self.textEdit_ann.setText( sys.stdout.getvalue() )
         sys.stdout = self.oldstdout
 
@@ -1086,7 +1089,7 @@ class Ui_bc_Form(object):
         self.lineEdit_rep_confile.setPlaceholderText(QtGui.QApplication.translate("bc_Form", "/Path/To/file", None, QtGui.QApplication.UnicodeUTF8))
         self.toolButton_rep_confile.setText(QtGui.QApplication.translate("bc_Form", "...", None, QtGui.QApplication.UnicodeUTF8))
         self.label_rep_cmdlineoutput.setText(QtGui.QApplication.translate("bc_Form", "Command Line Output:", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_rep_annDir.setText(QtGui.QApplication.translate("bc_Form", "Annotated Bulk Extractor Output Directory", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_rep_annDir.setText(QtGui.QApplication.translate("bc_Form", "Annotated Feature Files Directory", None, QtGui.QApplication.UnicodeUTF8))
         self.lineEdit_rep_annDir.setPlaceholderText(QtGui.QApplication.translate("bc_Form", "/Path/To/Directory", None, QtGui.QApplication.UnicodeUTF8))
         self.toolButton_rep_annDir.setText(QtGui.QApplication.translate("bc_Form", "...", None, QtGui.QApplication.UnicodeUTF8))
         self.label_rephdr.setText(QtGui.QApplication.translate("bc_Form", "Produces Office Open XML and PDF reports to assist in image analysis", None, QtGui.QApplication.UnicodeUTF8))
@@ -1119,8 +1122,8 @@ class Ui_bc_Form(object):
         # Tab-4: Annotated Files
         self.label_ann_image.setText(QtGui.QApplication.translate("bc_Form", "Image File", None, QtGui.QApplication.UnicodeUTF8))
         self.label_ann_beFeatDir.setText(QtGui.QApplication.translate("bc_Form", "Bulk Extractor Feature Directory", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_ann_annDir.setText(QtGui.QApplication.translate("bc_Form", "Annotated Files Directory (Output)", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_ann_bcpyDir.setText(QtGui.QApplication.translate("bc_Form", "Bulk Extractor Python Directory", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_ann_annDir.setText(QtGui.QApplication.translate("bc_Form", "Annotated Feature Files Directory (new)", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_ann_bcpyDir.setText(QtGui.QApplication.translate("bc_Form", "Bulk Extractor Python Directory (optional)", None, QtGui.QApplication.UnicodeUTF8))
 
         self.lineEdit_ann_image.setPlaceholderText(QtGui.QApplication.translate("bc_Form", "/Path/To/File", None, QtGui.QApplication.UnicodeUTF8))
         self.lineEdit_ann_beFeatDir.setPlaceholderText(QtGui.QApplication.translate("bc_Form", "/Path/To/Directory", None, QtGui.QApplication.UnicodeUTF8))
