@@ -14,7 +14,11 @@
 
 import os
 from PyQt4 import QtCore, QtGui
+from PyQt4.Qt import *
 from subprocess import Popen,PIPE
+import sys, time
+import threading
+
 from generate_report import *
 from bc_utils import *
 #from PyQt4.Qsci import *
@@ -29,7 +33,18 @@ try:
 except AttributeError:
     _fromUtf8 = lambda s: s
 
+# The following global variables are used as they are used in the
+# threads which access attributes defined in other classes. In Python this
+# seems to be the only simple solution for a case like this where the 
+# GUI attributes are initialized only once by the main routine.
+global_fw = "null"
+g_textEdit_fwcmdlineoutput = "null"
+g_xmlFwFilename = "null"
+
 class Ui_MainWindow(object):
+    #def __init__(self, parent=None):
+        #self.setupUi(MainWindow)
+
     imageFileName = "null"
     fwImageFileName = "null"
     beImageFileName = "null"
@@ -51,6 +66,17 @@ class Ui_MainWindow(object):
     repOutDir = "null"
     repConfile = "null"
     repAnnDir = "null"
+    progressBar_fw = "null"
+
+    # The standard output from this point is placed by an in-memory
+    # buffer. This was originally done much later, but due to the indroduction
+    # of the threads which need to access these elements, this was put in
+    # global location.
+    oldstdout = sys.stdout
+    sys.stdout = StringIO()
+
+    global g_fwXmlFileName
+    g_fwXmlFileName =  fwXmlFileName
 
     def setupUi(self, MainWindow):
         # Set the directory to user's home directory
@@ -114,6 +140,9 @@ class Ui_MainWindow(object):
         self.label_fwcmdlineoutput.setObjectName(_fromUtf8("label_fwcmdlineoutput"))
         self.gridLayout.addWidget(self.label_fwcmdlineoutput, 5, 0, 1, 1)
         self.textEdit_fwcmdlineoutput = QtGui.QTextEdit(self.tab_fw)
+        global g_textEdit_fwcmdlineoutput
+        g_textEdit_fwcmdlineoutput = self.textEdit_fwcmdlineoutput
+
         self.textEdit_fwcmdlineoutput.setObjectName(_fromUtf8("textEdit_fwcmdlineoutput"))
         self.gridLayout.addWidget(self.textEdit_fwcmdlineoutput, 6, 0, 1, 3)
         self.buttonBox_fw = QtGui.QDialogButtonBox(self.tab_fw)
@@ -121,6 +150,15 @@ class Ui_MainWindow(object):
         self.buttonBox_fw.setStandardButtons(QtGui.QDialogButtonBox.Cancel|QtGui.QDialogButtonBox.Close|QtGui.QDialogButtonBox.Ok)
         self.buttonBox_fw.setObjectName(_fromUtf8("buttonBox_fw"))
         self.gridLayout.addWidget(self.buttonBox_fw, 7, 1, 1, 2)
+
+        self.progressBar_fw = ProgressBar()
+        global global_fw
+        global_fw =  self.progressBar_fw
+
+        self.progressBar_fw.setProperty("value", 5)
+        self.progressBar_fw.setObjectName(_fromUtf8("progressBar_fw"))
+        self.gridLayout.addWidget(self.progressBar_fw, 7, 0, 1, 1)
+
         self.tabWidget.addTab(self.tab_fw, _fromUtf8(""))
         self.tab_ann = QtGui.QWidget()
         self.tab_ann.setObjectName(_fromUtf8("tab_ann"))
@@ -177,6 +215,14 @@ class Ui_MainWindow(object):
         self.toolButton_ann_beFeatDir = QtGui.QToolButton(self.tab_ann)
         self.toolButton_ann_beFeatDir.setObjectName(_fromUtf8("toolButton_ann_beFeatDir"))
         self.gridLayout_4.addWidget(self.toolButton_ann_beFeatDir, 4, 2, 1, 1)
+
+        # FIXME: Add the following lines once the progress bar is implemented
+        ####self.progressBar_ann = QtGui.QProgressBar(self.tab_ann)
+        ####self.progressBar_ann.setProperty("value", 24)
+        ####self.progressBar_ann.setObjectName(_fromUtf8("progressBar_ann"))
+        ####self.gridLayout_4.addWidget(self.progressBar_ann, 11, 0, 1, 1)
+        
+
         self.label_ann_beFeatDir = QtGui.QLabel(self.tab_ann)
         font = QtGui.QFont()
         font.setPointSize(10)
@@ -298,6 +344,13 @@ class Ui_MainWindow(object):
         self.buttonBox_rep.setStandardButtons(QtGui.QDialogButtonBox.Cancel|QtGui.QDialogButtonBox.Close|QtGui.QDialogButtonBox.Ok)
         self.buttonBox_rep.setObjectName(_fromUtf8("buttonBox_rep"))
         self.gridLayout_2.addWidget(self.buttonBox_rep, 11, 1, 1, 2)
+        
+        # FIXME: Add the following lines once the progress bar is implemented
+        ####self.progressBar_rep = QtGui.QProgressBar(self.tab_rep)
+        ####self.progressBar_rep.setProperty("value", 24)
+        ####self.progressBar_rep.setObjectName(_fromUtf8("progressBar_rep"))
+        ####self.gridLayout_2.addWidget(self.progressBar_rep, 11, 0, 1, 1)
+
         self.tabWidget.addTab(self.tab_rep, _fromUtf8(""))
         self.gridLayout_3.addWidget(self.tabWidget, 0, 0, 1, 1)
         MainWindow.setCentralWidget(self.centralwidget)
@@ -337,22 +390,16 @@ class Ui_MainWindow(object):
         self.menuFile.addAction(self.actionExit)
         self.menuFile.addSeparator()
         self.menuEdit.addSeparator()
-        self.menuEdit.addAction(self.actionCopy)
+        ##self.menuEdit.addAction(self.actionCopy)
+        self.menuEdit.addAction('&Copy')
+        #self.menuEdit.setShortcut('Ctrl+C')
         self.menuEdit.addAction(self.actionPaste)
         self.menuEdit.addAction(self.actionCut)
         self.menuHelp.addAction(self.actionShow_Help)
         self.menubar.addAction(self.menuFile.menuAction())
         self.menubar.addAction(self.menuEdit.menuAction())
         self.menubar.addAction(self.menuHelp.menuAction())
-
-        ##self.text = QsciScintilla()
-
         # End Main Window stuff
-
-        # The standard output from this point is placed by an in-memory
-        # buffer.
-        self.oldstdout = sys.stdout
-        sys.stdout = StringIO()
 
         # File navigation for Fiwalk XML Generation tab
         
@@ -361,7 +408,7 @@ class Ui_MainWindow(object):
         QtCore.QObject.connect(self.toolButton_fw_xmlFile, QtCore.SIGNAL(_fromUtf8("clicked()")), self.getFwOutputXmlFilePath)
         QtCore.QObject.connect(self.buttonBox_fw, QtCore.SIGNAL(_fromUtf8("accepted()")), self.buttonClickedOkFw)
         QtCore.QObject.connect(self.buttonBox_fw, QtCore.SIGNAL(_fromUtf8("rejected()")), self.buttonClickedCancel)
-
+#
         # File navigation for Annotated files Tab
         QtCore.QObject.connect(self.toolButton_ann_image, QtCore.SIGNAL(_fromUtf8("clicked()")), self.getAnnImageFileName)
 
@@ -380,12 +427,17 @@ class Ui_MainWindow(object):
         QtCore.QObject.connect(self.buttonBox_rep, QtCore.SIGNAL(_fromUtf8("accepted()")), self.buttonClickedOkRep)
         QtCore.QObject.connect(self.buttonBox_rep, QtCore.SIGNAL(_fromUtf8("rejected()")), self.buttonClickedCancel)
 
-        # Main Menu operations - To-Be-Implemented
         self.actionExit.triggered.connect(self.exitMenu)
         self.actionCopy.triggered.connect(self.copyMenu)
         self.actionCut.triggered.connect(self.cutMenu)
         self.actionPaste.triggered.connect(self.pasteMenu)
 
+        ##QtCore.QObject.connect(self.actionPaste, QtCore.SIGNAL("triggered()"), QtCore.SLOT("paste ()"))
+        ##QtCore.QObject.connect(self.actionCut, QtCore.SIGNAL("triggered()"), QtCore.SLOT("cut ()"))
+        ##QtCore.QObject.connect(self.actionCopy, QtCore.SIGNAL("triggered()"), self.text, QtCore.SLOT("copy ()"))
+
+
+        self.progressBar_fw.show()
         self.retranslateUi(MainWindow)
         self.tabWidget.setCurrentIndex(1)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
@@ -394,13 +446,21 @@ class Ui_MainWindow(object):
         QtCore.QCoreApplication.instance().quit()
 
     def cutMenu(self):
-        print("cut operation ")
+
+        cutData = myClipBoard.text("plain",QClipboard.Selection)
+        print ("The clipboard has ",  cutData)
+        print ("SELECTION ",  QClipboard.Selection)
+        print ("CLIPBOARD ",  QClipboard.Clipboard)
+        print ("OWNS_CLIPBOARD ",  QClipboard.ownsClipboard())
+        print ("OWNS_FINDBUF ",  QClipboard.ownsFindBuffer())
+        print ("OWNS_Selection ",  QClipboard.ownsSelection())
+        myClipBoard.setText(cutData.text(), QClipboard.Selection)
 
     def copyMenu(self):
-        print("copy operation ")
+        print("Copying text ")
 
     def pasteMenu(self):
-        print("paste operation ")
+        print("PASTINGg text ")
 
     # buttonClickCancel: This called by any click that represents the
     # "Reject" role - Cancel and Close here. It just terminates the Gui.
@@ -687,21 +747,18 @@ class Ui_MainWindow(object):
         print("\n >> Generating Reports in directory ", self.reportsDir)
     
         # All fine. Generate the reports now.
+        '''
         bc_get_reports(PdfReport, FiwalkReport, self.xmlFileName, \
                                  self.annDir, \
                                  self.reportsDir, \
                                  self.configFileName)
+        '''
 
         # Terminate the redirecting of the stdout to the in-memory buffer.
         self.textEdit.setText( sys.stdout.getvalue() )
         sys.stdout = self.oldstdout
 
     def buttonClickedOkFw(self):
-
-        # The standard output from this point is placed by an in-memory
-        # buffer.
-        self.oldstdout = sys.stdout
-        sys.stdout = StringIO()
 
         # If Image file is not selected through menu, see if it is
         # typed in the text box:
@@ -714,30 +771,28 @@ class Ui_MainWindow(object):
         if ui.lineEdit_fw_xmlFile.text() != self.fwXmlFileName:
             self.fwXmlFileName = ui.lineEdit_fw_xmlFile.text()
             self.fwTextFileName = self.fwXmlFileName + '.txt'
+
+            # Thread uses it. so copy to the global value
+            global g_fwXmlFileName
+            g_fwXmlFileName = self.fwXmlFileName
             ## print("D: XML File Selected from the box: ", self.xmlFileName)
 
-        #cmd = ['fiwalk', '-f', '-X', self.fwXmlFileName, '-T', self.fwTextFileName, self.fwImageFileName]
         cmd = ['fiwalk', '-f', '-X', self.fwXmlFileName, self.fwImageFileName]
         print(">> Command Executed for Fiwalk = ", cmd)
 
-        (data, err) = Popen(cmd, stdout=PIPE, stderr=PIPE).communicate()
+        # Start two threads - one for executing the above command and
+        # a second one to start a progress bar on the gui which keeps
+        # spinning till the first thread finishes the command execution
+        # and signals the second one by setting a flag. 
+        thread1 = bcThread(cmd)
+        thread2 = guiThread()
+        thread1.start()
+        thread2.start()
 
-        if len(err) > 0 :
-           #sys.stderr.write("Debug: type(err) = %r.\n" % type(err))
-           # Terminate the redirecting of the stdout to the in-memory buffer.
-           print(">> ERROR!!! Fiwalk terminated with error: \n", err)
-           self.textEdit_fwcmdlineoutput.setText( sys.stdout.getvalue() )
-           sys.stdout = self.oldstdout
-           raise ValueError("fiwalk error (" + str(err).strip() + "): "+" ".join(cmd))
-        else:
-           print("\n>> Success!!! Fiwalk crated the following file(s): \n")
-           print(" o ", self.fwXmlFileName)
-           #print(" o ", self.fwTextFileName)
-        
         # Terminate the redirecting of the stdout to the in-memory buffer.
-        #self.textEdit_fw.setText( sys.stdout.getvalue() )
-        self.textEdit_fwcmdlineoutput.setText( sys.stdout.getvalue() )
-        sys.stdout = self.oldstdout
+        #### Commented for now, as it is called from the thread : FIXME
+        ####self.textEdit_fwcmdlineoutput.setText( sys.stdout.getvalue() )
+        ####sys.stdout = self.oldstdout
 
     def buttonClickedOkBe(self):
         # The standard output from this point is placed by an in-memory
@@ -821,13 +876,15 @@ class Ui_MainWindow(object):
         (data, err) = Popen(cmd, stdout=PIPE, stderr=PIPE).communicate()
         if len(err) > 0:
             print(">> ERROR!!! identify_filenames terminated with error: \n", err)
-            self.textEdit_ann.setText( sys.stdout.getvalue() )
+            #self.textEdit_ann.setText( sys.stdout.getvalue() )
+            self.textEdit_ann.append( sys.stdout.getvalue() )
             sys.stdout = self.oldstdout
             raise ValueError("identify_filenames error (" + str(err).strip() + "): "+" ".join(cmd))
             exit(1)
 
         print("\n>> Success!!! Annotated feature files created in the directory: ", self.annOutputDirName)
-        self.textEdit_ann.setText( sys.stdout.getvalue() )
+        #self.textEdit_ann.setText( sys.stdout.getvalue() )
+        self.textEdit_ann.append( sys.stdout.getvalue() )
         sys.stdout = self.oldstdout
 
     def buttonClickedOkRep(self):
@@ -967,9 +1024,7 @@ class Ui_MainWindow(object):
 
         return (0)
 
-    ##def retranslateUi(self, bc_Form):
     def retranslateUi(self, MainWindow):
-        ##bc_Form.setWindowTitle(QtGui.QApplication.translate("bc_Form", "Bitcurator Reports", None, QtGui.QApplication.UnicodeUTF8))
         MainWindow.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Bitcurator Reports", None, QtGui.QApplication.UnicodeUTF8))
 
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_fw), QtGui.QApplication.translate("MainWindow", "Fiwalk XML", None, QtGui.QApplication.UnicodeUTF8))
@@ -1034,6 +1089,92 @@ class Ui_MainWindow(object):
         self.actionShow_Help.setText(QtGui.QApplication.translate("MainWindow", "Show Help", None, QtGui.QApplication.UnicodeUTF8))
         self.actionExit.setText(QtGui.QApplication.translate("MainWindow", "Exit", None, QtGui.QApplication.UnicodeUTF8))
 
+# Thread for running the fiwalk command
+class bcThread(threading.Thread):
+    def __init__(self, cmd):
+        threading.Thread.__init__(self)
+        self.cmd = cmd
+
+    def run(self):
+        (data, err) = Popen(self.cmd, stdout=PIPE, stderr=PIPE).communicate()
+
+        if len(err) > 0 :
+           #sys.stderr.write("Debug: type(err) = %r.\n" % type(err))
+           # Terminate the redirecting of the stdout to the in-memory buffer.
+           print(">> ERROR!!! Fiwalk terminated with error: \n", err)
+           #self.progressBar_fw.timer.stop()
+           ProgressBar._active = False
+           
+           ## End buffering the stdout to StringIO
+           ##self.textEdit_fwcmdlineoutput.setText( sys.stdout.getvalue() )
+           ##sys.stdout = self.oldstdout
+           x = Ui_MainWindow
+           global g_textEdit_fwcmdlineoutput
+           g_textEdit_fwcmdlineoutput.append( sys.stdout.getvalue() )
+           sys.stdout = x.oldstdout
+           raise ValueError("fiwalk error (" + str(err).strip() + "): "+" ".join(cmd))
+        else:
+           print("\n>> Success!!! Fiwalk created the following file(s): \n")
+
+           # Set the progresbar active flag so the other thread can
+           # get out of the while loop.
+           ProgressBar._active = False
+           #print("D: bcThread: Progressbar Active Flag Set to: ", ProgressBar._active)
+
+           # Set the progressbar maximum to > minimum so the spinning will stop
+           global global_fw
+           global_fw.progressbar.setRange(0,10)
+           
+           global g_fwXmlFileName
+           print(" o ", g_fwXmlFileName) 
+
+           x = Ui_MainWindow
+           global g_textEdit_fwcmdlineoutput
+           # Note: setText for seme reason, wouldn't work when used with
+           # global value. append seems to work
+           # g_textEdit_fwcmdlineoutput.setText( sys.stdout.getvalue() )
+           g_textEdit_fwcmdlineoutput.append( sys.stdout.getvalue() )
+           sys.stdout = x.oldstdout
+
+# This is the thread which spins in a loop till the other thread which
+# does the work sets the flag once the task is completed.
+class guiThread(threading.Thread):
+    def __init__(self):
+        threading.Thread.__init__(self)
+    def run(self):
+        global global_fw
+        progressbar = global_fw
+        progressbar.startLoop_bc()
+
+class ProgressBar(QtGui.QWidget):
+    _active = False
+    #def __init__(self, parent=None, total=20):
+    def __init__(self, parent=None):
+        super(ProgressBar, self).__init__(parent)
+        self.progressbar = QtGui.QProgressBar()
+        main_layout = QtGui.QGridLayout()
+        main_layout.addWidget(self.progressbar, 0, 1)
+        self.setLayout(main_layout)
+        self.setWindowTitle('Progress')
+
+    def closeEvent(self):
+        self._active = False
+
+    def startLoop_bc(self):
+        self._active = True
+        ProgressBar._active = True 
+
+        global global_fw
+        global_fw.progressbar.setRange(0,0)
+
+        while True:
+            time.sleep(1.05)
+            QtGui.qApp.processEvents()
+            #print("D: ProgressBar._active = ", ProgressBar._active)
+            if not ProgressBar._active:
+                #print ("D: startLoop_bc thread detected flag = ", ProgressBar._active)
+                break
+        ProgressBar._active = False
 
 if __name__ == "__main__":
     import sys
