@@ -446,9 +446,6 @@ class Ui_MainWindow(object):
         QtCore.QCoreApplication.instance().quit()
 
     def cutMenu(self):
-        print("cutting  text ")
-        myClipBoard = QApplication.clipboard()
-        print("Original Text = ", myClipBoard.text())
 
         cutData = myClipBoard.text("plain",QClipboard.Selection)
         print ("The clipboard has ",  cutData)
@@ -458,44 +455,12 @@ class Ui_MainWindow(object):
         print ("OWNS_FINDBUF ",  QClipboard.ownsFindBuffer())
         print ("OWNS_Selection ",  QClipboard.ownsSelection())
         myClipBoard.setText(cutData.text(), QClipboard.Selection)
-        #myClipBoard.setText("This is a test of my clipboard",QClipboard.Selection)
-        #myClipBoard.setText("This is a test of my clipboard",QClipboard.Clipboard)
-        #test = myClipBoard.text("plain",QClipboard.Selection)
-        #print ("The clipboard has ", test)
-
-        #clipboard = QtGui.QApplication.clipboard()
-        #clipboard.setText('my data')
 
     def copyMenu(self):
-        print("CCCCCCCopying text ")
-        myClipBoard = QApplication.clipboard()
-        test = myClipBoard.text("plain",QClipboard.Selection)
-        print ("The clipboard has " + test)
-        myClipBoard.setText("This is a test of my clipboard",QClipboard.Selection)
-        myClipBoard.setText("This is a test of my clipboard",QClipboard.Clipboard)
-        test = myClipBoard.text("plain",QClipboard.Selection)
-        print ("The clipboard has " + test)
+        print("Copying text ")
 
     def pasteMenu(self):
-        print("PPPPASTINGg text ")
-        '''
-        myClipBoard = QApplication.clipboard()
-        #myClipBoard.setText(cutData,QClipboard.Selection)
-        print("CUUUUUUTTTTT data: ", self.cutMenu.cutData)
-
-        myClipBoard.setText(self.cutMenu.cutData,QClipboard.Selection)
-        print("PPPPP:Set new text: ", myClipBoard.text)
-        '''
-        clipboard = QApplication.clipboard()
-        mimeData = clipboard.mimeData()
-
-        if (mimeData.hasText()):
-            #print("MMMMMMMM text: ", mimeData.text())
-            #clipboard.setText(mimeData.text())
-            clipboard.setText(clipboard)
-            #clipboard.setTextFormat(Qt.PlainText)
-        else:
-            clipboard.setText(tr("Cannot display data"))
+        print("PASTINGg text ")
 
     # buttonClickCancel: This called by any click that represents the
     # "Reject" role - Cancel and Close here. It just terminates the Gui.
