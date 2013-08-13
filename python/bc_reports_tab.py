@@ -40,6 +40,9 @@ except AttributeError:
 global_fw = "null"
 g_textEdit_fwcmdlineoutput = "null"
 g_xmlFwFilename = "null"
+global_ann = "null"
+g_textEdit_anncmdlineoutput = "null"
+
 
 class Ui_MainWindow(object):
     #def __init__(self, parent=None):
@@ -74,6 +77,8 @@ class Ui_MainWindow(object):
     # global location.
     oldstdout = sys.stdout
     sys.stdout = StringIO()
+    global g_oldstdout
+    g_oldstdout = oldstdout
 
     global g_fwXmlFileName
     g_fwXmlFileName =  fwXmlFileName
@@ -202,8 +207,12 @@ class Ui_MainWindow(object):
         self.label_anncmdlineoutput.setFont(font)
         self.label_anncmdlineoutput.setObjectName(_fromUtf8("label_anncmdlineoutput"))
         self.gridLayout_4.addWidget(self.label_anncmdlineoutput, 9, 0, 1, 1)
+
         self.textEdit_ann = QtGui.QTextEdit(self.tab_ann)
         self.textEdit_ann.setAutoFillBackground(True)
+        global g_textEdit_anncmdlineoutput
+        g_textEdit_anncmdlineoutput = self.textEdit_ann
+
         self.textEdit_ann.setObjectName(_fromUtf8("textEdit_ann"))
         self.gridLayout_4.addWidget(self.textEdit_ann, 10, 0, 1, 3)
         self.toolButton_ann_image = QtGui.QToolButton(self.tab_ann)
@@ -217,11 +226,14 @@ class Ui_MainWindow(object):
         self.gridLayout_4.addWidget(self.toolButton_ann_beFeatDir, 4, 2, 1, 1)
 
         # FIXME: Add the following lines once the progress bar is implemented
+        self.progressBar_ann = ProgressBar()
+        global global_ann
+        global_ann = self.progressBar_ann
+      
         ####self.progressBar_ann = QtGui.QProgressBar(self.tab_ann)
-        ####self.progressBar_ann.setProperty("value", 24)
-        ####self.progressBar_ann.setObjectName(_fromUtf8("progressBar_ann"))
-        ####self.gridLayout_4.addWidget(self.progressBar_ann, 11, 0, 1, 1)
-        
+        self.progressBar_ann.setProperty("value", 24)
+        self.progressBar_ann.setObjectName(_fromUtf8("progressBar_ann"))
+        self.gridLayout_4.addWidget(self.progressBar_ann, 11, 0, 1, 1)
 
         self.label_ann_beFeatDir = QtGui.QLabel(self.tab_ann)
         font = QtGui.QFont()
@@ -338,6 +350,9 @@ class Ui_MainWindow(object):
         self.gridLayout_2.addWidget(self.label_rep_cmdlineoutput, 9, 0, 1, 1)
         self.textEdit_rep = QtGui.QTextEdit(self.tab_rep)
         self.textEdit_rep.setAutoFillBackground(True)
+        global g_textEdit_repcmdlineoutput
+        g_textEdit_repcmdlineoutput = self.textEdit_rep
+
         self.textEdit_rep.setObjectName(_fromUtf8("textEdit_rep"))
         self.gridLayout_2.addWidget(self.textEdit_rep, 10, 0, 1, 3)
         self.buttonBox_rep = QtGui.QDialogButtonBox(self.tab_rep)
@@ -347,9 +362,12 @@ class Ui_MainWindow(object):
         
         # FIXME: Add the following lines once the progress bar is implemented
         ####self.progressBar_rep = QtGui.QProgressBar(self.tab_rep)
-        ####self.progressBar_rep.setProperty("value", 24)
-        ####self.progressBar_rep.setObjectName(_fromUtf8("progressBar_rep"))
-        ####self.gridLayout_2.addWidget(self.progressBar_rep, 11, 0, 1, 1)
+        self.progressBar_rep = ProgressBar()
+        global global_rep
+        global_rep = self.progressBar_rep
+        self.progressBar_rep.setProperty("value", 24)
+        self.progressBar_rep.setObjectName(_fromUtf8("progressBar_rep"))
+        self.gridLayout_2.addWidget(self.progressBar_rep, 11, 0, 1, 1)
 
         self.tabWidget.addTab(self.tab_rep, _fromUtf8(""))
         self.gridLayout_3.addWidget(self.tabWidget, 0, 0, 1, 1)
@@ -760,6 +778,8 @@ class Ui_MainWindow(object):
 
     def buttonClickedOkFw(self):
 
+        self.oldstdout = sys.stdout
+        sys.stdout = StringIO()
         # If Image file is not selected through menu, see if it is
         # typed in the text box:
         if ui.lineEdit_fw_image.text() != self.fwImageFileName:
@@ -784,8 +804,8 @@ class Ui_MainWindow(object):
         # a second one to start a progress bar on the gui which keeps
         # spinning till the first thread finishes the command execution
         # and signals the second one by setting a flag. 
-        thread1 = bcThread(cmd)
-        thread2 = guiThread()
+        thread1 = bcThread_fw(cmd)
+        thread2 = guiThread("fiwalk")
         thread1.start()
         thread2.start()
 
@@ -835,6 +855,9 @@ class Ui_MainWindow(object):
         sys.stdout = self.oldstdout
 
     def buttonClickedOkAnn(self):
+        oldstdout = sys.stdout
+        sys.stdout = StringIO()
+
         # If Image file is not selected through menu, see if it is
         # typed in the text box:
         if ui.lineEdit_ann_image.text() != self.annImageFileName:
@@ -867,27 +890,24 @@ class Ui_MainWindow(object):
             self.annBcpyDir = "/home/bcadmin/Tools/bulk_extractor/python"
 
         identify_cmd = self.annBcpyDir + '/' + 'identify_filenames.py'
-        print("annBcpyDir: ", self.annBcpyDir)
+        #print("D: annBcpyDir: ", self.annBcpyDir)
 
         cmd = ['python3',identify_cmd,'--all','--imagefile',\
           self.annImageFileName, self.annBeFeatDir, self.annOutputDirName]
         print("\n>> Running identify_filanames script : ", cmd)
 
-        (data, err) = Popen(cmd, stdout=PIPE, stderr=PIPE).communicate()
-        if len(err) > 0:
-            print(">> ERROR!!! identify_filenames terminated with error: \n", err)
-            #self.textEdit_ann.setText( sys.stdout.getvalue() )
-            self.textEdit_ann.append( sys.stdout.getvalue() )
-            sys.stdout = self.oldstdout
-            raise ValueError("identify_filenames error (" + str(err).strip() + "): "+" ".join(cmd))
-            exit(1)
-
-        print("\n>> Success!!! Annotated feature files created in the directory: ", self.annOutputDirName)
-        #self.textEdit_ann.setText( sys.stdout.getvalue() )
-        self.textEdit_ann.append( sys.stdout.getvalue() )
-        sys.stdout = self.oldstdout
+        # Start two threads - one for executing the above command and
+        # a second one to start a progress bar on the gui which keeps
+        # spinning till the first thread finishes the command execution
+        # and signals the second one by setting a flag. 
+        thread1 = bcThread_ann(cmd, self.annOutputDirName)
+        thread2 = guiThread("ann")
+        thread1.start()
+        thread2.start()
 
     def buttonClickedOkRep(self):
+        self.oldstdout = sys.stdout
+        sys.stdout = StringIO()
         use_config_file = True
 
         ### FIXME: self.setEnabled(False)
@@ -901,19 +921,20 @@ class Ui_MainWindow(object):
         # stdout to the in-memory buffer.
         if self.bc_rep_check_parameters() == -1:
             print(">> Report Generation is Aborted ")
-            self.textEdit.setText( sys.stdout.getvalue() )
+            self.textEdit_rep.setText( sys.stdout.getvalue() )
             sys.stdout = self.oldstdout
             return
 
-        # All fine. Generate the reports now.
-        bc_get_reports(PdfReport, FiwalkReport, self.repFwXmlFileName, \
-                                 self.repAnnDir, \
-                                 self.repOutDir, \
-                                 self.repConfile)
-
-        # Terminate the redirecting of the stdout to the in-memory buffer.
-        self.textEdit_rep.setText( sys.stdout.getvalue() )
-        sys.stdout = self.oldstdout
+        # Start two threads - one for executing the above command and
+        # a second one to start a progress bar on the gui which keeps
+        # spinning till the first thread finishes the command execution
+        # and signals the second one by setting a flag. 
+        thread1 = bcThread_rep(PdfReport, FiwalkReport, \
+                               self.repFwXmlFileName,self.repAnnDir, \
+                               self.repOutDir, self.repConfile )
+        thread2 = guiThread("rep")
+        thread1.start()
+        thread2.start()
 
         # We will not quit from the Gui window until the user clicks
         # on Close.
@@ -1090,7 +1111,7 @@ class Ui_MainWindow(object):
         self.actionExit.setText(QtGui.QApplication.translate("MainWindow", "Exit", None, QtGui.QApplication.UnicodeUTF8))
 
 # Thread for running the fiwalk command
-class bcThread(threading.Thread):
+class bcThread_fw(threading.Thread):
     def __init__(self, cmd):
         threading.Thread.__init__(self)
         self.cmd = cmd
@@ -1099,56 +1120,123 @@ class bcThread(threading.Thread):
         (data, err) = Popen(self.cmd, stdout=PIPE, stderr=PIPE).communicate()
 
         if len(err) > 0 :
-           #sys.stderr.write("Debug: type(err) = %r.\n" % type(err))
-           # Terminate the redirecting of the stdout to the in-memory buffer.
-           print(">> ERROR!!! Fiwalk terminated with error: \n", err)
-           #self.progressBar_fw.timer.stop()
            ProgressBar._active = False
            
-           ## End buffering the stdout to StringIO
-           ##self.textEdit_fwcmdlineoutput.setText( sys.stdout.getvalue() )
-           ##sys.stdout = self.oldstdout
            x = Ui_MainWindow
+           print(">> ERROR!!! Fiwalk terminated with error: \n", err)
            global g_textEdit_fwcmdlineoutput
            g_textEdit_fwcmdlineoutput.append( sys.stdout.getvalue() )
            sys.stdout = x.oldstdout
            raise ValueError("fiwalk error (" + str(err).strip() + "): "+" ".join(cmd))
         else:
-           print("\n>> Success!!! Fiwalk created the following file(s): \n")
 
-           # Set the progresbar active flag so the other thread can
-           # get out of the while loop.
-           ProgressBar._active = False
-           #print("D: bcThread: Progressbar Active Flag Set to: ", ProgressBar._active)
+            # Set the progresbar active flag so the other thread can
+            # get out of the while loop.
+            ProgressBar._active = False
+            #print("D: bcThread_fw: Progressbar Active Flag Set to: ", ProgressBar._active)
 
-           # Set the progressbar maximum to > minimum so the spinning will stop
-           global global_fw
-           global_fw.progressbar.setRange(0,10)
+            print("\n>> Success!!! Fiwalk created the following file(s): \n")
+
+            # Set the progressbar maximum to > minimum so the spinning will stop
+            global global_fw
+            global_fw.progressbar.setRange(0,10)
            
-           global g_fwXmlFileName
-           print(" o ", g_fwXmlFileName) 
+            global g_fwXmlFileName
+            print(" o ", g_fwXmlFileName) 
 
-           x = Ui_MainWindow
-           global g_textEdit_fwcmdlineoutput
-           # Note: setText for seme reason, wouldn't work when used with
-           # global value. append seems to work
-           # g_textEdit_fwcmdlineoutput.setText( sys.stdout.getvalue() )
-           g_textEdit_fwcmdlineoutput.append( sys.stdout.getvalue() )
-           sys.stdout = x.oldstdout
+            x = Ui_MainWindow
+            # Note: setText for seme reason, wouldn't work when used with
+            # global value. append seems to work
+            #g_textEdit_fwcmdlineoutput.setText( sys.stdout.getvalue() )
+            g_textEdit_fwcmdlineoutput.append( sys.stdout.getvalue() )
+            sys.stdout = x.oldstdout
+                
+# Thread for running the identify_filenames command
+class bcThread_ann(threading.Thread):
+    def __init__(self, cmd, outdir):
+        threading.Thread.__init__(self)
+        self.cmd = cmd
+        self.outdir = outdir
+
+    def run(self):
+        (data, err) = Popen(self.cmd, stdout=PIPE, stderr=PIPE).communicate()
+        if len(err) > 0:
+            print(">> ERROR!!! identify_filenames terminated with error: \n", err)
+            ProgressBar._active = False
+            x = Ui_MainWindow
+            g_textEdit_anncmdlineoutput.append( sys.stdout.getvalue() )
+            sys.stdout = x.oldstdout
+
+            # In case the progress bar is spinning, stop it
+            global_ann.progressbar.setRange(0,10)
+            raise ValueError("identify_filenames error (" + str(err).strip() + "): "+" ".join(cmd))
+            exit(1)
+        else:
+            print("\n>> Success!!! Annotated feature files created in the directory: ", self.outdir)
+
+            # Set the progressbar maximum to > minimum so the spinning will stop
+            global_ann.progressbar.setRange(0,10)
+           
+            x = Ui_MainWindow
+
+            g_textEdit_anncmdlineoutput.append( sys.stdout.getvalue() )
+            sys.stdout = x.oldstdout
+
+class bcThread_rep(threading.Thread):
+    def __init__(self, PdfReport, FiwalkReport, \
+                       repFwXmlFileName,repAnnDir, \
+                       repOutDir, repConfile ):
+        threading.Thread.__init__(self)
+        self.PdfReport = PdfReport
+        self.FiwalkReport = FiwalkReport
+        self.repFwXmlFileName = repFwXmlFileName
+        self.repAnnDir = repAnnDir
+        self.repOutDir = repOutDir
+        self.repConfile = repConfile
+
+    def run(self):
+        # Generate the reports now.
+        bc_get_reports(PdfReport, FiwalkReport, self.repFwXmlFileName, \
+                                 self.repAnnDir, \
+                                 self.repOutDir, \
+                                 self.repConfile)
+
+        print("\n>> Success!!! Reports generated in the directory: ", self.repOutDir)
+
+        # Set the progressbar maximum to > minimum so the spinning will stop
+        global global_rep
+        global_rep.progressbar.setRange(0,10)
+           
+        x = Ui_MainWindow
+        global g_textEdit_repcmdlineoutput
+
+        # Terminate the redirecting of the stdout to the in-memory buffer.
+        g_textEdit_repcmdlineoutput.append( sys.stdout.getvalue() )
+        sys.stdout = x.oldstdout
+
 
 # This is the thread which spins in a loop till the other thread which
 # does the work sets the flag once the task is completed.
 class guiThread(threading.Thread):
-    def __init__(self):
+    def __init__(self, cmd_type):
         threading.Thread.__init__(self)
+        self.cmd_type = cmd_type
+
     def run(self):
-        global global_fw
-        progressbar = global_fw
-        progressbar.startLoop_bc()
+        if self.cmd_type == "fiwalk":
+            global global_fw
+            progressbar = global_fw
+        elif self.cmd_type == "ann":
+            global global_ann
+            progressbar = global_ann
+        elif self.cmd_type == "rep":
+            global global_rep
+            progressbar = global_rep
+
+        progressbar.startLoop_bc(self.cmd_type)
 
 class ProgressBar(QtGui.QWidget):
     _active = False
-    #def __init__(self, parent=None, total=20):
     def __init__(self, parent=None):
         super(ProgressBar, self).__init__(parent)
         self.progressbar = QtGui.QProgressBar()
@@ -1160,12 +1248,19 @@ class ProgressBar(QtGui.QWidget):
     def closeEvent(self):
         self._active = False
 
-    def startLoop_bc(self):
+    def startLoop_bc(self, cmd_type):
         self._active = True
         ProgressBar._active = True 
 
-        global global_fw
-        global_fw.progressbar.setRange(0,0)
+        if cmd_type == "fiwalk":
+            global global_fw
+            global_fw.progressbar.setRange(0,0)
+        elif cmd_type == "ann":
+            global global_ann
+            global_ann.progressbar.setRange(0,0)
+        elif cmd_type == "rep":
+            global global_rep
+            global_rep.progressbar.setRange(0,0)
 
         while True:
             time.sleep(1.05)
