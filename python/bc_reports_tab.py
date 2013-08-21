@@ -1057,13 +1057,13 @@ class Ui_MainWindow(object):
         self.lineEdit_rep_fwxmlfile.setPlaceholderText(QtGui.QApplication.translate("MainWindow", "/Path/To/File", None, QtGui.QApplication.UnicodeUTF8))
         self.toolButton_rep_fwxmlfile.setText(QtGui.QApplication.translate("MainWindow", "...", None, QtGui.QApplication.UnicodeUTF8))
         self.label_rep_fwxmlfile.setText(QtGui.QApplication.translate("MainWindow", "Fiwalk XML File", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_rep_outdir.setText(QtGui.QApplication.translate("MainWindow", "Output Directory For Reports:", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_rep_outdir.setText(QtGui.QApplication.translate("MainWindow", "Output Directory For Reports (new)", None, QtGui.QApplication.UnicodeUTF8))
         self.lineEdit_rep_outdir.setPlaceholderText(QtGui.QApplication.translate("MainWindow", "/Path/To/Directory", None, QtGui.QApplication.UnicodeUTF8))
         self.toolButton_rep_outdir.setText(QtGui.QApplication.translate("MainWindow", "...", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_rep_confile.setText(QtGui.QApplication.translate("MainWindow", "Config File (optional):", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_rep_confile.setText(QtGui.QApplication.translate("MainWindow", "Config File (optional)", None, QtGui.QApplication.UnicodeUTF8))
         self.lineEdit_rep_confile.setPlaceholderText(QtGui.QApplication.translate("MainWindow", "/Path/To/file", None, QtGui.QApplication.UnicodeUTF8))
         self.toolButton_rep_confile.setText(QtGui.QApplication.translate("MainWindow", "...", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_rep_cmdlineoutput.setText(QtGui.QApplication.translate("MainWindow", "Command Line Output:", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_rep_cmdlineoutput.setText(QtGui.QApplication.translate("MainWindow", "Command Line Output", None, QtGui.QApplication.UnicodeUTF8))
         self.label_rep_annDir.setText(QtGui.QApplication.translate("MainWindow", "Annotated Feature Files Directory", None, QtGui.QApplication.UnicodeUTF8))
         self.lineEdit_rep_annDir.setPlaceholderText(QtGui.QApplication.translate("MainWindow", "/Path/To/Directory", None, QtGui.QApplication.UnicodeUTF8))
         self.toolButton_rep_annDir.setText(QtGui.QApplication.translate("MainWindow", "...", None, QtGui.QApplication.UnicodeUTF8))
@@ -1078,7 +1078,7 @@ class Ui_MainWindow(object):
         self.toolButton_fw_xmlFile.setText(QtGui.QApplication.translate("MainWindow", "...", None, QtGui.QApplication.UnicodeUTF8))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_fw), QtGui.QApplication.translate("MainWindow", "Fiwalk XML", None, QtGui.QApplication.UnicodeUTF8))
         self.label_fwhdr.setText(QtGui.QApplication.translate("MainWindow", "Fiwalk produces a DFXML file showing the volumes, directories, and files contained within a disk image.", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_fwcmdlineoutput.setText(QtGui.QApplication.translate("MainWindow", "Command Line Output:", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_fwcmdlineoutput.setText(QtGui.QApplication.translate("MainWindow", "Command Line Output", None, QtGui.QApplication.UnicodeUTF8))
 
         # Tab-4: Annotated Files
         self.label_ann_image.setText(QtGui.QApplication.translate("MainWindow", "Image File", None, QtGui.QApplication.UnicodeUTF8))
@@ -1172,6 +1172,10 @@ class bcThread_ann(threading.Thread):
             raise ValueError("identify_filenames error (" + str(err).strip() + "): "+" ".join(cmd))
             exit(1)
         else:
+            # Set the progresbar active flag so the other thread can
+            # get out of the while loop.
+            ProgressBar._active = False
+
             print("\n>> Success!!! Annotated feature files created in the directory: ", self.outdir)
 
             # Set the progressbar maximum to > minimum so the spinning will stop
@@ -1200,6 +1204,10 @@ class bcThread_rep(threading.Thread):
                                  self.repAnnDir, \
                                  self.repOutDir, \
                                  self.repConfile)
+
+        # Set the progresbar active flag so the other thread can
+        # get out of the while loop.
+        ProgressBar._active = False
 
         print("\n>> Success!!! Reports generated in the directory: ", self.repOutDir)
 
