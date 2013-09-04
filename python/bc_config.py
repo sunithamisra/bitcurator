@@ -1,6 +1,14 @@
 #!/usr/bin/python
 # coding=UTF-8
 #
+# BitCurator 
+# Copyright (C) 2012
+# All rights reserved.
+# 
+# This code is distributed under the terms of the GNU General Public 
+# License, Version 3. See the text file "COPYING" for further details 
+# about the terms of this license.
+#
 # This file has routines related to the configuration information
 # of generate_reports script
 
@@ -109,7 +117,7 @@ def bc_parse_config_file(PdfReport, FiwalkReport, config_file):
                 if line1[2].rstrip() == 'YES':
                     PdfReport.bc_config_report_special_files = True
                 else:
-                    print("D: Not reporting Special files")
+                    # print("D: Not reporting Special files")
                     PdfReport.bc_config_report_special_files = False
             elif line1[1].rstrip() == 'MAX_LINES_TO_REPORT':
                 PdfReport.bc_max_lines_to_report = int(line1[2])
