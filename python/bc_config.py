@@ -117,7 +117,7 @@ def bc_parse_config_file(PdfReport, FiwalkReport, config_file):
                 if line1[2].rstrip() == 'YES':
                     PdfReport.bc_config_report_special_files = True
                 else:
-                    print("D: Not reporting Special files")
+                    # print("D: Not reporting Special files")
                     PdfReport.bc_config_report_special_files = False
             elif line1[1].rstrip() == 'MAX_LINES_TO_REPORT':
                 PdfReport.bc_max_lines_to_report = int(line1[2])

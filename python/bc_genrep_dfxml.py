@@ -44,6 +44,9 @@ def bc_get_volume_info_from_sax(FiwalkReport, fn, image_info, prtn_info_items, g
 
     xmlfile = open(fn, 'rb')
 
+    '''
+    ## NOTE: Originally we mandated the xml file to end with .xml
+    ## Code retained for reference and context
     # Currently we support taking only xml file as input. The following
     # check is for future enhancement.
     if fn.endswith('xml'):
@@ -53,7 +56,11 @@ def bc_get_volume_info_from_sax(FiwalkReport, fn, image_info, prtn_info_items, g
       
     else:
         # We use this call if we're processing a disk image
-        print("Expected an XML File for now ")
+        print("Warning: Expected an XML File ")
+    '''
+    r = fiwalk.fiwalk_vobj_using_sax(xmlfile=open(fn, 'rb'),callback=cbv)
+    image_info['image_filename'] = r.imageobject._tags['image_filename']
+    image_info['partitions'] = str(FiwalkReport.numPartitions)
 
 #
 # From dfxml utilities, Get the file and volume objects extracted 
@@ -100,6 +107,13 @@ def bc_process_xmlfile_using_sax(FiwalkReport, fn, prtn_info, glb_image_info, im
 
     xmlfile = open(fn, 'rb')
 
+    # We assume that we are processing a fiwalk XML fle
+    fiwalk.fiwalk_using_sax(xmlfile=open(fn, 'rb'),callback=cb)
+
+    ''' 
+    ## NOTE: Original code preserved for reference and context. It was
+    ## originally assumed that the xml file will have a .xml prefix.
+    #
     # Currently we support taking only xml file as input. The following
     # check is for future enhancement.
     if fn.endswith('xml'):
@@ -108,6 +122,7 @@ def bc_process_xmlfile_using_sax(FiwalkReport, fn, prtn_info, glb_image_info, im
     else:
         # We use this call if we're processing a disk image
         fiwalk.fiwalk_using_sax(imagefile=open(fn, 'rb'),callback=cb)
+    '''
 
 #
 # bc_make_dict forms a list of dictionaries, where information from each 

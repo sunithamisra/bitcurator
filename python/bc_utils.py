@@ -65,11 +65,11 @@ def is_special_file(filename):
         return(True)
     return(False)
 
-def match_and_write(of, line, pattern, separator):
+def match_and_write(of, line, pattern, no_eol):
     if re.match(pattern,line):
         line1 = re.split(":", line.rstrip('\n'))
         of.write(bytes(line1[1], 'UTF-8')) 
-        if (separator):
+        if (no_eol):
             of.write(b";") 
         else:
             of.write(b"\n") 

@@ -46,12 +46,18 @@ def process_files(fn, ws):
                 build_local_wb(ws, fi, row_idx[0])
                 row_idx[0] += 1
 
+    '''
+    ## NOTE: Original code preserved for reference and context. It was
+    ## originally assumed that the xml file will have a .xml prefix.
+    #
     if fn.endswith('xml'):
         # We use this call if we're processing a fiwalk XML file
         fiwalk.fiwalk_using_sax(xmlfile=open(fn, 'rb'),callback=cb)
     else:
         # We use this call if we're processing a disk image
         fiwalk.fiwalk_using_sax(imagefile=open(fn, 'rb'),callback=cb)
+    '''
+    fiwalk.fiwalk_using_sax(xmlfile=open(fn, 'rb'),callback=cb)
 
 def bc_generate_xlsx(fn):
 
