@@ -77,6 +77,7 @@ class Ui_MainWindow(object):
     # global location.
     oldstdout = sys.stdout
     sys.stdout = StringIO()
+
     global g_oldstdout
     g_oldstdout = oldstdout
 
