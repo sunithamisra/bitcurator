@@ -1,5 +1,13 @@
 #!/usr/bin/env python
 #
+# BitCurator
+# Copyright (C) 2012
+# All rights reserved.
+# 
+# This code is distributed under the terms of the GNU General Public 
+# License, Version 3. See the text file "COPYING" for further details 
+# about the terms of this license.
+#
 # Generate report in Excel format (from xml input)
 # 
 
@@ -38,21 +46,28 @@ def process_files(fn, ws):
                 build_local_wb(ws, fi, row_idx[0])
                 row_idx[0] += 1
 
+    '''
+    ## NOTE: Original code preserved for reference and context. It was
+    ## originally assumed that the xml file will have a .xml prefix.
+    #
     if fn.endswith('xml'):
         # We use this call if we're processing a fiwalk XML file
         fiwalk.fiwalk_using_sax(xmlfile=open(fn, 'rb'),callback=cb)
     else:
         # We use this call if we're processing a disk image
         fiwalk.fiwalk_using_sax(imagefile=open(fn, 'rb'),callback=cb)
+    '''
+    fiwalk.fiwalk_using_sax(xmlfile=open(fn, 'rb'),callback=cb)
 
 def bc_generate_xlsx(fn):
 
-    wb = Workbook(optimized_write = True)
+    wb = Workbook()
+    #wb = Workbook(optimized_write = True)
     #dest_filename = r'test_book.xlsx'
     dest_filename = fn.outdir + "/" + filename_from_path(fn.fiwalk_xmlfile) + ".xlsx"
     print("Generating Excel report ", dest_filename)
-    #ws = wb.worksheets[0]
-    ws = wb.create_sheet()
+    ws = wb.worksheets[0]
+    #ws = wb.create_sheet()
     ws.title = "File Object Information"
 
     ws.cell('%s%s'%('A', '1')).value = '%s' % "Partition"
