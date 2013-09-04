@@ -1,6 +1,14 @@
 #!/usr/bin/python
 # coding=UTF-8
+#
+# BitCurator
+# Copyright (C) 2012
+# All rights reserved.
 # 
+# This code is distributed under the terms of the GNU General Public 
+# License, Version 3. See the text file "COPYING" for further details 
+# about the terms of this license.
+#
 # This is a python file containing some utility functions for
 # generate_reports script
 
@@ -57,11 +65,11 @@ def is_special_file(filename):
         return(True)
     return(False)
 
-def match_and_write(of, line, pattern, separator):
+def match_and_write(of, line, pattern, no_eol):
     if re.match(pattern,line):
         line1 = re.split(":", line.rstrip('\n'))
         of.write(bytes(line1[1], 'UTF-8')) 
-        if (separator):
+        if (no_eol):
             of.write(b";") 
         else:
             of.write(b"\n") 
