@@ -488,7 +488,7 @@ class Ui_MainWindow(object):
 
     def getImageFileName(self):
         # Navigation
-        image_file = QtGui.QFileDialog.getOpenFileName()
+        image_file = QtGui.QFileDialog.getOpenFileName(caption="Select an image file")
         print(">> Image File Selected: ", image_file)
 
         self.lineEdit_image.setText(image_file)
@@ -497,7 +497,7 @@ class Ui_MainWindow(object):
 
     def getFwImageFileName(self):
         # Navigation
-        image_file = QtGui.QFileDialog.getOpenFileName()
+        image_file = QtGui.QFileDialog.getOpenFileName(caption="Select an image file")
         print(">> Image File Selected: ", image_file)
 
         self.lineEdit_fw_image.setText(image_file)
@@ -506,7 +506,7 @@ class Ui_MainWindow(object):
 
     def getBeImageFileName(self):
         # Navigation
-        image_file = QtGui.QFileDialog.getOpenFileName()
+        image_file = QtGui.QFileDialog.getOpenFileName(caption="Select an image file")
         print(">> Image File Selected: ", image_file)
 
         self.lineEdit_be_image.setText(image_file)
@@ -515,7 +515,7 @@ class Ui_MainWindow(object):
 
     def getAnnImageFileName(self):
         # Navigation
-        image_file = QtGui.QFileDialog.getOpenFileName()
+        image_file = QtGui.QFileDialog.getOpenFileName(caption="Select an image file")
         print(">> Image File Selected: ", image_file)
 
         self.lineEdit_ann_image.setText(image_file)
@@ -524,7 +524,7 @@ class Ui_MainWindow(object):
 
     def getbcpyDir(self):
         # Navigation
-        bcpyDir = QtGui.QFileDialog.getExistingDirectory()
+        bcpyDir = QtGui.QFileDialog.getExistingDirectory(caption="Create a directory for the annotation")
         print(">> BC Python Directory Selected: ", bcpyDir)
 
         self.lineEdit_bcpydir.setText(bcpyDir)
@@ -558,7 +558,7 @@ class Ui_MainWindow(object):
     def getBeOutputDir(self):
         # Since This directory should not exist, use getSaveFileName
         # to let the user create a new directory.
-        outdir = QtGui.QFileDialog.getSaveFileName()
+        outdir = QtGui.QFileDialog.getSaveFileName(caption="Select the bulk extractor feature directory")
 
         ## print(">> BE Output Directory Selected by navigating: ", outdir)
         print(">> BE Output Directory Selected for Bulk Extractor ", outdir)
@@ -577,7 +577,7 @@ class Ui_MainWindow(object):
         os.mkdir(self.beOutputDirName)
 
     def getBeFeatDir(self):
-        beFeatDir = QtGui.QFileDialog.getExistingDirectory()
+        beFeatDir = QtGui.QFileDialog.getExistingDirectory(caption="Select the bulk extractor feature directory")
         print(">> Annotate: BE Features Directory Selected: ", beFeatDir)
 
         self.lineEdit_ann_beFeatDir.setText(beFeatDir)
@@ -587,7 +587,7 @@ class Ui_MainWindow(object):
     def getAnnOutputDir(self):
         # Since This directory should not exist, use getSaveFileName
         # to let the user create a new directory.
-        ann_outdir = QtGui.QFileDialog.getSaveFileName()
+        ann_outdir = QtGui.QFileDialog.getSaveFileName(caption="Create a directory for the annotation")
 
         ## print(">> Annotated files Directory Selected by navigating: ", ann_outdir)
         print(">> Output Directory Selected for Bulk Extractor ", ann_outdir)
@@ -605,7 +605,7 @@ class Ui_MainWindow(object):
         os.mkdir(self.annOutputDirName)
     def getAnnBcpyDir(self):
         # Navigation
-        bcpyDir = QtGui.QFileDialog.getExistingDirectory()
+        bcpyDir = QtGui.QFileDialog.getExistingDirectory(caption="")
         print(">> BC Python Directory Selected: ", bcpyDir)
 
         self.lineEdit_ann_bcpyDir.setText(bcpyDir)
@@ -614,7 +614,7 @@ class Ui_MainWindow(object):
 
     def getFwOutputXmlFilePath(self):
         # Navigation
-        xml_output_file = QtGui.QFileDialog.getSaveFileName()
+        xml_output_file = QtGui.QFileDialog.getSaveFileName(caption="Select a location and enter a filename")
         ## print("D: Fiwalk XML File Selected: ", xml_output_file)
 
         self.lineEdit_fw_xmlFile.setText(xml_output_file)
@@ -626,7 +626,7 @@ class Ui_MainWindow(object):
     # by navigating trough the directories
     def getRepFwXmlFileName(self):
         # Navigation
-        xml_file = QtGui.QFileDialog.getOpenFileName()
+        xml_file = QtGui.QFileDialog.getOpenFileName(caption="Select a fiwalk XML file")
         # print("D: Fiwalk XML File Selected: ", xml_file)
 
         self.lineEdit_rep_fwxmlfile.setText(xml_file)
@@ -637,7 +637,7 @@ class Ui_MainWindow(object):
     # getRepBeAnnotatedDir: Routine to let the user choose the Directory name
     # containing the annotated files by navigating
     def getRepBeAnnotatedDir(self):
-        ann_dir = QtGui.QFileDialog.getExistingDirectory()
+        ann_dir = QtGui.QFileDialog.getExistingDirectory(caption="Select an annotated features directory")
         # print("D: Annotated Directory Selected by navigating: ", ann_dir)
 
         self.lineEdit_rep_annDir.setText(ann_dir)
@@ -649,7 +649,7 @@ class Ui_MainWindow(object):
     def getRepOutputDir(self):
         # Since This directory should not exist, use getSaveFileName
         # to let the user create a new directory.
-        outdir = QtGui.QFileDialog.getSaveFileName()
+        outdir = QtGui.QFileDialog.getSaveFileName(caption="Create a report directory")
 
         # print("D: Output Directory Selected by navigating: ", outdir)
 
@@ -1140,7 +1140,7 @@ class bcThread_fw(threading.Thread):
 
             # Set the progressbar maximum to > minimum so the spinning will stop
             global global_fw
-            global_fw.progressbar.setRange(0,10)
+            global_fw.progressbar.setRange(0,1)
            
             global g_fwXmlFileName
             print(" o ", g_fwXmlFileName) 
@@ -1169,7 +1169,7 @@ class bcThread_ann(threading.Thread):
             sys.stdout = x.oldstdout
 
             # In case the progress bar is spinning, stop it
-            global_ann.progressbar.setRange(0,10)
+            global_ann.progressbar.setRange(0,1)
             raise ValueError("identify_filenames error (" + str(err).strip() + "): "+" ".join(cmd))
             exit(1)
         else:
@@ -1180,7 +1180,7 @@ class bcThread_ann(threading.Thread):
             print("\n>> Success!!! Annotated feature files created in the directory: ", self.outdir)
 
             # Set the progressbar maximum to > minimum so the spinning will stop
-            global_ann.progressbar.setRange(0,10)
+            global_ann.progressbar.setRange(0,1)
            
             x = Ui_MainWindow
 
@@ -1214,7 +1214,7 @@ class bcThread_rep(threading.Thread):
 
         # Set the progressbar maximum to > minimum so the spinning will stop
         global global_rep
-        global_rep.progressbar.setRange(0,10)
+        global_rep.progressbar.setRange(0,1)
            
         x = Ui_MainWindow
         global g_textEdit_repcmdlineoutput
