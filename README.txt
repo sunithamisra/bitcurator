@@ -1,7 +1,7 @@
 BitCurator: Tools for Digital Forensics Methods and Workflows in Real-World Collecting Institutions
----------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------
 
-Copyright (C) 2012
+Copyright (C) 2011-2013
 All rights reserved.
 
 Unless otherwise indicated, software items in this repository are distributed under 

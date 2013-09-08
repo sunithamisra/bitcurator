@@ -4,8 +4,15 @@ Tools for Digital Forensics Methods and Workflows in
 Real-World Collecting Institutions
 ----------------------------------------------------
 
-Copyright (C) 2012
+Copyright (C) 2011-2013
 All rights reserved.
+
+September 9, 2013:
+BitCurator 0.3.4 released
+- Updated GUI, threaded progress bars complete. Updated OK/Cancel buttons.
+- Updated bulk_extractor to 1.4.0RC1
+- Updated AFFLIBv3 (v3.7.2)
+- Updated TSK to accommodate AFFLIBv3 3.7.2 update
 
 June 3, 2013:
 BitCurator 0.2.6 released
