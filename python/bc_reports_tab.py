@@ -89,26 +89,25 @@ class Ui_MainWindow(object):
         os.chdir(os.environ["HOME"])
 
         MainWindow.setObjectName(_fromUtf8("MainWindow"))
-        MainWindow.resize(566, 675)
+        MainWindow.resize(599, 707)
         self.centralwidget = QtGui.QWidget(MainWindow)
         self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
-        self.gridLayout_3 = QtGui.QGridLayout(self.centralwidget)
-        self.gridLayout_3.setObjectName(_fromUtf8("gridLayout_3"))
+        self.gridLayout = QtGui.QGridLayout(self.centralwidget)
+        self.gridLayout.setObjectName(_fromUtf8("gridLayout"))
         self.tabWidget = QtGui.QTabWidget(self.centralwidget)
         self.tabWidget.setAutoFillBackground(True)
         self.tabWidget.setObjectName(_fromUtf8("tabWidget"))
         self.tab_fw = QtGui.QWidget()
         self.tab_fw.setObjectName(_fromUtf8("tab_fw"))
-        self.gridLayout = QtGui.QGridLayout(self.tab_fw)
-        self.gridLayout.setObjectName(_fromUtf8("gridLayout"))
-        self.label_fwhdr = QtGui.QLabel(self.tab_fw)
-        font = QtGui.QFont()
-        font.setPointSize(10)
-        font.setItalic(True)
-        self.label_fwhdr.setFont(font)
-        self.label_fwhdr.setWordWrap(True)
-        self.label_fwhdr.setObjectName(_fromUtf8("label"))
-        self.gridLayout.addWidget(self.label_fwhdr, 0, 0, 1, 3)
+        self.gridLayout_3 = QtGui.QGridLayout(self.tab_fw)
+        self.gridLayout_3.setObjectName(_fromUtf8("gridLayout_3"))
+        self.textEdit_fwcmdlineoutput = QtGui.QTextEdit(self.tab_fw)
+
+        global g_textEdit_fwcmdlineoutput
+        g_textEdit_fwcmdlineoutput = self.textEdit_fwcmdlineoutput     
+
+        self.textEdit_fwcmdlineoutput.setObjectName(_fromUtf8("textEdit_fwcmdlineoutput"))
+        self.gridLayout_3.addWidget(self.textEdit_fwcmdlineoutput, 6, 0, 1, 6)
         self.label_fw_image = QtGui.QLabel(self.tab_fw)
         font = QtGui.QFont()
         font.setPointSize(10)
@@ -116,13 +115,7 @@ class Ui_MainWindow(object):
         font.setWeight(75)
         self.label_fw_image.setFont(font)
         self.label_fw_image.setObjectName(_fromUtf8("label_fw_image"))
-        self.gridLayout.addWidget(self.label_fw_image, 1, 0, 1, 2)
-        self.lineEdit_fw_image = QtGui.QLineEdit(self.tab_fw)
-        self.lineEdit_fw_image.setObjectName(_fromUtf8("lineEdit_fw_image"))
-        self.gridLayout.addWidget(self.lineEdit_fw_image, 2, 0, 1, 2)
-        self.toolButton_fw_image = QtGui.QToolButton(self.tab_fw)
-        self.toolButton_fw_image.setObjectName(_fromUtf8("toolButton_fw_image"))
-        self.gridLayout.addWidget(self.toolButton_fw_image, 2, 2, 1, 1)
+        self.gridLayout_3.addWidget(self.label_fw_image, 1, 0, 1, 2)
         self.label_fw_xmlFile = QtGui.QLabel(self.tab_fw)
         font = QtGui.QFont()
         font.setPointSize(10)
@@ -130,13 +123,7 @@ class Ui_MainWindow(object):
         font.setWeight(75)
         self.label_fw_xmlFile.setFont(font)
         self.label_fw_xmlFile.setObjectName(_fromUtf8("label_fw_xmlFile"))
-        self.gridLayout.addWidget(self.label_fw_xmlFile, 3, 0, 1, 2)
-        self.lineEdit_fw_xmlFile = QtGui.QLineEdit(self.tab_fw)
-        self.lineEdit_fw_xmlFile.setObjectName(_fromUtf8("lineEdit_fw_xmlFile"))
-        self.gridLayout.addWidget(self.lineEdit_fw_xmlFile, 4, 0, 1, 2)
-        self.toolButton_fw_xmlFile = QtGui.QToolButton(self.tab_fw)
-        self.toolButton_fw_xmlFile.setObjectName(_fromUtf8("toolButton_fw_xmlFile"))
-        self.gridLayout.addWidget(self.toolButton_fw_xmlFile, 4, 2, 1, 1)
+        self.gridLayout_3.addWidget(self.label_fw_xmlFile, 3, 0, 1, 2)
         self.label_fwcmdlineoutput = QtGui.QLabel(self.tab_fw)
         font = QtGui.QFont()
         font.setPointSize(10)
@@ -144,62 +131,95 @@ class Ui_MainWindow(object):
         font.setWeight(75)
         self.label_fwcmdlineoutput.setFont(font)
         self.label_fwcmdlineoutput.setObjectName(_fromUtf8("label_fwcmdlineoutput"))
-        self.gridLayout.addWidget(self.label_fwcmdlineoutput, 5, 0, 1, 1)
-        self.textEdit_fwcmdlineoutput = QtGui.QTextEdit(self.tab_fw)
-        global g_textEdit_fwcmdlineoutput
-        g_textEdit_fwcmdlineoutput = self.textEdit_fwcmdlineoutput
+        self.gridLayout_3.addWidget(self.label_fwcmdlineoutput, 5, 0, 1, 1)
+        self.label_fwhdr = QtGui.QLabel(self.tab_fw)
+        font = QtGui.QFont()
+        font.setPointSize(10)
+        font.setItalic(True)
+        self.label_fwhdr.setFont(font)
+        self.label_fwhdr.setWordWrap(True)
+        self.label_fwhdr.setObjectName(_fromUtf8("label_fwhdr"))
+        self.gridLayout_3.addWidget(self.label_fwhdr, 0, 0, 1, 6)
+        self.lineEdit_fw_image = QtGui.QLineEdit(self.tab_fw)
+        self.lineEdit_fw_image.setObjectName(_fromUtf8("lineEdit_fw_image"))
+        self.gridLayout_3.addWidget(self.lineEdit_fw_image, 2, 0, 1, 5)
+        self.toolButton_fw_xmlFile = QtGui.QToolButton(self.tab_fw)
+        self.toolButton_fw_xmlFile.setObjectName(_fromUtf8("toolButton_fw_xmlFile"))
+        self.gridLayout_3.addWidget(self.toolButton_fw_xmlFile, 4, 5, 1, 1)
+        self.lineEdit_fw_xmlFile = QtGui.QLineEdit(self.tab_fw)
+        self.lineEdit_fw_xmlFile.setObjectName(_fromUtf8("lineEdit_fw_xmlFile"))
+        self.gridLayout_3.addWidget(self.lineEdit_fw_xmlFile, 4, 0, 1, 5)
+        self.toolButton_fw_image = QtGui.QToolButton(self.tab_fw)
+        self.toolButton_fw_image.setObjectName(_fromUtf8("toolButton_fw_image"))
+        self.gridLayout_3.addWidget(self.toolButton_fw_image, 2, 5, 1, 1)
+        self.pb_fw_close = QtGui.QPushButton(self.tab_fw)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.pb_fw_close.sizePolicy().hasHeightForWidth())
+        self.pb_fw_close.setSizePolicy(sizePolicy)
+        self.pb_fw_close.setObjectName(_fromUtf8("pb_fw_close"))
+        self.gridLayout_3.addWidget(self.pb_fw_close, 7, 2, 1, 1)
+        self.pb_fw_cancel = QtGui.QPushButton(self.tab_fw)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.pb_fw_cancel.sizePolicy().hasHeightForWidth())
+        self.pb_fw_cancel.setSizePolicy(sizePolicy)
+        self.pb_fw_cancel.setObjectName(_fromUtf8("pb_fw_cancel"))
+        self.gridLayout_3.addWidget(self.pb_fw_cancel, 7, 3, 1, 1)
+        self.pb_fw_run = QtGui.QPushButton(self.tab_fw)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.pb_fw_run.sizePolicy().hasHeightForWidth())
+        self.pb_fw_run.setSizePolicy(sizePolicy)
+        self.pb_fw_run.setObjectName(_fromUtf8("pb_fw_run"))
+        self.gridLayout_3.addWidget(self.pb_fw_run, 7, 4, 1, 1)
 
-        self.textEdit_fwcmdlineoutput.setObjectName(_fromUtf8("textEdit_fwcmdlineoutput"))
-        self.gridLayout.addWidget(self.textEdit_fwcmdlineoutput, 6, 0, 1, 3)
-        self.buttonBox_fw = QtGui.QDialogButtonBox(self.tab_fw)
-        self.buttonBox_fw.setOrientation(QtCore.Qt.Horizontal)
-        self.buttonBox_fw.setStandardButtons(QtGui.QDialogButtonBox.Cancel|QtGui.QDialogButtonBox.Close|QtGui.QDialogButtonBox.Ok)
-        self.buttonBox_fw.setObjectName(_fromUtf8("buttonBox_fw"))
-        self.gridLayout.addWidget(self.buttonBox_fw, 7, 1, 1, 2)
 
+        #self.progressBar_fw = QtGui.QProgressBar(self.tab_fw)
         self.progressBar_fw = ProgressBar()
         global global_fw
         global_fw =  self.progressBar_fw
 
-        self.progressBar_fw.setProperty("value", 5)
+        self.progressBar_fw.setProperty("value", 1)
         self.progressBar_fw.setObjectName(_fromUtf8("progressBar_fw"))
-        self.gridLayout.addWidget(self.progressBar_fw, 7, 0, 1, 1)
-
+        self.gridLayout_3.addWidget(self.progressBar_fw, 7, 0, 1, 1)
         self.tabWidget.addTab(self.tab_fw, _fromUtf8(""))
+
         self.tab_ann = QtGui.QWidget()
         self.tab_ann.setObjectName(_fromUtf8("tab_ann"))
         self.gridLayout_4 = QtGui.QGridLayout(self.tab_ann)
         self.gridLayout_4.setObjectName(_fromUtf8("gridLayout_4"))
-        self.lineEdit_ann_annDir = QtGui.QLineEdit(self.tab_ann)
-        self.lineEdit_ann_annDir.setObjectName(_fromUtf8("lineEdit_ann_annDir"))
-        self.gridLayout_4.addWidget(self.lineEdit_ann_annDir, 6, 0, 1, 2)
-        self.toolButton_ann_annDir = QtGui.QToolButton(self.tab_ann)
-        self.toolButton_ann_annDir.setObjectName(_fromUtf8("toolButton_ann_annDir"))
-        self.gridLayout_4.addWidget(self.toolButton_ann_annDir, 6, 2, 1, 1)
-        self.label_annhdr = QtGui.QLabel(self.tab_ann)
-        font = QtGui.QFont()
-        font.setPointSize(10)
-        font.setItalic(True)
-        self.label_annhdr.setFont(font)
-        self.label_annhdr.setWordWrap(True)
-        self.label_annhdr.setObjectName(_fromUtf8("label_annhdr"))
-        self.gridLayout_4.addWidget(self.label_annhdr, 0, 0, 1, 3)
-        self.label_ann_image = QtGui.QLabel(self.tab_ann)
+        self.label_ann_annDir = QtGui.QLabel(self.tab_ann)
         font = QtGui.QFont()
         font.setPointSize(10)
         font.setBold(True)
         font.setWeight(75)
-        self.label_ann_image.setFont(font)
-        self.label_ann_image.setObjectName(_fromUtf8("label_ann_image"))
-        self.gridLayout_4.addWidget(self.label_ann_image, 1, 0, 1, 1)
-        self.buttonBox_ann = QtGui.QDialogButtonBox(self.tab_ann)
-        self.buttonBox_ann.setStandardButtons(QtGui.QDialogButtonBox.Cancel|QtGui.QDialogButtonBox.Close|QtGui.QDialogButtonBox.Ok)
-        self.buttonBox_ann.setObjectName(_fromUtf8("buttonBox_ann"))
-        self.gridLayout_4.addWidget(self.buttonBox_ann, 11, 1, 1, 2)
-        self.lineEdit_ann_image = QtGui.QLineEdit(self.tab_ann)
-        self.lineEdit_ann_image.setText(_fromUtf8(""))
-        self.lineEdit_ann_image.setObjectName(_fromUtf8("lineEdit_ann_image"))
-        self.gridLayout_4.addWidget(self.lineEdit_ann_image, 2, 0, 1, 2)
+        self.label_ann_annDir.setFont(font)
+        self.label_ann_annDir.setObjectName(_fromUtf8("label_ann_annDir"))
+        self.gridLayout_4.addWidget(self.label_ann_annDir, 5, 0, 1, 4)
+        self.pb_ann_close = QtGui.QPushButton(self.tab_ann)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.pb_ann_close.sizePolicy().hasHeightForWidth())
+        self.pb_ann_close.setSizePolicy(sizePolicy)
+        self.pb_ann_close.setObjectName(_fromUtf8("pb_ann_close"))
+        self.gridLayout_4.addWidget(self.pb_ann_close, 11, 2, 1, 1)
+        self.toolButton_ann_annDir = QtGui.QToolButton(self.tab_ann)
+        self.toolButton_ann_annDir.setObjectName(_fromUtf8("toolButton_ann_annDir"))
+        self.gridLayout_4.addWidget(self.toolButton_ann_annDir, 6, 5, 1, 1)
+        self.textEdit_ann = QtGui.QTextEdit(self.tab_ann)
+        self.textEdit_ann.setAutoFillBackground(True)
+
+        global g_textEdit_anncmdlineoutput
+        g_textEdit_anncmdlineoutput = self.textEdit_ann
+        
+
+        self.textEdit_ann.setObjectName(_fromUtf8("textEdit_ann"))
+        self.gridLayout_4.addWidget(self.textEdit_ann, 10, 0, 1, 6)
         self.label_anncmdlineoutput = QtGui.QLabel(self.tab_ann)
         font = QtGui.QFont()
         font.setPointSize(10)
@@ -208,34 +228,17 @@ class Ui_MainWindow(object):
         self.label_anncmdlineoutput.setFont(font)
         self.label_anncmdlineoutput.setObjectName(_fromUtf8("label_anncmdlineoutput"))
         self.gridLayout_4.addWidget(self.label_anncmdlineoutput, 9, 0, 1, 1)
-
-        self.textEdit_ann = QtGui.QTextEdit(self.tab_ann)
-        self.textEdit_ann.setAutoFillBackground(True)
-        global g_textEdit_anncmdlineoutput
-        g_textEdit_anncmdlineoutput = self.textEdit_ann
-
-        self.textEdit_ann.setObjectName(_fromUtf8("textEdit_ann"))
-        self.gridLayout_4.addWidget(self.textEdit_ann, 10, 0, 1, 3)
         self.toolButton_ann_image = QtGui.QToolButton(self.tab_ann)
         self.toolButton_ann_image.setObjectName(_fromUtf8("toolButton_ann_image"))
-        self.gridLayout_4.addWidget(self.toolButton_ann_image, 2, 2, 1, 1)
-        self.toolButton_ann_bcpyDir = QtGui.QToolButton(self.tab_ann)
-        self.toolButton_ann_bcpyDir.setObjectName(_fromUtf8("toolButton_ann_bcpyDir"))
-        self.gridLayout_4.addWidget(self.toolButton_ann_bcpyDir, 8, 2, 1, 1)
-        self.toolButton_ann_beFeatDir = QtGui.QToolButton(self.tab_ann)
-        self.toolButton_ann_beFeatDir.setObjectName(_fromUtf8("toolButton_ann_beFeatDir"))
-        self.gridLayout_4.addWidget(self.toolButton_ann_beFeatDir, 4, 2, 1, 1)
-
-        # FIXME: Add the following lines once the progress bar is implemented
-        self.progressBar_ann = ProgressBar()
-        global global_ann
-        global_ann = self.progressBar_ann
-      
-        ####self.progressBar_ann = QtGui.QProgressBar(self.tab_ann)
-        self.progressBar_ann.setProperty("value", 24)
-        self.progressBar_ann.setObjectName(_fromUtf8("progressBar_ann"))
-        self.gridLayout_4.addWidget(self.progressBar_ann, 11, 0, 1, 1)
-
+        self.gridLayout_4.addWidget(self.toolButton_ann_image, 2, 5, 1, 1)
+        self.label_ann_image = QtGui.QLabel(self.tab_ann)
+        font = QtGui.QFont()
+        font.setPointSize(10)
+        font.setBold(True)
+        font.setWeight(75)
+        self.label_ann_image.setFont(font)
+        self.label_ann_image.setObjectName(_fromUtf8("label_ann_image"))
+        self.gridLayout_4.addWidget(self.label_ann_image, 1, 0, 1, 1)
         self.label_ann_beFeatDir = QtGui.QLabel(self.tab_ann)
         font = QtGui.QFont()
         font.setPointSize(10)
@@ -243,23 +246,34 @@ class Ui_MainWindow(object):
         font.setWeight(75)
         self.label_ann_beFeatDir.setFont(font)
         self.label_ann_beFeatDir.setObjectName(_fromUtf8("label_ann_beFeatDir"))
-        self.gridLayout_4.addWidget(self.label_ann_beFeatDir, 3, 0, 1, 2)
-        self.lineEdit_ann_beFeatDir = QtGui.QLineEdit(self.tab_ann)
-        self.lineEdit_ann_beFeatDir.setText(_fromUtf8(""))
-        self.lineEdit_ann_beFeatDir.setObjectName(_fromUtf8("lineEdit_ann_beFeatDir"))
-        self.gridLayout_4.addWidget(self.lineEdit_ann_beFeatDir, 4, 0, 1, 2)
+        self.gridLayout_4.addWidget(self.label_ann_beFeatDir, 3, 0, 1, 4)
+        self.pb_ann_cancel = QtGui.QPushButton(self.tab_ann)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.pb_ann_cancel.sizePolicy().hasHeightForWidth())
+        self.pb_ann_cancel.setSizePolicy(sizePolicy)
+        self.pb_ann_cancel.setObjectName(_fromUtf8("pb_ann_cancel"))
+        self.gridLayout_4.addWidget(self.pb_ann_cancel, 11, 3, 1, 1)
+        self.pb_ann_run = QtGui.QPushButton(self.tab_ann)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.pb_ann_run.sizePolicy().hasHeightForWidth())
+        self.pb_ann_run.setSizePolicy(sizePolicy)
+        self.pb_ann_run.setObjectName(_fromUtf8("pb_ann_run"))
+        self.gridLayout_4.addWidget(self.pb_ann_run, 11, 4, 1, 1)
+        self.lineEdit_ann_image = QtGui.QLineEdit(self.tab_ann)
+        self.lineEdit_ann_image.setText(_fromUtf8(""))
+        self.lineEdit_ann_image.setObjectName(_fromUtf8("lineEdit_ann_image"))
+        self.gridLayout_4.addWidget(self.lineEdit_ann_image, 2, 0, 1, 5)
         self.lineEdit_ann_bcpyDir = QtGui.QLineEdit(self.tab_ann)
         self.lineEdit_ann_bcpyDir.setText(_fromUtf8(""))
         self.lineEdit_ann_bcpyDir.setObjectName(_fromUtf8("lineEdit_ann_bcpyDir"))
-        self.gridLayout_4.addWidget(self.lineEdit_ann_bcpyDir, 8, 0, 1, 2)
-        self.label_ann_annDir = QtGui.QLabel(self.tab_ann)
-        font = QtGui.QFont()
-        font.setPointSize(10)
-        font.setBold(True)
-        font.setWeight(75)
-        self.label_ann_annDir.setFont(font)
-        self.label_ann_annDir.setObjectName(_fromUtf8("label_ann_annDir"))
-        self.gridLayout_4.addWidget(self.label_ann_annDir, 5, 0, 1, 2)
+        self.gridLayout_4.addWidget(self.lineEdit_ann_bcpyDir, 8, 0, 1, 5)
+        self.toolButton_ann_beFeatDir = QtGui.QToolButton(self.tab_ann)
+        self.toolButton_ann_beFeatDir.setObjectName(_fromUtf8("toolButton_ann_beFeatDir"))
+        self.gridLayout_4.addWidget(self.toolButton_ann_beFeatDir, 4, 5, 1, 1)
         self.label_ann_bcpyDir = QtGui.QLabel(self.tab_ann)
         font = QtGui.QFont()
         font.setPointSize(10)
@@ -267,12 +281,44 @@ class Ui_MainWindow(object):
         font.setWeight(75)
         self.label_ann_bcpyDir.setFont(font)
         self.label_ann_bcpyDir.setObjectName(_fromUtf8("label_ann_bcpyDir"))
-        self.gridLayout_4.addWidget(self.label_ann_bcpyDir, 7, 0, 1, 2)
+        self.gridLayout_4.addWidget(self.label_ann_bcpyDir, 7, 0, 1, 4)
+        self.label_annhdr = QtGui.QLabel(self.tab_ann)
+        font = QtGui.QFont()
+        font.setPointSize(10)
+        font.setItalic(True)
+        self.label_annhdr.setFont(font)
+        self.label_annhdr.setWordWrap(True)
+        self.label_annhdr.setObjectName(_fromUtf8("label_annhdr"))
+        self.gridLayout_4.addWidget(self.label_annhdr, 0, 0, 1, 6)
+        self.lineEdit_ann_annDir = QtGui.QLineEdit(self.tab_ann)
+        self.lineEdit_ann_annDir.setObjectName(_fromUtf8("lineEdit_ann_annDir"))
+        self.gridLayout_4.addWidget(self.lineEdit_ann_annDir, 6, 0, 1, 5)
+        self.lineEdit_ann_beFeatDir = QtGui.QLineEdit(self.tab_ann)
+        self.lineEdit_ann_beFeatDir.setText(_fromUtf8(""))
+        self.lineEdit_ann_beFeatDir.setObjectName(_fromUtf8("lineEdit_ann_beFeatDir"))
+        self.gridLayout_4.addWidget(self.lineEdit_ann_beFeatDir, 4, 0, 1, 5)
+
+        self.toolButton_ann_bcpyDir = QtGui.QToolButton(self.tab_ann)
+        self.toolButton_ann_bcpyDir.setObjectName(_fromUtf8("toolButton_ann_bcpyDir"))
+        self.gridLayout_4.addWidget(self.toolButton_ann_bcpyDir, 8, 5, 1, 1)
+
+        #self.progressBar_ann = QtGui.QProgressBar(self.tab_ann)
+        self.progressBar_ann = ProgressBar()
+        global global_ann
+        global_ann = self.progressBar_ann
+  
+        self.progressBar_ann.setProperty("value", 1)
+        self.progressBar_ann.setObjectName(_fromUtf8("progressBar_ann"))
+        self.gridLayout_4.addWidget(self.progressBar_ann, 11, 0, 1, 1)
         self.tabWidget.addTab(self.tab_ann, _fromUtf8(""))
+
         self.tab_rep = QtGui.QWidget()
         self.tab_rep.setObjectName(_fromUtf8("tab_rep"))
         self.gridLayout_2 = QtGui.QGridLayout(self.tab_rep)
         self.gridLayout_2.setObjectName(_fromUtf8("gridLayout_2"))
+        self.lineEdit_rep_outdir = QtGui.QLineEdit(self.tab_rep)
+        self.lineEdit_rep_outdir.setObjectName(_fromUtf8("lineEdit_rep_outdir"))
+        self.gridLayout_2.addWidget(self.lineEdit_rep_outdir, 6, 0, 1, 4)
         self.label_rephdr = QtGui.QLabel(self.tab_rep)
         font = QtGui.QFont()
         font.setPointSize(10)
@@ -280,7 +326,7 @@ class Ui_MainWindow(object):
         self.label_rephdr.setFont(font)
         self.label_rephdr.setWordWrap(True)
         self.label_rephdr.setObjectName(_fromUtf8("label_rephdr"))
-        self.gridLayout_2.addWidget(self.label_rephdr, 0, 0, 1, 3)
+        self.gridLayout_2.addWidget(self.label_rephdr, 0, 0, 1, 5)
         self.label_rep_fwxmlfile = QtGui.QLabel(self.tab_rep)
         font = QtGui.QFont()
         font.setPointSize(10)
@@ -292,10 +338,10 @@ class Ui_MainWindow(object):
         self.lineEdit_rep_fwxmlfile = QtGui.QLineEdit(self.tab_rep)
         self.lineEdit_rep_fwxmlfile.setText(_fromUtf8(""))
         self.lineEdit_rep_fwxmlfile.setObjectName(_fromUtf8("lineEdit_rep_fwxmlfile"))
-        self.gridLayout_2.addWidget(self.lineEdit_rep_fwxmlfile, 2, 0, 1, 2)
+        self.gridLayout_2.addWidget(self.lineEdit_rep_fwxmlfile, 2, 0, 1, 4)
         self.toolButton_rep_fwxmlfile = QtGui.QToolButton(self.tab_rep)
         self.toolButton_rep_fwxmlfile.setObjectName(_fromUtf8("toolButton_rep_fwxmlfile"))
-        self.gridLayout_2.addWidget(self.toolButton_rep_fwxmlfile, 2, 2, 1, 1)
+        self.gridLayout_2.addWidget(self.toolButton_rep_fwxmlfile, 2, 4, 1, 1)
         self.label_rep_annDir = QtGui.QLabel(self.tab_rep)
         font = QtGui.QFont()
         font.setPointSize(10)
@@ -307,10 +353,10 @@ class Ui_MainWindow(object):
         self.lineEdit_rep_annDir = QtGui.QLineEdit(self.tab_rep)
         self.lineEdit_rep_annDir.setText(_fromUtf8(""))
         self.lineEdit_rep_annDir.setObjectName(_fromUtf8("lineEdit_rep_annDir"))
-        self.gridLayout_2.addWidget(self.lineEdit_rep_annDir, 4, 0, 1, 2)
+        self.gridLayout_2.addWidget(self.lineEdit_rep_annDir, 4, 0, 1, 4)
         self.toolButton_rep_annDir = QtGui.QToolButton(self.tab_rep)
         self.toolButton_rep_annDir.setObjectName(_fromUtf8("toolButton_rep_annDir"))
-        self.gridLayout_2.addWidget(self.toolButton_rep_annDir, 4, 2, 1, 1)
+        self.gridLayout_2.addWidget(self.toolButton_rep_annDir, 4, 4, 1, 1)
         self.label_rep_outdir = QtGui.QLabel(self.tab_rep)
         font = QtGui.QFont()
         font.setPointSize(10)
@@ -319,28 +365,23 @@ class Ui_MainWindow(object):
         self.label_rep_outdir.setFont(font)
         self.label_rep_outdir.setObjectName(_fromUtf8("label_rep_outdir"))
         self.gridLayout_2.addWidget(self.label_rep_outdir, 5, 0, 1, 1)
-        self.lineEdit_rep_outdir = QtGui.QLineEdit(self.tab_rep)
-        self.lineEdit_rep_outdir.setObjectName(_fromUtf8("lineEdit_rep_outdir"))
-        self.gridLayout_2.addWidget(self.lineEdit_rep_outdir, 6, 0, 1, 2)
         self.toolButton_rep_outdir = QtGui.QToolButton(self.tab_rep)
         self.toolButton_rep_outdir.setObjectName(_fromUtf8("toolButton_rep_outdir"))
-        self.gridLayout_2.addWidget(self.toolButton_rep_outdir, 6, 2, 1, 1)
-
+        self.gridLayout_2.addWidget(self.toolButton_rep_outdir, 6, 4, 1, 1)
         self.label_rep_confile = QtGui.QLabel(self.tab_rep)
         font = QtGui.QFont()
         font.setPointSize(10)
         font.setBold(True)
         font.setWeight(75)
         self.label_rep_confile.setFont(font)
-        self.label_rep_confile.setObjectName(_fromUtf8("label_rep_confle"))
+        self.label_rep_confile.setObjectName(_fromUtf8("label_rep_confile"))
         self.gridLayout_2.addWidget(self.label_rep_confile, 7, 0, 1, 1)
-
         self.lineEdit_rep_confile = QtGui.QLineEdit(self.tab_rep)
         self.lineEdit_rep_confile.setObjectName(_fromUtf8("lineEdit_rep_confile"))
-        self.gridLayout_2.addWidget(self.lineEdit_rep_confile, 8, 0, 1, 2)
+        self.gridLayout_2.addWidget(self.lineEdit_rep_confile, 8, 0, 1, 4)
         self.toolButton_rep_confile = QtGui.QToolButton(self.tab_rep)
         self.toolButton_rep_confile.setObjectName(_fromUtf8("toolButton_rep_confile"))
-        self.gridLayout_2.addWidget(self.toolButton_rep_confile, 8, 2, 1, 1)
+        self.gridLayout_2.addWidget(self.toolButton_rep_confile, 8, 4, 1, 1)
         self.label_rep_cmdlineoutput = QtGui.QLabel(self.tab_rep)
         font = QtGui.QFont()
         font.setPointSize(10)
@@ -351,30 +392,50 @@ class Ui_MainWindow(object):
         self.gridLayout_2.addWidget(self.label_rep_cmdlineoutput, 9, 0, 1, 1)
         self.textEdit_rep = QtGui.QTextEdit(self.tab_rep)
         self.textEdit_rep.setAutoFillBackground(True)
+
         global g_textEdit_repcmdlineoutput
         g_textEdit_repcmdlineoutput = self.textEdit_rep
 
         self.textEdit_rep.setObjectName(_fromUtf8("textEdit_rep"))
-        self.gridLayout_2.addWidget(self.textEdit_rep, 10, 0, 1, 3)
-        self.buttonBox_rep = QtGui.QDialogButtonBox(self.tab_rep)
-        self.buttonBox_rep.setStandardButtons(QtGui.QDialogButtonBox.Cancel|QtGui.QDialogButtonBox.Close|QtGui.QDialogButtonBox.Ok)
-        self.buttonBox_rep.setObjectName(_fromUtf8("buttonBox_rep"))
-        self.gridLayout_2.addWidget(self.buttonBox_rep, 11, 1, 1, 2)
-        
-        # FIXME: Add the following lines once the progress bar is implemented
-        ####self.progressBar_rep = QtGui.QProgressBar(self.tab_rep)
+        self.gridLayout_2.addWidget(self.textEdit_rep, 10, 0, 1, 5)
+        self.pb_rep_run = QtGui.QPushButton(self.tab_rep)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.pb_rep_run.sizePolicy().hasHeightForWidth())
+        self.pb_rep_run.setSizePolicy(sizePolicy)
+        self.pb_rep_run.setObjectName(_fromUtf8("pb_rep_run"))
+        self.gridLayout_2.addWidget(self.pb_rep_run, 11, 3, 1, 1)
+        self.pb_rep_cancel = QtGui.QPushButton(self.tab_rep)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.pb_rep_cancel.sizePolicy().hasHeightForWidth())
+        self.pb_rep_cancel.setSizePolicy(sizePolicy)
+        self.pb_rep_cancel.setObjectName(_fromUtf8("pb_rep_cancel"))
+        self.gridLayout_2.addWidget(self.pb_rep_cancel, 11, 2, 1, 1)
+        self.pb_rep_close = QtGui.QPushButton(self.tab_rep)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.pb_rep_close.sizePolicy().hasHeightForWidth())
+        self.pb_rep_close.setSizePolicy(sizePolicy)
+        self.pb_rep_close.setObjectName(_fromUtf8("pb_rep_close"))
+        self.gridLayout_2.addWidget(self.pb_rep_close, 11, 1, 1, 1)
+
+        #self.progressBar_rep = QtGui.QProgressBar(self.tab)
         self.progressBar_rep = ProgressBar()
         global global_rep
         global_rep = self.progressBar_rep
-        self.progressBar_rep.setProperty("value", 24)
+
+        self.progressBar_rep.setProperty("value", 1)
         self.progressBar_rep.setObjectName(_fromUtf8("progressBar_rep"))
         self.gridLayout_2.addWidget(self.progressBar_rep, 11, 0, 1, 1)
-
         self.tabWidget.addTab(self.tab_rep, _fromUtf8(""))
-        self.gridLayout_3.addWidget(self.tabWidget, 0, 0, 1, 1)
+        self.gridLayout.addWidget(self.tabWidget, 0, 0, 1, 1)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 566, 25))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 599, 25))
         self.menubar.setObjectName(_fromUtf8("menubar"))
         self.menuFile = QtGui.QMenu(self.menubar)
         self.menuFile.setObjectName(_fromUtf8("menuFile"))
@@ -386,56 +447,54 @@ class Ui_MainWindow(object):
         self.statusbar = QtGui.QStatusBar(MainWindow)
         self.statusbar.setObjectName(_fromUtf8("statusbar"))
         MainWindow.setStatusBar(self.statusbar)
+
+        ## Note: Check the following block
         self.toolBar = QtGui.QToolBar(MainWindow)
         self.toolBar.setObjectName(_fromUtf8("toolBar"))
         MainWindow.addToolBar(QtCore.Qt.TopToolBarArea, self.toolBar)
         self.toolBar_2 = QtGui.QToolBar(MainWindow)
         self.toolBar_2.setObjectName(_fromUtf8("toolBar_2"))
         MainWindow.addToolBar(QtCore.Qt.TopToolBarArea, self.toolBar_2)
+
         self.actionCopy = QtGui.QAction(MainWindow)
         self.actionCopy.setObjectName(_fromUtf8("actionCopy"))
-        self.actionPaste = QtGui.QAction(MainWindow)
-        self.actionPaste.setObjectName(_fromUtf8("actionPaste"))
         self.actionCut = QtGui.QAction(MainWindow)
         self.actionCut.setObjectName(_fromUtf8("actionCut"))
+        self.actionPaste = QtGui.QAction(MainWindow)
+        self.actionPaste.setObjectName(_fromUtf8("actionPaste"))
         self.actionShow_Help = QtGui.QAction(MainWindow)
-        self.actionShow_Help.setCheckable(False)
         self.actionShow_Help.setObjectName(_fromUtf8("actionShow_Help"))
         self.actionExit = QtGui.QAction(MainWindow)
-        self.actionExit.setCheckable(False)
-        self.actionExit.setIconVisibleInMenu(True)
         self.actionExit.setObjectName(_fromUtf8("actionExit"))
-        self.menuFile.addSeparator()
         self.menuFile.addAction(self.actionExit)
-        self.menuFile.addSeparator()
-        self.menuEdit.addSeparator()
-        ##self.menuEdit.addAction(self.actionCopy)
-        self.menuEdit.addAction('&Copy')
-        #self.menuEdit.setShortcut('Ctrl+C')
-        self.menuEdit.addAction(self.actionPaste)
+        self.menuEdit.addAction(self.actionCopy)
         self.menuEdit.addAction(self.actionCut)
+        self.menuEdit.addAction(self.actionPaste)
         self.menuHelp.addAction(self.actionShow_Help)
         self.menubar.addAction(self.menuFile.menuAction())
         self.menubar.addAction(self.menuEdit.menuAction())
         self.menubar.addAction(self.menuHelp.menuAction())
-        # End Main Window stuff
 
         # File navigation for Fiwalk XML Generation tab
         
         QtCore.QObject.connect(self.toolButton_fw_image, QtCore.SIGNAL(_fromUtf8("clicked()")), self.getFwImageFileName)
 
         QtCore.QObject.connect(self.toolButton_fw_xmlFile, QtCore.SIGNAL(_fromUtf8("clicked()")), self.getFwOutputXmlFilePath)
-        QtCore.QObject.connect(self.buttonBox_fw, QtCore.SIGNAL(_fromUtf8("accepted()")), self.buttonClickedOkFw)
-        QtCore.QObject.connect(self.buttonBox_fw, QtCore.SIGNAL(_fromUtf8("rejected()")), self.buttonClickedCancel)
-#
+
+        QtCore.QObject.connect(self.pb_fw_run, QtCore.SIGNAL(_fromUtf8("clicked()")), self.buttonClickedOkFw)
+        QtCore.QObject.connect(self.pb_fw_close, QtCore.SIGNAL(_fromUtf8("clicked()")), self.buttonClickedCancel)
+        QtCore.QObject.connect(self.pb_fw_cancel, QtCore.SIGNAL(_fromUtf8("clicked()")), self.buttonClickedCancel)
+
         # File navigation for Annotated files Tab
         QtCore.QObject.connect(self.toolButton_ann_image, QtCore.SIGNAL(_fromUtf8("clicked()")), self.getAnnImageFileName)
 
         QtCore.QObject.connect(self.toolButton_ann_beFeatDir, QtCore.SIGNAL(_fromUtf8("clicked()")), self.getBeFeatDir)
         QtCore.QObject.connect(self.toolButton_ann_annDir, QtCore.SIGNAL(_fromUtf8("clicked()")), self.getAnnOutputDir)
         QtCore.QObject.connect(self.toolButton_ann_bcpyDir, QtCore.SIGNAL(_fromUtf8("clicked()")), self.getAnnBcpyDir)
-        QtCore.QObject.connect(self.buttonBox_ann, QtCore.SIGNAL(_fromUtf8("accepted()")), self.buttonClickedOkAnn)
-        QtCore.QObject.connect(self.buttonBox_ann, QtCore.SIGNAL(_fromUtf8("rejected()")), self.buttonClickedCancel)
+
+        QtCore.QObject.connect(self.pb_ann_run, QtCore.SIGNAL(_fromUtf8("clicked()")), self.buttonClickedOkAnn)
+        QtCore.QObject.connect(self.pb_ann_close, QtCore.SIGNAL(_fromUtf8("clicked()")), self.buttonClickedCancel)
+        QtCore.QObject.connect(self.pb_ann_cancel, QtCore.SIGNAL(_fromUtf8("clicked()")), self.buttonClickedCancel)
 
         # File navigation for Reports Tab
         QtCore.QObject.connect(self.toolButton_rep_fwxmlfile, QtCore.SIGNAL(_fromUtf8("clicked()")), self.getRepFwXmlFileName)
@@ -443,8 +502,9 @@ class Ui_MainWindow(object):
         QtCore.QObject.connect(self.toolButton_rep_confile, QtCore.SIGNAL(_fromUtf8("clicked()")), self.getRepConfigFile)
         QtCore.QObject.connect(self.toolButton_rep_annDir, QtCore.SIGNAL(_fromUtf8("clicked()")), self.getRepBeAnnotatedDir)
 
-        QtCore.QObject.connect(self.buttonBox_rep, QtCore.SIGNAL(_fromUtf8("accepted()")), self.buttonClickedOkRep)
-        QtCore.QObject.connect(self.buttonBox_rep, QtCore.SIGNAL(_fromUtf8("rejected()")), self.buttonClickedCancel)
+        QtCore.QObject.connect(self.pb_rep_run, QtCore.SIGNAL(_fromUtf8("clicked()")), self.buttonClickedOkRep)
+        QtCore.QObject.connect(self.pb_rep_close, QtCore.SIGNAL(_fromUtf8("clicked()")), self.buttonClickedCancel)
+        QtCore.QObject.connect(self.pb_rep_cancel, QtCore.SIGNAL(_fromUtf8("clicked()")), self.buttonClickedCancel)
 
         self.actionExit.triggered.connect(self.exitMenu)
         self.actionCopy.triggered.connect(self.copyMenu)
@@ -777,8 +837,9 @@ class Ui_MainWindow(object):
         self.textEdit.setText( sys.stdout.getvalue() )
         sys.stdout = self.oldstdout
 
+    # buttonClickedOkFw: Routine invoked when the "Run" (formerly OK) 
+    # button on the Fiwalk tab is pressed.
     def buttonClickedOkFw(self):
-
         self.oldstdout = sys.stdout
         sys.stdout = StringIO()
         # If Image file is not selected through menu, see if it is
@@ -855,6 +916,8 @@ class Ui_MainWindow(object):
         self.textEdit_becmdlineoutput.setText( sys.stdout.getvalue() )
         sys.stdout = self.oldstdout
 
+    # buttonClickedOkAnn: Routine invoked when the "Run" (formerly OK) 
+    # button on the Annotate tab is pressed.
     def buttonClickedOkAnn(self):
         oldstdout = sys.stdout
         sys.stdout = StringIO()
@@ -906,6 +969,8 @@ class Ui_MainWindow(object):
         thread1.start()
         thread2.start()
 
+    # buttonClickedOkRep: Routine invoked when the "Run" (formerly OK) 
+    # button on the Reports tab is pressed.
     def buttonClickedOkRep(self):
         self.oldstdout = sys.stdout
         sys.stdout = StringIO()
@@ -1054,7 +1119,7 @@ class Ui_MainWindow(object):
 
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_rep), QtGui.QApplication.translate("MainWindow", "Reports", None, QtGui.QApplication.UnicodeUTF8))
 
-        # Tab-1: Reports
+        # Tab: Reports
         self.lineEdit_rep_fwxmlfile.setPlaceholderText(QtGui.QApplication.translate("MainWindow", "/Path/To/File", None, QtGui.QApplication.UnicodeUTF8))
         self.toolButton_rep_fwxmlfile.setText(QtGui.QApplication.translate("MainWindow", "...", None, QtGui.QApplication.UnicodeUTF8))
         self.label_rep_fwxmlfile.setText(QtGui.QApplication.translate("MainWindow", "Fiwalk XML File", None, QtGui.QApplication.UnicodeUTF8))
@@ -1065,6 +1130,12 @@ class Ui_MainWindow(object):
         self.lineEdit_rep_confile.setPlaceholderText(QtGui.QApplication.translate("MainWindow", "/Path/To/file", None, QtGui.QApplication.UnicodeUTF8))
         self.toolButton_rep_confile.setText(QtGui.QApplication.translate("MainWindow", "...", None, QtGui.QApplication.UnicodeUTF8))
         self.label_rep_cmdlineoutput.setText(QtGui.QApplication.translate("MainWindow", "Command Line Output", None, QtGui.QApplication.UnicodeUTF8))
+
+        # Reports Tab: bush buttons
+        self.pb_rep_run.setText(QtGui.QApplication.translate("MainWindow", "Run", None, QtGui.QApplication.UnicodeUTF8))
+        self.pb_rep_cancel.setText(QtGui.QApplication.translate("MainWindow", "Cancel", None, QtGui.QApplication.UnicodeUTF8))
+        self.pb_rep_close.setText(QtGui.QApplication.translate("MainWindow", "Close", None, QtGui.QApplication.UnicodeUTF8))
+
         self.label_rep_annDir.setText(QtGui.QApplication.translate("MainWindow", "Annotated Feature Files Directory", None, QtGui.QApplication.UnicodeUTF8))
         self.lineEdit_rep_annDir.setPlaceholderText(QtGui.QApplication.translate("MainWindow", "/Path/To/Directory", None, QtGui.QApplication.UnicodeUTF8))
         self.toolButton_rep_annDir.setText(QtGui.QApplication.translate("MainWindow", "...", None, QtGui.QApplication.UnicodeUTF8))
@@ -1076,6 +1147,12 @@ class Ui_MainWindow(object):
         self.label_fw_xmlFile.setText(QtGui.QApplication.translate("MainWindow", "Output XML File", None, QtGui.QApplication.UnicodeUTF8))
         self.lineEdit_fw_xmlFile.setPlaceholderText(QtGui.QApplication.translate("MainWindow", "/Path/To/File", None, QtGui.QApplication.UnicodeUTF8))
         self.toolButton_fw_image.setText(QtGui.QApplication.translate("MainWindow", "...", None, QtGui.QApplication.UnicodeUTF8))
+
+        ## Fiwalk - bush buttons
+        self.pb_fw_close.setText(QtGui.QApplication.translate("MainWindow", "Close", None, QtGui.QApplication.UnicodeUTF8))
+        self.pb_fw_cancel.setText(QtGui.QApplication.translate("MainWindow", "Cancel", None, QtGui.QApplication.UnicodeUTF8))
+        self.pb_fw_run.setText(QtGui.QApplication.translate("MainWindow", "Run", None, QtGui.QApplication.UnicodeUTF8))
+
         self.toolButton_fw_xmlFile.setText(QtGui.QApplication.translate("MainWindow", "...", None, QtGui.QApplication.UnicodeUTF8))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_fw), QtGui.QApplication.translate("MainWindow", "Fiwalk XML", None, QtGui.QApplication.UnicodeUTF8))
         self.label_fwhdr.setText(QtGui.QApplication.translate("MainWindow", "Fiwalk produces a DFXML file showing the volumes, directories, and files contained within a disk image.", None, QtGui.QApplication.UnicodeUTF8))
@@ -1086,6 +1163,11 @@ class Ui_MainWindow(object):
         self.label_ann_beFeatDir.setText(QtGui.QApplication.translate("MainWindow", "Bulk Extractor Feature Directory", None, QtGui.QApplication.UnicodeUTF8))
         self.label_ann_annDir.setText(QtGui.QApplication.translate("MainWindow", "Annotated Feature Files Directory (new)", None, QtGui.QApplication.UnicodeUTF8))
         self.label_ann_bcpyDir.setText(QtGui.QApplication.translate("MainWindow", "Bulk Extractor Python Directory (optional)", None, QtGui.QApplication.UnicodeUTF8))
+
+        ## Annotated Files: Push buttons
+        self.pb_ann_close.setText(QtGui.QApplication.translate("MainWindow", "Close", None, QtGui.QApplication.UnicodeUTF8))
+        self.pb_ann_cancel.setText(QtGui.QApplication.translate("MainWindow", "Cancel", None, QtGui.QApplication.UnicodeUTF8))
+        self.pb_ann_run.setText(QtGui.QApplication.translate("MainWindow", "Run", None, QtGui.QApplication.UnicodeUTF8))
 
         self.lineEdit_ann_image.setPlaceholderText(QtGui.QApplication.translate("MainWindow", "/Path/To/File", None, QtGui.QApplication.UnicodeUTF8))
         self.lineEdit_ann_beFeatDir.setPlaceholderText(QtGui.QApplication.translate("MainWindow", "/Path/To/Directory", None, QtGui.QApplication.UnicodeUTF8))
@@ -1099,6 +1181,7 @@ class Ui_MainWindow(object):
 
         self.label_anncmdlineoutput.setText(QtGui.QApplication.translate("MainWindow", "Command Line Output", None, QtGui.QApplication.UnicodeUTF8))
         self.label_annhdr.setText(QtGui.QApplication.translate("MainWindow", "Produces reports that identify which bulk extractor features are contained within files in a disk image.", None, QtGui.QApplication.UnicodeUTF8))
+
 
         self.menuFile.setTitle(QtGui.QApplication.translate("MainWindow", "File", None, QtGui.QApplication.UnicodeUTF8))
         self.menuEdit.setTitle(QtGui.QApplication.translate("MainWindow", "Edit", None, QtGui.QApplication.UnicodeUTF8))
@@ -1128,7 +1211,12 @@ class bcThread_fw(threading.Thread):
            global g_textEdit_fwcmdlineoutput
            g_textEdit_fwcmdlineoutput.append( sys.stdout.getvalue() )
            sys.stdout = x.oldstdout
-           raise ValueError("fiwalk error (" + str(err).strip() + "): "+" ".join(cmd))
+
+           # Set the progressbar maximum to > minimum so the spinning will stop
+           global global_fw
+           global_fw.progressbar.setRange(0,1)
+
+           raise ValueError("fiwalk error (" + str(err).strip() + "): "+" ".join(self.cmd))
         else:
 
             # Set the progresbar active flag so the other thread can
@@ -1139,7 +1227,7 @@ class bcThread_fw(threading.Thread):
             print("\n>> Success!!! Fiwalk created the following file(s): \n")
 
             # Set the progressbar maximum to > minimum so the spinning will stop
-            global global_fw
+            #global global_fw
             global_fw.progressbar.setRange(0,1)
            
             global g_fwXmlFileName
@@ -1170,7 +1258,7 @@ class bcThread_ann(threading.Thread):
 
             # In case the progress bar is spinning, stop it
             global_ann.progressbar.setRange(0,1)
-            raise ValueError("identify_filenames error (" + str(err).strip() + "): "+" ".join(cmd))
+            raise ValueError("identify_filenames error (" + str(err).strip() + "): "+" ".join(self.cmd))
             exit(1)
         else:
             # Set the progresbar active flag so the other thread can
