@@ -12,7 +12,7 @@
 # This is a python file containing some utility functions for
 # generate_reports script
 
-import re
+import re, os
 
 reportFileList = [None]*35
 
@@ -182,6 +182,12 @@ def bc_get_reports(PdfReport, FiwalkReport, fiwalk_xmlfile, annotated_dir, outdi
 
             report_fi = FiwalkReport(args.fiwalk_xmlfile)
             report_fi.process_generate_report_fiwalk_from_xml(args)
+
+        # Delete the temporary file created: <outdir>.txt
+        cmd = "/bin/rm " + args.outdir + ".txt"
+
+        # print("D: Deleting temp file", args.outdir, cmd)
+        os.system(cmd)
 
         ##exit(1)
 
