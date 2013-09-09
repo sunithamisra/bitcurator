@@ -1042,7 +1042,7 @@ class FiwalkReport:
         prtn = FiwalkReport.numPartitions
 
         # Table headers
-        header_be = ['Bulk Extractor Report Files','Feature Instances','FLTF','FUTF','FICR']
+        header_be = ['Bulk Extractor Report Files','Feature Instances','FLTF','FUTF','FIER']
         header_files = ['Filename','Partition','DIR','Size','Deleted','Filetype']
         
         tab_header_delfiles = [' Partition ', 'Deleted File']
