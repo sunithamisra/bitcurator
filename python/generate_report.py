@@ -88,14 +88,14 @@ class PDF_BE(FPDF):
         self.set_font('Times','I',10)
 
         self.underline = 1
-        self.set_x(-10)
+        self.set_x(10)
         self.cell(0, 10, 'Abbreviation Key:', border=0, ln=1)
         self.underline = 0
-        self.set_x(-10)
+        self.set_x(10)
         self.cell(0, 5, 'FLTF: Total features located to files', border=0, ln=1)
-        self.set_x(-10)
+        self.set_x(10)
         self.cell(0, 5, 'FUTF: Total features unallocated to files', border=0, ln=1)
-        self.set_x(-10)
+        self.set_x(10)
         self.cell(0, 5, 'FIER: Total features in encoded regions', border=0, ln=1)
                 
         #Colors, line width and bold font
