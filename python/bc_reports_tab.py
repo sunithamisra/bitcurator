@@ -188,6 +188,130 @@ class Ui_MainWindow(object):
         self.gridLayout_3.addWidget(self.progressBar_fw, 7, 0, 1, 1)
         self.tabWidget.addTab(self.tab_fw, _fromUtf8(""))
 
+        '''
+        self.tab_bev = QtGui.QWidget()
+        self.tab_bev.setObjectName(_fromUtf8("tab_bev"))
+        self.pushButton_bev = QtGui.QPushButton(self.tab_bev)
+        self.pushButton_bev.setGeometry(QtCore.QRect(220, 130, 135, 27))
+        self.pushButton_bev.setObjectName(_fromUtf8("pushButton_bev"))
+        self.label_bevhdr = QtGui.QLabel(self.tab_bev)
+        self.label_bevhdr.setGeometry(QtCore.QRect(9, 9, 561, 61))
+        font = QtGui.QFont()
+        font.setBold(True)
+        font.setItalic(True)
+        font.setWeight(75)
+        self.label_bevhdr.setFont(font)
+        self.label_bevhdr.setWordWrap(True)
+        self.label_bevhdr.setObjectName(_fromUtf8("label_bevhdr"))
+        self.tabWidget.addTab(self.tab_bev, _fromUtf8(""))
+        '''
+
+        '''
+        self.tab_bev = QtGui.QWidget()
+        self.tab_bev.setObjectName(_fromUtf8("tab_bev"))
+        self.pb_bev_close = QtGui.QPushButton(self.tab_bev)
+        self.pb_bev_close.setGeometry(QtCore.QRect(493, 518, 85, 27))
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.pb_bev_close.sizePolicy().hasHeightForWidth())
+        self.pb_bev_close.setSizePolicy(sizePolicy)
+        self.pb_bev_close.setObjectName(_fromUtf8("pb_bev_close"))
+        self.textEdit_bev = QtGui.QTextEdit(self.tab_bev)
+        self.textEdit_bev.setGeometry(QtCore.QRect(9, 269, 571, 211))
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.textEdit_bev.sizePolicy().hasHeightForWidth())
+        self.textEdit_bev.setSizePolicy(sizePolicy)
+        self.textEdit_bev.setObjectName(_fromUtf8("textEdit_bev"))
+        self.label_bevhdr = QtGui.QLabel(self.tab_bev)
+        self.label_bevhdr.setGeometry(QtCore.QRect(10, 20, 551, 61))
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Ignored, QtGui.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.label_bevhdr.sizePolicy().hasHeightForWidth())
+        self.label_bevhdr.setSizePolicy(sizePolicy)
+        font = QtGui.QFont()
+        font.setBold(True)
+        font.setItalic(True)
+        font.setWeight(75)
+        self.label_bevhdr.setFont(font)
+        self.label_bevhdr.setWordWrap(True)
+        self.label_bevhdr.setObjectName(_fromUtf8("label_bevhdr"))
+        self.pushButton_bev = QtGui.QPushButton(self.tab_bev)
+        self.pushButton_bev.setGeometry(QtCore.QRect(200, 160, 135, 27))
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.pushButton_bev.sizePolicy().hasHeightForWidth())
+        self.pushButton_bev.setSizePolicy(sizePolicy)
+        self.pushButton_bev.setObjectName(_fromUtf8("pushButton_bev"))
+        self.label_bev_commandline = QtGui.QLabel(self.tab_bev)
+        self.label_bev_commandline.setGeometry(QtCore.QRect(20, 240, 181, 17))
+        font = QtGui.QFont()
+        font.setBold(True)
+        font.setWeight(75)
+        self.label_bev_commandline.setFont(font)
+        self.label_bev_commandline.setObjectName(_fromUtf8("label_bev_commandline"))
+        self.tabWidget.addTab(self.tab_bev, _fromUtf8(""))
+        '''
+        self.tab_bev = QtGui.QWidget()
+        self.tab_bev.setObjectName(_fromUtf8("tab_bev"))
+        self.gridLayout_5 = QtGui.QGridLayout(self.tab_bev)
+        self.gridLayout_5.setObjectName(_fromUtf8("gridLayout_5"))
+        self.label_bevhdr = QtGui.QLabel(self.tab_bev)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.label_bevhdr.sizePolicy().hasHeightForWidth())
+        self.label_bevhdr.setSizePolicy(sizePolicy)
+        font = QtGui.QFont()
+        font.setBold(True)
+        font.setItalic(True)
+        font.setWeight(75)
+        self.label_bevhdr.setFont(font)
+        self.label_bevhdr.setWordWrap(True)
+        self.label_bevhdr.setObjectName(_fromUtf8("label_bevhdr"))
+        self.gridLayout_5.addWidget(self.label_bevhdr, 0, 0, 1, 3)
+        self.textEdit_bev = QtGui.QTextEdit(self.tab_bev)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.textEdit_bev.sizePolicy().hasHeightForWidth())
+        self.textEdit_bev.setSizePolicy(sizePolicy)
+        self.textEdit_bev.setObjectName(_fromUtf8("textEdit_bev"))
+        self.gridLayout_5.addWidget(self.textEdit_bev, 5, 0, 1, 3)
+        self.pb_bev_close = QtGui.QPushButton(self.tab_bev)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.pb_bev_close.sizePolicy().hasHeightForWidth())
+        self.pb_bev_close.setSizePolicy(sizePolicy)
+        self.pb_bev_close.setObjectName(_fromUtf8("pb_bev_close"))
+        self.gridLayout_5.addWidget(self.pb_bev_close, 6, 2, 1, 1)
+        self.label_bev_commandline = QtGui.QLabel(self.tab_bev)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.label_bev_commandline.sizePolicy().hasHeightForWidth())
+        self.label_bev_commandline.setSizePolicy(sizePolicy)
+        font = QtGui.QFont()
+        font.setBold(True)
+        font.setWeight(75)
+        self.label_bev_commandline.setFont(font)
+        self.label_bev_commandline.setObjectName(_fromUtf8("label_bev_commandline"))
+        self.gridLayout_5.addWidget(self.label_bev_commandline, 3, 0, 1, 1)
+        self.pushButton_bev = QtGui.QPushButton(self.tab_bev)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.pushButton_bev.sizePolicy().hasHeightForWidth())
+        self.pushButton_bev.setSizePolicy(sizePolicy)
+        self.pushButton_bev.setObjectName(_fromUtf8("pushButton_bev"))
+        self.gridLayout_5.addWidget(self.pushButton_bev, 1, 1, 2, 1)
+        self.tabWidget.addTab(self.tab_bev, _fromUtf8(""))
+
         self.tab_ann = QtGui.QWidget()
         self.tab_ann.setObjectName(_fromUtf8("tab_ann"))
         self.gridLayout_4 = QtGui.QGridLayout(self.tab_ann)
@@ -484,6 +608,9 @@ class Ui_MainWindow(object):
         QtCore.QObject.connect(self.pb_fw_run, QtCore.SIGNAL(_fromUtf8("clicked()")), self.buttonClickedOkFw)
         QtCore.QObject.connect(self.pb_fw_close, QtCore.SIGNAL(_fromUtf8("clicked()")), self.buttonClickedCancel)
         QtCore.QObject.connect(self.pb_fw_cancel, QtCore.SIGNAL(_fromUtf8("clicked()")), self.buttonClickedCancel)
+
+        # File navigation for beview tab
+        QtCore.QObject.connect(self.pb_bev_close, QtCore.SIGNAL(_fromUtf8("clicked()")), self.buttonClickedCancel)
 
         # File navigation for Annotated files Tab
         QtCore.QObject.connect(self.toolButton_ann_image, QtCore.SIGNAL(_fromUtf8("clicked()")), self.getAnnImageFileName)
@@ -1111,10 +1238,32 @@ class Ui_MainWindow(object):
 
         return (0)
 
+    def on_pushButton_bev_clicked(self):
+        
+        #cmd = ['/usr/bin/java -Xmx1g -jar /home/sunitha/BC/beviewer/BEViewer.jar']
+        #cmdstr = "/home/sunitha/BC/kambc/bitcurator/python/beviewer_sh"
+        cmdstr = "/home/bcadmin/Tools/bulk_extractor/java_gui"
+
+        print(">> Launching BEViewer >> ")
+        
+        # Note: We can't use Popen here as the call to Popen blocks, which
+        # doesn't let us get back to the GUI when the viewer is launched.
+        # startDetached apparently seems to fix that issue.
+
+        QtCore.QProcess.startDetached(cmdstr)
+        self.textEdit_bev.setText( sys.stdout.getvalue() )
+        sys.stdout = self.oldstdout
+
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Bitcurator Reports", None, QtGui.QApplication.UnicodeUTF8))
 
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_fw), QtGui.QApplication.translate("MainWindow", "Fiwalk XML", None, QtGui.QApplication.UnicodeUTF8))
+
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_bev), QtGui.QApplication.translate("MainWindow", "BEViewer", None, QtGui.QApplication.UnicodeUTF8))
+
+        self.pushButton_bev.clicked.connect(self.on_pushButton_bev_clicked)
+ 
+
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_ann), QtGui.QApplication.translate("MainWindow", "Annotated Features", None, QtGui.QApplication.UnicodeUTF8))
 
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_rep), QtGui.QApplication.translate("MainWindow", "Reports", None, QtGui.QApplication.UnicodeUTF8))
@@ -1148,7 +1297,7 @@ class Ui_MainWindow(object):
         self.lineEdit_fw_xmlFile.setPlaceholderText(QtGui.QApplication.translate("MainWindow", "/Path/To/File", None, QtGui.QApplication.UnicodeUTF8))
         self.toolButton_fw_image.setText(QtGui.QApplication.translate("MainWindow", "...", None, QtGui.QApplication.UnicodeUTF8))
 
-        ## Fiwalk - bush buttons
+        ## Fiwalk - push buttons
         self.pb_fw_close.setText(QtGui.QApplication.translate("MainWindow", "Close", None, QtGui.QApplication.UnicodeUTF8))
         self.pb_fw_cancel.setText(QtGui.QApplication.translate("MainWindow", "Cancel", None, QtGui.QApplication.UnicodeUTF8))
         self.pb_fw_run.setText(QtGui.QApplication.translate("MainWindow", "Run", None, QtGui.QApplication.UnicodeUTF8))
@@ -1157,6 +1306,13 @@ class Ui_MainWindow(object):
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_fw), QtGui.QApplication.translate("MainWindow", "Fiwalk XML", None, QtGui.QApplication.UnicodeUTF8))
         self.label_fwhdr.setText(QtGui.QApplication.translate("MainWindow", "Fiwalk produces a DFXML file showing the volumes, directories, and files contained within a disk image.", None, QtGui.QApplication.UnicodeUTF8))
         self.label_fwcmdlineoutput.setText(QtGui.QApplication.translate("MainWindow", "Command Line Output", None, QtGui.QApplication.UnicodeUTF8))
+
+        # beview - close button, Launch button and cmd line label
+
+        self.label_bevhdr.setText(QtGui.QApplication.translate("MainWindow", "Bulk extractor scans disk images, files, and directories and extracts features of interest without parsing the file system. Click on the button to launch the bulk extractor GUI", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_bev_commandline.setText(QtGui.QApplication.translate("MainWindow", "Command Line Output", None, QtGui.QApplication.UnicodeUTF8))
+        self.pushButton_bev.setText(QtGui.QApplication.translate("MainWindow", "Launch BEViewer", None, QtGui.QApplication.UnicodeUTF8))
+        self.pb_bev_close.setText(QtGui.QApplication.translate("MainWindow", "Close", None, QtGui.QApplication.UnicodeUTF8))
 
         # Tab-4: Annotated Files
         self.label_ann_image.setText(QtGui.QApplication.translate("MainWindow", "Image File", None, QtGui.QApplication.UnicodeUTF8))
