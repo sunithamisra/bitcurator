@@ -1242,7 +1242,7 @@ class Ui_MainWindow(object):
         
         #cmd = ['/usr/bin/java -Xmx1g -jar /home/sunitha/BC/beviewer/BEViewer.jar']
         #cmdstr = "/home/sunitha/BC/kambc/bitcurator/python/beviewer_sh"
-        cmdstr = "/home/bcadmin/Tools/bulk_extractor/java_gui"
+        cmdstr = "/usr/bin/java -Xmx1g -jar /home/bcadmin/Tools/bulk_extractor/java_gui/BEViewer.jar"
 
         print(">> Launching BEViewer >> ")
         
