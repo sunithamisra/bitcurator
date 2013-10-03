@@ -814,7 +814,7 @@ class PdfReport:
                 ## NOT Reporting this feature
                 continue
 
-            print (">> Generating final report file for feature", feature)
+            print (">> Generating report file for feature", feature)
 
             ifd = open(input_file, "r")
             linenumber = 0
@@ -834,11 +834,12 @@ class PdfReport:
             for line in lines:
                 linenumber+=1
 
-                # print("D: Line: ", line[2:])
+                #print("D: Line: ", linenumber, line[2:] )
                 bc_utils.match_and_write(of, line[2:], "Total features input", 1)
                 bc_utils.match_and_write(of, line[2:], "Total features located to files", 1)
                 bc_utils.match_and_write(of, line[2:], "Total features in unallocated space" ,1)
-                bc_utils.match_and_write(of, line[2:], "Total features in compressed regions", 0)
+                #bc_utils.match_and_write(of, line[2:], "Total features in compressed regions", 0)
+                bc_utils.match_and_write(of, line[2:], "Total features in encoded regions", 0)
 
                 if ((fnmatch.fnmatch(line, 'Total*') or
                     (fnmatch.fnmatch(line, 'Unicode*')))):
@@ -852,6 +853,7 @@ class PdfReport:
                 pdf_file = be_create_pdf_report_file(input_file, annotated_file)
                 
         of.close()
+
         return
 
 
@@ -1285,6 +1287,5 @@ if __name__=="__main__":
 
             report_fi = FiwalkReport(args.fiwalk_xmlfile)
             report_fi.process_generate_report_fiwalk_from_xml(args)
-
 
         exit(1)
