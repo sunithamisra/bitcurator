@@ -65,11 +65,14 @@ def is_special_file(filename):
         return(True)
     return(False)
 
+# Matches the pattern with the "line" and writes the text on the rhs of 
+# ":" into the text file of. If no_eol is 0, writes a newline as well.This 
+# is used to create a temporary file used for populating beRepot.pdf file.
 def match_and_write(of, line, pattern, no_eol):
     if re.match(pattern,line):
         line1 = re.split(":", line.rstrip('\n'))
         of.write(bytes(line1[1], 'UTF-8')) 
-        if (no_eol):
+        if (no_eol == 1):
             of.write(b";") 
         else:
             of.write(b"\n") 
@@ -159,12 +162,10 @@ def bc_get_reports(PdfReport, FiwalkReport, fiwalk_xmlfile, annotated_dir, outdi
         use_config_file = True
         fiwalk_txtfile = None
 
-        print("\n")
-        print(">> config_file: ", config_file)
-        print(">> fiwalk_xmlfile: ", args.fiwalk_xmlfile)
-        print(">> annotated Directory: ", args.annotated_dir)
-        print(">> Output Directory: ", args.outdir)
-        print("\n")
+        print(" o config_file: ", config_file)
+        print(" o fiwalk_xmlfile: ", args.fiwalk_xmlfile)
+        print(" o annotated Directory: ", args.annotated_dir)
+        print(" o Output Directory: ", args.outdir)
 
         report = PdfReport(args.annotated_dir, args.outdir, use_config_file, config_file)
         report.be_process_generate_report(args, use_config_file)
@@ -178,16 +179,15 @@ def bc_get_reports(PdfReport, FiwalkReport, fiwalk_xmlfile, annotated_dir, outdi
         elif args.fiwalk_xmlfile:
             fiwalk_xmlfile = args.fiwalk_xmlfile
 
-            ## print("D: Using Fiwalk XML file ", fiwalk_xmlfile)
-
             report_fi = FiwalkReport(args.fiwalk_xmlfile)
             report_fi.process_generate_report_fiwalk_from_xml(args)
 
+        
         # Delete the temporary file created: <outdir>.txt
         cmd = "/bin/rm " + args.outdir + ".txt"
 
         # print("D: Deleting temp file", args.outdir, cmd)
         os.system(cmd)
-
+        return
         ##exit(1)
 
