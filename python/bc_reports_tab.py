@@ -1047,117 +1047,6 @@ class Ui_MainWindow(object):
         self.allrepConfile = config_file
         return config_file
     
-    # buttonClickedOkAllReports: Routine invoked when the OK button is clicked.
-    # Using StringIO (equivalent to cStringIO in Python-2.x), the stdio is
-    # redirected into an in-memory buffer, which is displayed in the
-    # text window at the end.
-    # FIXME: Remove this function once buttonClickedOkallrep() is tested fully
-    def buttonClickedOkAllReports(self):
-        # First create a directory for storing bulk-extractor files and
-        # another for storing the annotated files.
-        ## FIXME: Trying to imitate c/c++'s static local varaible
-        ## buttonClickedOk.ctr += 1
-        ## print("CTR = ", buttonClickedOk.ctr)
-        
-        self.beDir = self.outputDirName + '/beDir'
-        if os.path.exists(self.beDir):
-            raise RuntimeError(self.beDir+" exists")
-
-            self.textEdit.setText( sys.stdout.getvalue() )
-            sys.stdout = self.oldstdout
-            exit(1)
-
-        os.mkdir(self.beDir)
-        print(">> Created Bulk Extractor Directory: ", self.beDir)
-
-        # Now create the Feature files using bulk-extractor
-        cmd = ['bulk_extractor', self.imageFileName, '-o', self.beDir]
-
-        print(">> Bulk_extractor running on image ", self.imageFileName)
-        (data, err) = Popen(cmd, stdout=PIPE, stderr=PIPE).communicate()
-        if len(err) > 0:
-            raise ValueError("Error in bulk-extractor (" + str(err).strip() + "): "+" ".join(cmd))
-            self.textEdit.setText( sys.stdout.getvalue() )
-            sys.stdout = self.oldstdout
-            exit(1)
-        else:
-            print("\n>> Success!!! Bulk-extractor created feature files in Directory ", self.beDir)
-
-        # Now create the XML file using fiwalk
-        self.xmlFileName = self.outputDirName + '/fiwalkXmlFile.xml'
-        self.TextFileName = self.outputDirName + '/fiwalkXmlFile.txt'
-        #cmd = ['fiwalk', '-f', '-X', self.xmlFileName, '-T', self.TextFileName, self.imageFileName]
-        cmd = ['fiwalk', '-f', '-X', self.xmlFileName, self.imageFileName]
-        print(">> Command Executed for Fiwalk = ", cmd)
-        (data, err) = Popen(cmd, stdout=PIPE, stderr=PIPE).communicate()
-
-        if len(err) > 0:
-            print(">> ERROR!!! Fiwalk terminated with error: \n", err)
-            #sys.stderr.write("Debug: type(err) = %r.\n" % type(err))
-            # Terminate the redirecting of the stdout to the in-memory buffer.
-            self.textEdit.setText( sys.stdout.getvalue() )
-            sys.stdout = self.oldstdout
-            raise ValueError("fiwalk error (" + str(err).strip() + "): "+" ".join(cmd))
-            exit(1)
-        else:
-            print("\n>> Success!!! Fiwalk created the following file(s): \n")
-            print(" o ", self.xmlFileName)
-            #print(" o ", self.TextFileName)
-
-        # Now create the directory for Annotated files and run the python
-        # script identify_filenames to crate the annotated files in that directory.
-        self.annDir = self.outputDirName + '/annDir'
-        if os.path.exists(self.annDir):
-            raise RuntimeError(self.annDir+" exists")
-            self.textEdit.setText( sys.stdout.getvalue() )
-            sys.stdout = self.oldstdout
-            exit(1)
-
-        os.mkdir(self.annDir)
-        print("\n>> Directory for annotated files %s is created " %self.annDir)
-
-        ## Now run the identify_filenames script from bcpyDir specified by
-        ## the user.
-
-        identify_cmd = self.bcpyDir + '/' + 'identify_filenames.py'
-        cmd = ['python3',identify_cmd,'--all','--imagefile',\
-          self.imageFileName, self.beDir, self.annDir]
-        print("\n>> Running identify_filanames script : ", cmd)
-
-        (data, err) = Popen(cmd, stdout=PIPE, stderr=PIPE).communicate()
-        if len(err) > 0:
-           print(">> ERROR!!! identify_filenames terminated with error: \n", err)
-           self.textEdit.setText( sys.stdout.getvalue() )
-           sys.stdout = self.oldstdout
-           raise ValueError("fiwalk error (" + str(err).strip() + "): "+" ".join(cmd))
-           exit(1)
-
-        print("\n>> Success!!! Annotated files created the directory: ", self.annDir)
-
-        # To generate reports, create a 'reports' directory in outdir
-        self.reportsDir = self.outputDirName + '/reportsDir'
-
-        # Now Check the parameters and run the reports
-        if self.bc_allrep_check_parameters() == -1:
-            print(">> Report Generation is Aborted ")
-            self.textEdit.setText( sys.stdout.getvalue() )
-            sys.stdout = self.oldstdout
-            exit (1)
-
-        print("\n >> Generating Reports in directory ", self.reportsDir)
-    
-        # All fine. Generate the reports now.
-        '''
-        bc_get_reports(PdfReport, FiwalkReport, self.xmlFileName, \
-                                 self.annDir, \
-                                 self.reportsDir, \
-                                 self.configFileName)
-        '''
-
-        # Terminate the redirecting of the stdout to the in-memory buffer.
-        self.textEdit.setText( sys.stdout.getvalue() )
-        sys.stdout = self.oldstdout
-
     def buttonClickedOkAllrep(self):
         self.oldstdout = sys.stdout
         sys.stdout = StringIO()
@@ -1174,7 +1063,7 @@ class Ui_MainWindow(object):
         # Create the XML file in the given directory. If it already
         # exists, remove it before running the command
         os.mkdir(self.allrepOutDir)
-        self.allrepXmlFileName = self.allrepOutDir + "/bcXmlFile"
+        self.allrepXmlFileName = self.allrepOutDir + "/fiwalk-output.xml"
 
         global g_allrepXmlFileName
         g_allrepXmlFileName = self.allrepXmlFileName
@@ -1182,51 +1071,36 @@ class Ui_MainWindow(object):
         if os.path.exists(self.allrepXmlFileName):
             os.remove(self.allrepXmlFileName)
         
-        cmd = ['fiwalk', '-f', '-X', self.allrepXmlFileName, self.allrepImageFileName]
-        print(">> Command Executed for Fiwalk = ", cmd)
+        fwcmd = ['fiwalk', '-f', '-X', self.allrepXmlFileName, self.allrepImageFileName]
+        print(">> Command Executed for Fiwalk: ", fwcmd)
+
+        # Now setup cmd for identify_filenames on the Feature files to 
+        # generat the annotated reports.
+
+        # Create the directory for annotated output under the output dir
+        self.allrepAnnDir = self.allrepOutDir + '/' + 'annotated-features'
+        os.mkdir(self.allrepAnnDir)
+
+        identify_cmd = self.allrepBcpyDir + '/' + 'identify_filenames.py'
+        anncmd = ['python3',identify_cmd,'--all','--imagefile',\
+          self.allrepImageFileName, self.allrepBeFeatDir, self.allrepAnnDir]
+
+    
+        # Now set up cmd for generating reports
+        genrep_outdir = self.allrepOutDir + '/reports'
 
         # Start two threads - one for executing the above command and
         # a second one to start a progress bar on the gui which keeps
         # spinning till the first thread finishes the command execution
         # and signals the second one by setting a flag. 
-        thread1 = bcThread_allrep_fw(cmd)
-        thread2 = guiThread("allrep")
-        thread1.start()
+        thread1 = bcThread_allrep_all(fwcmd, anncmd, self.allrepAnnDir, \
+                               PdfReport, FiwalkReport, \
+                               self.allrepXmlFileName, \
+                               genrep_outdir, self.allrepConfile )
+
+        thread2 = guiThread("allrep", thread1)
         thread2.start()
-        thread1.join()
-        thread2.join()
-
-        # Now run identify_filenames on the Feature files to generate
-        # the annotated reports.
-
-        # Create the directory for annotated output under the output dir
-        self.allrepAnnDir = self.allrepOutDir + '/' + 'annDir'
-        os.mkdir(self.allrepAnnDir)
-
-        identify_cmd = self.allrepBcpyDir + '/' + 'identify_filenames.py'
-        cmd = ['python3',identify_cmd,'--all','--imagefile',\
-          self.allrepImageFileName, self.allrepBeFeatDir, self.allrepAnnDir]
-
-        print("\n>> Running identify_filanames script : ", cmd)
-
-        # Start threads for running identify_filenames
-        thread1 = bcThread_allrep_ann(cmd, self.allrepAnnDir)
-        thread2 = guiThread("allrep")
         thread1.start()
-        thread2.start()
-        thread1.join()
-        thread2.join()
-
-        # Annotated Files Generated in directory  self.allrepAnnDir
-        print("\n>> Generating reports now ")
-
-        outdir = self.allrepOutDir + '/reports'
-        thread1 = bcThread_allrep_rep(PdfReport, FiwalkReport, \
-                               self.allrepXmlFileName,self.allrepAnnDir, \
-                               outdir, self.allrepConfile )
-        thread2 = guiThread("allrep")
-        thread1.start()
-        thread2.start()
 
         self.textEdit_allrep.setText( sys.stdout.getvalue() )
         sys.stdout = self.oldstdout
@@ -1512,10 +1386,10 @@ class Ui_MainWindow(object):
 
         # The direcotry that contains identify_filenames script is set
         # to default: 
-        # self.allrepBcpyDir = FIXME: Default path here
+        self.allrepBcpyDir = "/home/bcadmin/Tools/bulk_extractor/python"
         # FIXME: For testing, I have set it to my path. Replace this
         # line with the line above before committing.
-        self.allrepBcpyDir = "/home/sunitha/Research/Tools/bulk_extractor/python"
+        # self.allrepBcpyDir = "/home/sunitha/Research/Tools/bulk_extractor/python"
         return (0)
 
 
@@ -1691,13 +1565,24 @@ class Ui_MainWindow(object):
         self.actionExit.setText(QtGui.QApplication.translate("MainWindow", "Exit", None, QtGui.QApplication.UnicodeUTF8))
 
 # Thread for running the allrep fiwalk command
-class bcThread_allrep_fw(threading.Thread):
-    def __init__(self, cmd):
+class bcThread_allrep_all(threading.Thread):
+    def __init__(self, fwcmd, anncmd, allrepAnnDir, PdfReport, FiwalkReport,\
+                 allrepXmlFileName, \
+                 genrep_outdir, allrepConfile ):
         threading.Thread.__init__(self)
-        self.cmd = cmd
+        self.fwcmd = fwcmd
+        self.anncmd = anncmd
+        self.annoutdir = allrepAnnDir
+        self.PdfReport = PdfReport
+        self.FiwalkReport = FiwalkReport
+        self.allrepXmlFileName = allrepXmlFileName
+        self.allrepAnnDir = allrepAnnDir
+        self.allrepOutDir = genrep_outdir
+        self.allrepConfile = allrepConfile
 
     def run(self):
-        (data, err) = Popen(self.cmd, stdout=PIPE, stderr=PIPE).communicate()
+        # Run fiwalk first
+        (data, err) = Popen(self.fwcmd, stdout=PIPE, stderr=PIPE).communicate()
 
         if len(err) > 0 :
            ProgressBar._active = False
@@ -1714,28 +1599,75 @@ class bcThread_allrep_fw(threading.Thread):
 
            raise ValueError("allrep fiwalk error (" + str(err).strip() + "): "+" ".join(self.cmd))
         else:
+            print("\n>> Success!!! Fiwalk created the following file: ")
 
-            # Set the progresbar active flag so the other thread can
-            # get out of the while loop.
-            ProgressBar._active = False
-            #print("D: bcThread_fw: Progressbar Active Flag Set to: ", ProgressBar._active)
-
-            print("\n>> Success!!! Fiwalk created the following file: \n")
-
-            # Set the progressbar maximum to > minimum so the spinning will stop
-            global global_allrep
-            global_allrep.progressbar.setRange(0,1)
-           
             global g_allrepXmlFileName
             print(" o ", g_allrepXmlFileName) 
 
-            x = Ui_MainWindow
+            print("\n>> Creating annotated Features \n")
+
+            # Dump the text in stdout to textEdit screen.
             # Note: setText for some reason, wouldn't work when used with
             # global value. append seems to work
-            #g_textEdit_fwcmdlineoutput.setText( sys.stdout.getvalue() )
-            ##g_textEdit_allrepcmdlineoutput.append( sys.stdout.getvalue() )
-            ##sys.stdout = x.oldstdout
+            ##g_textEdit_allrepcmdlineoutput.setText( sys.stdout.getvalue() )
+            x = Ui_MainWindow
+            g_textEdit_allrepcmdlineoutput.append( sys.stdout.getvalue() )
+            sys.stdout = x.oldstdout
 
+            # Buffer the stdout to stringio again.
+            oldstdout = sys.stdout
+            sys.stdout = StringIO()
+
+            # Now run the identify_filenames cmd.
+            (data, err) = Popen(self.anncmd, stdout=PIPE, stderr=PIPE).communicate()
+            if len(err) > 0:
+                print(">> ERROR!!! identify_filenames terminated with error: \n", err)
+                ProgressBar._active = False
+                x = Ui_MainWindow
+                g_textEdit_allrepcmdlineoutput.append( sys.stdout.getvalue() )
+                sys.stdout = x.oldstdout
+
+                # In case the progress bar is spinning, stop it
+                global_allrep.progressbar.setRange(0,1)
+                raise ValueError("identify_filenames error (" + str(err).strip() + "): "+" ".join(self.cmd))
+                exit(1)
+            else:
+                print(">> Success!!! Annotated feature files created in the directory: \n o ", self.annoutdir)
+
+                # Now run the reports generation routine
+                # Generate the reports now.
+                print("\n>> Generating BitCurator Reports: \n")
+
+                g_textEdit_allrepcmdlineoutput.append( sys.stdout.getvalue() )
+                sys.stdout = x.oldstdout
+                oldstdout = sys.stdout
+                sys.stdout = StringIO()
+
+                ## print("D: bcThread_allrep_rep: XmlFile: ", self.allrepXmlFileName)
+                ## print("D: bcThread_allrep_rep: AnnDir: ", self.allrepAnnDir)
+                ## print("D: bcThread_allrep_rep: Outdir: ", self.allrepOutDir)
+                ## print("D: bcThread_allrep_rep: Confile: ", self.allrepConfile)
+                bc_get_reports(self.PdfReport, self.FiwalkReport, \
+                                 self.allrepXmlFileName, \
+                                 self.allrepAnnDir, \
+                                 self.allrepOutDir, \
+                                 self.allrepConfile)
+
+                # Set the progresbar active flag so the other thread can
+                # get out of the while loop.
+                ProgressBar._active = False
+
+                print("\n>> Success!!! BitCurator Reports generated in the directory: \n o ", self.allrepOutDir)
+
+                # Set the progressbar maximum to > minimum so the spinning will stop
+                global_allrep.progressbar.setRange(0,1)
+                
+                x = Ui_MainWindow
+
+                # Terminate the redirecting of the stdout to the in-memory buffer.
+                g_textEdit_allrepcmdlineoutput.append( sys.stdout.getvalue() )
+                sys.stdout = x.oldstdout
+                
 # Thread for running the fiwalk command
 class bcThread_fw(threading.Thread):
     def __init__(self, cmd):
@@ -1817,41 +1749,6 @@ class bcThread_ann(threading.Thread):
             g_textEdit_anncmdlineoutput.append( sys.stdout.getvalue() )
             sys.stdout = x.oldstdout
 
-# Thread for running the identify_filenames command from "run all" tab
-class bcThread_allrep_ann(threading.Thread):
-    def __init__(self, cmd, outdir):
-        threading.Thread.__init__(self)
-        self.cmd = cmd
-        self.outdir = outdir
-
-    def run(self):
-        (data, err) = Popen(self.cmd, stdout=PIPE, stderr=PIPE).communicate()
-        if len(err) > 0:
-            print(">> ERROR!!! identify_filenames terminated with error: \n", err)
-            ProgressBar._active = False
-            x = Ui_MainWindow
-            g_textEdit_allrepcmdlineoutput.append( sys.stdout.getvalue() )
-            sys.stdout = x.oldstdout
-
-            # In case the progress bar is spinning, stop it
-            global_allrep.progressbar.setRange(0,1)
-            raise ValueError("identify_filenames error (" + str(err).strip() + "): "+" ".join(self.cmd))
-            exit(1)
-        else:
-            # Set the progresbar active flag so the other thread can
-            # get out of the while loop.
-            ProgressBar._active = False
-
-            print("\n>> Success!!! Annotated feature files created in the directory: ", self.outdir)
-
-            # Set the progressbar maximum to > minimum so the spinning will stop
-            global_allrep.progressbar.setRange(0,1)
-           
-            x = Ui_MainWindow
-
-            #g_textEdit_allrepcmdlineoutput.append( sys.stdout.getvalue() )
-            #sys.stdout = x.oldstdout
-
 class bcThread_rep(threading.Thread):
     def __init__(self, PdfReport, FiwalkReport, \
                        repFwXmlFileName,repAnnDir, \
@@ -1888,54 +1785,13 @@ class bcThread_rep(threading.Thread):
         g_textEdit_repcmdlineoutput.append( sys.stdout.getvalue() )
         sys.stdout = x.oldstdout
 
-class bcThread_allrep_rep(threading.Thread):
-    def __init__(self, PdfReport, FiwalkReport, \
-                       allrepXmlFileName,allrepAnnDir, \
-                       outdir, allrepConfile ):
-        threading.Thread.__init__(self)
-        self.PdfReport = PdfReport
-        self.FiwalkReport = FiwalkReport
-        self.allrepXmlFileName = allrepXmlFileName
-        self.allrepAnnDir = allrepAnnDir
-        self.allrepOutDir = outdir
-        self.allrepConfile = allrepConfile
-
-    def run(self):
-        # Generate the reports now.
-        ## print("D: bcThread_allrep_rep: XmlFile: ", self.allrepXmlFileName)
-        ## print("D: bcThread_allrep_rep: AnnDir: ", self.allrepAnnDir)
-        ## print("D: bcThread_allrep_rep: Outdir: ", self.allrepOutDir)
-        ## print("D: bcThread_allrep_rep: Confile: ", self.allrepConfile)
-        bc_get_reports(self.PdfReport, self.FiwalkReport, \
-                                 self.allrepXmlFileName, \
-                                 self.allrepAnnDir, \
-                                 self.allrepOutDir, \
-                                 self.allrepConfile)
-
-        # Set the progresbar active flag so the other thread can
-        # get out of the while loop.
-        ProgressBar._active = False
-
-        print("\n>> Success!!! All Reports generated in the directory: ", self.allrepOutDir)
-
-        # Set the progressbar maximum to > minimum so the spinning will stop
-        global global_allrep
-        global_allrep.progressbar.setRange(0,1)
-           
-        x = Ui_MainWindow
-        global g_textEdit_allrepcmdlineoutput
-
-        # Terminate the redirecting of the stdout to the in-memory buffer.
-        g_textEdit_allrepcmdlineoutput.append( sys.stdout.getvalue() )
-        sys.stdout = x.oldstdout
-
-
 # This is the thread which spins in a loop till the other thread which
 # does the work sets the flag once the task is completed.
 class guiThread(threading.Thread):
-    def __init__(self, cmd_type):
+    def __init__(self, cmd_type, thread_to_wait):
         threading.Thread.__init__(self)
         self.cmd_type = cmd_type
+        self.thread_to_wait = thread_to_wait
 
     def run(self):
         if self.cmd_type == "fiwalk":
@@ -1951,7 +1807,8 @@ class guiThread(threading.Thread):
             global global_allrep
             progressbar = global_allrep
 
-        progressbar.startLoop_bc(self.cmd_type)
+        progressbar.startLoop_bc(self.cmd_type, self.thread_to_wait)
+        #self.thread_to_wait.join()
 
 class ProgressBar(QtGui.QWidget):
     _active = False
@@ -1966,7 +1823,7 @@ class ProgressBar(QtGui.QWidget):
     def closeEvent(self):
         self._active = False
 
-    def startLoop_bc(self, cmd_type):
+    def startLoop_bc(self, cmd_type, thread_to_wait):
         self._active = True
         ProgressBar._active = True 
 
@@ -1989,6 +1846,7 @@ class ProgressBar(QtGui.QWidget):
             #print("D: ProgressBar._active = ", ProgressBar._active)
             if not ProgressBar._active:
                 #print ("D: startLoop_bc thread detected flag = ", ProgressBar._active)
+                thread_to_wait.join()
                 break
         ProgressBar._active = False
 
