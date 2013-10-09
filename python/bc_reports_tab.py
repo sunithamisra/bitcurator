@@ -1098,7 +1098,8 @@ class Ui_MainWindow(object):
                                self.allrepXmlFileName, \
                                genrep_outdir, self.allrepConfile )
 
-        thread2 = guiThread("allrep", thread1)
+        ###thread2 = guiThread("allrep", thread1)
+        thread2 = guiThread("allrep")
         thread2.start()
         thread1.start()
 
@@ -1389,7 +1390,7 @@ class Ui_MainWindow(object):
         self.allrepBcpyDir = "/home/bcadmin/Tools/bulk_extractor/python"
         # FIXME: For testing, I have set it to my path. Replace this
         # line with the line above before committing.
-        # self.allrepBcpyDir = "/home/sunitha/Research/Tools/bulk_extractor/python"
+        self.allrepBcpyDir = "/home/sunitha/Research/Tools/bulk_extractor/python"
         return (0)
 
 
@@ -1435,8 +1436,8 @@ class Ui_MainWindow(object):
     def on_pushButton_bev_clicked(self):
         
         #cmd = ['/usr/bin/java -Xmx1g -jar /home/sunitha/BC/beviewer/BEViewer.jar']
-        cmdstr = "/home/sunitha/BC/kambc/bitcurator/python/beviewer_sh"
-        #cmdstr = "/home/bcadmin/Tools/bulk_extractor/java_gui"
+        cmdstr = '/usr/bin/java -Xmx1g -jar /home/bcadmin/Tools/bulk_extractor/java_gui/BEViewer.jar'
+        #cmdstr = "/home/sunitha/BC/kambc/bitcurator/python/beviewer_sh"
 
         print(">> Launching BEViewer >> ")
         
@@ -1788,10 +1789,9 @@ class bcThread_rep(threading.Thread):
 # This is the thread which spins in a loop till the other thread which
 # does the work sets the flag once the task is completed.
 class guiThread(threading.Thread):
-    def __init__(self, cmd_type, thread_to_wait):
+    def __init__(self, cmd_type):
         threading.Thread.__init__(self)
         self.cmd_type = cmd_type
-        self.thread_to_wait = thread_to_wait
 
     def run(self):
         if self.cmd_type == "fiwalk":
@@ -1807,8 +1807,7 @@ class guiThread(threading.Thread):
             global global_allrep
             progressbar = global_allrep
 
-        progressbar.startLoop_bc(self.cmd_type, self.thread_to_wait)
-        #self.thread_to_wait.join()
+        progressbar.startLoop_bc(self.cmd_type)
 
 class ProgressBar(QtGui.QWidget):
     _active = False
@@ -1823,7 +1822,7 @@ class ProgressBar(QtGui.QWidget):
     def closeEvent(self):
         self._active = False
 
-    def startLoop_bc(self, cmd_type, thread_to_wait):
+    def startLoop_bc(self, cmd_type):
         self._active = True
         ProgressBar._active = True 
 
@@ -1846,7 +1845,6 @@ class ProgressBar(QtGui.QWidget):
             #print("D: ProgressBar._active = ", ProgressBar._active)
             if not ProgressBar._active:
                 #print ("D: startLoop_bc thread detected flag = ", ProgressBar._active)
-                thread_to_wait.join()
                 break
         ProgressBar._active = False
 
