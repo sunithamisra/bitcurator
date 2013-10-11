@@ -1390,7 +1390,8 @@ class Ui_MainWindow(object):
         self.allrepBcpyDir = "/home/bcadmin/Tools/bulk_extractor/python"
         # FIXME: For testing, I have set it to my path. Replace this
         # line with the line above before committing.
-        self.allrepBcpyDir = "/home/sunitha/Research/Tools/bulk_extractor/python"
+        #self.allrepBcpyDir = "/home/sunitha/Research/Tools/bulk_extractor/python"
+        self.allrepBcpyDir = "/home/bcadmin/Tools/bulk_extractor/python"
         return (0)
 
 
