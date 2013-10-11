@@ -760,12 +760,13 @@ class Ui_MainWindow(object):
 
     def buttonClickedCancel_allrep(self):
         print(">> Run All Task Cancelled ")
-        # Set the progressbar maximum to > minimum so the spinning will stop
-        global global_allrep
-        global_allrep.progressbar.setRange(0,1)
 
         # Set the active flag to False
         ProgressBar._active = False
+
+        # Set the progressbar maximum to > minimum so the spinning will stop
+        global global_allrep
+        global_allrep.progressbar.setRange(0,1)
 
         x = Ui_MainWindow
         global g_textEdit_allrepcmdlineoutput
@@ -1446,8 +1447,12 @@ class Ui_MainWindow(object):
         # startDetached apparently seems to fix that issue.
 
         QtCore.QProcess.startDetached(cmdstr)
-        self.textEdit_allrep.setText( sys.stdout.getvalue() )
+        #self.textEdit_allrep.setText( sys.stdout.getvalue() )
+        self.textEdit_allrep.append(sys.stdout.getvalue() )
         sys.stdout = self.oldstdout
+
+        oldstdout = sys.stdout
+        sys.stdout = StringIO()
 
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Bitcurator Reports", None, QtGui.QApplication.UnicodeUTF8))
