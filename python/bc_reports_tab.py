@@ -298,7 +298,7 @@ class Ui_MainWindow(object):
         self.textEdit_fwcmdlineoutput.setObjectName(_fromUtf8("textEdit_fwcmdlineoutput"))
         self.gridLayout_3.addWidget(self.textEdit_fwcmdlineoutput, 9, 0, 1, 4)
         self.pb_fw_cancel = QtGui.QPushButton(self.tab_fw)
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Minimum)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.pb_fw_cancel.sizePolicy().hasHeightForWidth())
