@@ -163,7 +163,7 @@ def bc_make_dict(fi, FiwalkReport, fn):
     FiwalkReport.dict_val["alloc"] = False
     FiwalkReport.dict_val["unalloc"] = False
 
-    if (fi.allocated):
+    if (fi.allocated()):
         FiwalkReport.dict_val["alloc"] = True
     else:
         FiwalkReport.dict_val["unalloc"] = True
