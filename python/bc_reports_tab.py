@@ -639,8 +639,7 @@ class Ui_MainWindow(object):
 
         QtCore.QObject.connect(self.pb_allrep_run, QtCore.SIGNAL(_fromUtf8("clicked()")), self.buttonClickedOkAllrep)
         QtCore.QObject.connect(self.pb_allrep_close, QtCore.SIGNAL(_fromUtf8("clicked()")), self.buttonClickedClose)
-        #QtCore.QObject.connect(self.pb_allrep_cancel, QtCore.SIGNAL(_fromUtf8("clicked()")), self.buttonClickedCancel_allrep)
-        QtCore.QObject.connect(self.pb_allrep_cancel, QtCore.SIGNAL(_fromUtf8("clicked()")), self.buttonClickedClose)
+        QtCore.QObject.connect(self.pb_allrep_cancel, QtCore.SIGNAL(_fromUtf8("clicked()")), self.buttonClickedCancel_allrep)
 
         # File navigation for Fiwalk XML Generation tab
         
@@ -650,8 +649,7 @@ class Ui_MainWindow(object):
 
         QtCore.QObject.connect(self.pb_fw_run, QtCore.SIGNAL(_fromUtf8("clicked()")), self.buttonClickedOkFw)
         QtCore.QObject.connect(self.pb_fw_close, QtCore.SIGNAL(_fromUtf8("clicked()")), self.buttonClickedClose)
-        #QtCore.QObject.connect(self.pb_fw_cancel, QtCore.SIGNAL(_fromUtf8("clicked()")), self.buttonClickedCancel_fw)
-        QtCore.QObject.connect(self.pb_fw_cancel, QtCore.SIGNAL(_fromUtf8("clicked()")), self.buttonClickedClose)
+        QtCore.QObject.connect(self.pb_fw_cancel, QtCore.SIGNAL(_fromUtf8("clicked()")), self.buttonClickedCancel_fw)
 
         # File navigation for Annotated files Tab
         QtCore.QObject.connect(self.toolButton_ann_image, QtCore.SIGNAL(_fromUtf8("clicked()")), self.getAnnImageFileName)
@@ -662,8 +660,7 @@ class Ui_MainWindow(object):
 
         QtCore.QObject.connect(self.pb_ann_run, QtCore.SIGNAL(_fromUtf8("clicked()")), self.buttonClickedOkAnn)
         QtCore.QObject.connect(self.pb_ann_close, QtCore.SIGNAL(_fromUtf8("clicked()")), self.buttonClickedClose)
-        #QtCore.QObject.connect(self.pb_ann_cancel, QtCore.SIGNAL(_fromUtf8("clicked()")), self.buttonClickedCancel_ann)
-        QtCore.QObject.connect(self.pb_ann_cancel, QtCore.SIGNAL(_fromUtf8("clicked()")), self.buttonClickedClose)
+        QtCore.QObject.connect(self.pb_ann_cancel, QtCore.SIGNAL(_fromUtf8("clicked()")), self.buttonClickedCancel_ann)
 
         # File navigation for Reports Tab
         QtCore.QObject.connect(self.toolButton_rep_fwxmlfile, QtCore.SIGNAL(_fromUtf8("clicked()")), self.getRepFwXmlFileName)
@@ -673,8 +670,7 @@ class Ui_MainWindow(object):
 
         QtCore.QObject.connect(self.pb_rep_run, QtCore.SIGNAL(_fromUtf8("clicked()")), self.buttonClickedOkRep)
         QtCore.QObject.connect(self.pb_rep_close, QtCore.SIGNAL(_fromUtf8("clicked()")), self.buttonClickedClose)
-        #QtCore.QObject.connect(self.pb_rep_cancel, QtCore.SIGNAL(_fromUtf8("clicked()")), self.buttonClickedCancel_rep)
-        QtCore.QObject.connect(self.pb_rep_cancel, QtCore.SIGNAL(_fromUtf8("clicked()")), self.buttonClickedClose)
+        QtCore.QObject.connect(self.pb_rep_cancel, QtCore.SIGNAL(_fromUtf8("clicked()")), self.buttonClickedCancel_rep)
 
         self.actionExit.triggered.connect(self.exitMenu)
         self.actionCopy.triggered.connect(self.copyMenu)
@@ -758,6 +754,9 @@ class Ui_MainWindow(object):
     def pasteMenu(self):
         print("PASTINGg text ")
 
+    #
+    # buttonClickCancel_allrep: Handle Cancel button for Run All tab 
+    #
     def buttonClickedCancel_allrep(self):
         print(">> Run All Task Cancelled ")
 
@@ -773,9 +772,18 @@ class Ui_MainWindow(object):
         g_textEdit_allrepcmdlineoutput.append( sys.stdout.getvalue() )
         sys.stdout = x.oldstdout
 
-    # buttonClickCancel_fw: 
+        x.oldstdout = sys.stdout
+        sys.stdout = StringIO()
+
+        # Set the flag in the thread to signal thread termination
+        global g_thread1_allrep_all
+        g_thread1_allrep_all.join()
+
+    #
+    # buttonClickCancel_fw: Handle Cancel button for Fiwalk tab 
+    #
     def buttonClickedCancel_fw(self):
-        print(">> Fiuwalk XML Generation Task Cancelled ")
+        print(">> Fiwalk XML Generation Task Cancelled ")
         # Set the progressbar maximum to > minimum so the spinning will stop
         global global_fw
         global_fw.progressbar.setRange(0,1)
@@ -788,7 +796,17 @@ class Ui_MainWindow(object):
         g_textEdit_fwcmdlineoutput.append( sys.stdout.getvalue() )
         sys.stdout = x.oldstdout
 
-    # buttonClickCancel_ann: 
+        x.oldstdout = sys.stdout
+        sys.stdout = StringIO()
+
+        # Set the flag in the thread to signal thread termination
+        global g_thread1_fw
+        g_thread1_fw.join()
+
+
+    #
+    # buttonClickCancel_ann: Handle Cancel button for Annotate tab 
+    #
     def buttonClickedCancel_ann(self):
         print(">> Annotated File Generation Task Cancelled ")
         # Set the progressbar maximum to > minimum so the spinning will stop
@@ -803,7 +821,17 @@ class Ui_MainWindow(object):
         g_textEdit_anncmdlineoutput.append( sys.stdout.getvalue() )
         sys.stdout = x.oldstdout
 
-    # buttonClickCancel_rep: 
+        x.oldstdout = sys.stdout
+        sys.stdout = StringIO()
+
+        # Set the flag in the thread to signal thread termination
+        global g_thread1_ann
+        g_thread1_ann.join()
+
+
+    #
+    # buttonClickCancel_rep: Handle Cancel button for Reports tab 
+    #
     def buttonClickedCancel_rep(self):
         print(">> Reports Generation Task Cancelled ")
         # Set the progressbar maximum to > minimum so the spinning will stop
@@ -818,16 +846,9 @@ class Ui_MainWindow(object):
         g_textEdit_repcmdlineoutput.append( sys.stdout.getvalue() )
         sys.stdout = x.oldstdout
 
-    def buttonClickedCancel_ann(self):
-        print("Setting progress bar flag to FALSE")
-        ProgressBar._active = False
-        #QtCore.QCoreApplication.instance().cancel()
-
-    def buttonClickedCancel_rep(self):
-        print("Setting progress bar flag to FALSE")
-        ProgressBar._active = False
-        #QtCore.QCoreApplication.instance().cancel()
-
+    #
+    # buttonClickClose: Handle Close button for all tabs 
+    #
     def buttonClickedClose(self):
         QtCore.QCoreApplication.instance().quit()
 
@@ -904,7 +925,7 @@ class Ui_MainWindow(object):
             self.textEdit.setText( sys.stdout.getvalue() )
             sys.stdout = self.oldstdout
 
-            exit(1)
+            #exit(1)
 
         os.mkdir(self.outputDirName)
     ##'''
@@ -926,7 +947,7 @@ class Ui_MainWindow(object):
             self.textEdit_becmdlineoutput.setText( sys.stdout.getvalue() )
             sys.stdout = self.oldstdout
 
-            exit(1)
+            ##exit(1)
 
         os.mkdir(self.beOutputDirName)
 
@@ -962,7 +983,7 @@ class Ui_MainWindow(object):
             self.textEdit_ann.setText( sys.stdout.getvalue() )
             sys.stdout = self.oldstdout
 
-            exit(1)
+            ##exit(1)
 
         os.mkdir(self.annOutputDirName)
     def getAnnBcpyDir(self):
@@ -1057,7 +1078,8 @@ class Ui_MainWindow(object):
             print(">> Report Generation is Aborted ")
             self.textEdit_allrep.setText( sys.stdout.getvalue() )
             sys.stdout = self.oldstdout
-            exit (1)
+            return
+            ##exit (1)
 
         print(">> Generating XML File for the image ", self.allrepImageFileName)
 
@@ -1073,8 +1095,6 @@ class Ui_MainWindow(object):
             os.remove(self.allrepXmlFileName)
         
         fwcmd = ['fiwalk', '-f', '-X', self.allrepXmlFileName, self.allrepImageFileName]
-        print(">> Command Executed for Fiwalk: ", fwcmd)
-
         # Now setup cmd for identify_filenames on the Feature files to 
         # generat the annotated reports.
 
@@ -1099,7 +1119,10 @@ class Ui_MainWindow(object):
                                self.allrepXmlFileName, \
                                genrep_outdir, self.allrepConfile )
 
-        ###thread2 = guiThread("allrep", thread1)
+        # Save the thread handle for later use in cancel task.
+        global g_thread1_allrep_all
+        g_thread1_allrep_all = thread1
+
         thread2 = guiThread("allrep")
         thread2.start()
         thread1.start()
@@ -1130,13 +1153,25 @@ class Ui_MainWindow(object):
             ## print("D: XML File Selected from the box: ", self.xmlFileName)
 
         cmd = ['fiwalk', '-f', '-X', self.fwXmlFileName, self.fwImageFileName]
-        print(">> Command Executed for Fiwalk = ", cmd)
+        print(">> Generating XML File ", self.fwXmlFileName)
+        print(">> Invoking command for Fiwalk = ", cmd)
+
+        self.textEdit_fwcmdlineoutput.setText( sys.stdout.getvalue() )
+        sys.stdout = self.oldstdout
+
+        self.oldstdout = sys.stdout
+        sys.stdout = StringIO()
 
         # Start two threads - one for executing the above command and
         # a second one to start a progress bar on the gui which keeps
         # spinning till the first thread finishes the command execution
         # and signals the second one by setting a flag. 
         thread1 = bcThread_fw(cmd)
+
+        # Save the thread handle for later use in cancel task.
+        global g_thread1_fw
+        g_thread1_fw = thread1
+
         thread2 = guiThread("fiwalk")
         thread1.start()
         thread2.start()
@@ -1230,11 +1265,21 @@ class Ui_MainWindow(object):
           self.annImageFileName, self.annBeFeatDir, self.annOutputDirName]
         print("\n>> Running identify_filanames script : ", cmd)
 
+        self.textEdit_ann.setText( sys.stdout.getvalue() )
+        sys.stdout = self.oldstdout
+
+        self.oldstdout = sys.stdout
+        sys.stdout = StringIO()
+
+
         # Start two threads - one for executing the above command and
         # a second one to start a progress bar on the gui which keeps
         # spinning till the first thread finishes the command execution
         # and signals the second one by setting a flag. 
         thread1 = bcThread_ann(cmd, self.annOutputDirName)
+        global g_thread1_ann
+        g_thread1_ann = thread1
+
         thread2 = guiThread("ann")
         thread1.start()
         thread2.start()
@@ -1571,7 +1616,7 @@ class Ui_MainWindow(object):
         self.actionShow_Help.setText(QtGui.QApplication.translate("MainWindow", "Show Help", None, QtGui.QApplication.UnicodeUTF8))
         self.actionExit.setText(QtGui.QApplication.translate("MainWindow", "Exit", None, QtGui.QApplication.UnicodeUTF8))
 
-# Thread for running the allrep fiwalk command
+# Thread for running the allrep (run all) command
 class bcThread_allrep_all(threading.Thread):
     def __init__(self, fwcmd, anncmd, allrepAnnDir, PdfReport, FiwalkReport,\
                  allrepXmlFileName, \
@@ -1586,26 +1631,48 @@ class bcThread_allrep_all(threading.Thread):
         self.allrepAnnDir = allrepAnnDir
         self.allrepOutDir = genrep_outdir
         self.allrepConfile = allrepConfile
+        super(bcThread_allrep_all, self).__init__()
+        self.stoprequest = threading.Event()
+        self.process = None
+
+    def join(self, timeout=None):
+        self.stoprequest.set()
+        super(bcThread_allrep_all, self).join(timeout)
+
+    def stopped(self):
+        return self.stoprequest.isSet()
 
     def run(self):
+      # While loop for handling "cancel" signal outside Popen calls
+      while not self.stoprequest.isSet():
         # Run fiwalk first
-        (data, err) = Popen(self.fwcmd, stdout=PIPE, stderr=PIPE).communicate()
+        print(">> Command Executed for Fiwalk: ", self.fwcmd)
 
-        if len(err) > 0 :
-           ProgressBar._active = False
+        p = self.process = Popen(self.fwcmd, stdout=PIPE, stderr=PIPE)
+        (data, err) = p.communicate()
+        if p.returncode:
+            ProgressBar._active = False
            
-           x = Ui_MainWindow
-           print(">> ERROR!!! Run All terminated with error: \n", err)
-           global g_textEdit_allrepcmdlineoutput
-           g_textEdit_allrepcmdlineoutput.append( sys.stdout.getvalue() )
-           sys.stdout = x.oldstdout
+            x = Ui_MainWindow
+            print(">> ERROR!!! Run All terminated with error: \n", err)
+            global g_textEdit_allrepcmdlineoutput
+            g_textEdit_allrepcmdlineoutput.append( sys.stdout.getvalue() )
+            sys.stdout = x.oldstdout
 
-           # Set the progressbar maximum to > minimum so the spinning will stop
-           global global_allrep
-           global_allrep.progressbar.setRange(0,1)
+            # Set the progressbar maximum to > minimum so the spinning will stop
+            global global_allrep
+            global_allrep.progressbar.setRange(0,1)
 
-           raise ValueError("allrep fiwalk error (" + str(err).strip() + "): "+" ".join(self.cmd))
+            # Buffer the stdout to stringio again.
+            x.oldstdout = sys.stdout
+            sys.stdout = StringIO()
         else:
+       
+            # If cancel button was pressed after Popen finished, check here.
+            # FIXME: Test this part more.
+            if self.stoprequest.isSet():
+                ## print("D: Breaking out of the loop - 3")
+                break
             print("\n>> Success!!! Fiwalk created the following file: ")
 
             global g_allrepXmlFileName
@@ -1616,7 +1683,6 @@ class bcThread_allrep_all(threading.Thread):
             # Dump the text in stdout to textEdit screen.
             # Note: setText for some reason, wouldn't work when used with
             # global value. append seems to work
-            ##g_textEdit_allrepcmdlineoutput.setText( sys.stdout.getvalue() )
             x = Ui_MainWindow
             g_textEdit_allrepcmdlineoutput.append( sys.stdout.getvalue() )
             sys.stdout = x.oldstdout
@@ -1626,8 +1692,9 @@ class bcThread_allrep_all(threading.Thread):
             sys.stdout = StringIO()
 
             # Now run the identify_filenames cmd.
-            (data, err) = Popen(self.anncmd, stdout=PIPE, stderr=PIPE).communicate()
-            if len(err) > 0:
+            p = self.process = Popen(self.anncmd, stdout=PIPE, stderr=PIPE)
+            (data, err) = p.communicate()
+            if p.returncode:
                 print(">> ERROR!!! identify_filenames terminated with error: \n", err)
                 ProgressBar._active = False
                 x = Ui_MainWindow
@@ -1636,9 +1703,13 @@ class bcThread_allrep_all(threading.Thread):
 
                 # In case the progress bar is spinning, stop it
                 global_allrep.progressbar.setRange(0,1)
-                raise ValueError("identify_filenames error (" + str(err).strip() + "): "+" ".join(self.cmd))
-                exit(1)
             else:
+               
+                # If cancel button was pressed after Popen finished, check here.
+                # FIXME: Test this part more.
+                if self.stoprequest.isSet():
+                    ## print("D: Breaking out of the loop - 2")
+                    break
                 print(">> Success!!! Annotated feature files created in the directory: \n o ", self.annoutdir)
 
                 # Now run the reports generation routine
@@ -1647,7 +1718,7 @@ class bcThread_allrep_all(threading.Thread):
 
                 g_textEdit_allrepcmdlineoutput.append( sys.stdout.getvalue() )
                 sys.stdout = x.oldstdout
-                oldstdout = sys.stdout
+                x.oldstdout = sys.stdout
                 sys.stdout = StringIO()
 
                 ## print("D: bcThread_allrep_rep: XmlFile: ", self.allrepXmlFileName)
@@ -1664,6 +1735,11 @@ class bcThread_allrep_all(threading.Thread):
                 # get out of the while loop.
                 ProgressBar._active = False
 
+                # If cancel button was pressed after Popen finished, check here.
+                # FIXME: Test this part more.
+                if self.stoprequest.isSet():
+                    ## print("D: Breaking out of the loop - 3")
+                    break
                 print("\n>> Success!!! BitCurator Reports generated in the directory: \n o ", self.allrepOutDir)
 
                 # Set the progressbar maximum to > minimum so the spinning will stop
@@ -1674,17 +1750,38 @@ class bcThread_allrep_all(threading.Thread):
                 # Terminate the redirecting of the stdout to the in-memory buffer.
                 g_textEdit_allrepcmdlineoutput.append( sys.stdout.getvalue() )
                 sys.stdout = x.oldstdout
+                x.oldstdout = sys.stdout
+                sys.stdout = StringIO()
+                break
+
+    def stop(self):
+        if self.process is not None:
+            print(">> Terminating the Thread for \"Run All\"")
+            self.process.terminate()
+        else:
+            Popen.terminate(self.process)
+
                 
 # Thread for running the fiwalk command
 class bcThread_fw(threading.Thread):
     def __init__(self, cmd):
         threading.Thread.__init__(self)
         self.cmd = cmd
+        super(bcThread_fw, self).__init__()
+        self.stoprequest = threading.Event()
+        self.process = None
+
+    def stopped(self):
+        return self.stoprequest.isSet()
+
+    def join(self, timeout=None):
+        self.stoprequest.set()
+        super(bcThread_fw, self).join(timeout)
 
     def run(self):
-        (data, err) = Popen(self.cmd, stdout=PIPE, stderr=PIPE).communicate()
-
-        if len(err) > 0 :
+        p = self.process = Popen(self.cmd, stdout=PIPE, stderr=PIPE)
+        (data, err) = p.communicate()
+        if p.returncode:
            ProgressBar._active = False
            
            x = Ui_MainWindow
@@ -1697,7 +1794,8 @@ class bcThread_fw(threading.Thread):
            global global_fw
            global_fw.progressbar.setRange(0,1)
 
-           raise ValueError("fiwalk error (" + str(err).strip() + "): "+" ".join(self.cmd))
+           x.oldstdout = sys.stdout
+           sys.stdout = StringIO()
         else:
 
             # Set the progresbar active flag so the other thread can
@@ -1717,20 +1815,38 @@ class bcThread_fw(threading.Thread):
             x = Ui_MainWindow
             # Note: setText for seme reason, wouldn't work when used with
             # global value. append seems to work
-            #g_textEdit_fwcmdlineoutput.setText( sys.stdout.getvalue() )
+            # g_textEdit_fwcmdlineoutput.setText( sys.stdout.getvalue() )
             g_textEdit_fwcmdlineoutput.append( sys.stdout.getvalue() )
             sys.stdout = x.oldstdout
                 
+    def stop(self):
+        if self.process is not None:
+            print(">> Terminating the Thread for \"Fiwalk\"")
+            self.process.terminate()
+        else:
+            Popen.terminate(self.process)
+
 # Thread for running the identify_filenames command
 class bcThread_ann(threading.Thread):
     def __init__(self, cmd, outdir):
         threading.Thread.__init__(self)
         self.cmd = cmd
         self.outdir = outdir
+        super(bcThread_ann, self).__init__()
+        self.stoprequest = threading.Event()
+        self.process = None
+
+    def stopped(self):
+        return self.stoprequest.isSet()
+
+    def join(self, timeout=None):
+        self.stoprequest.set()
+        super(bcThread_ann, self).join(timeout)
 
     def run(self):
-        (data, err) = Popen(self.cmd, stdout=PIPE, stderr=PIPE).communicate()
-        if len(err) > 0:
+        p = self.process = Popen(self.cmd, stdout=PIPE, stderr=PIPE)
+        (data, err) = p.communicate()
+        if p.returncode:
             print(">> ERROR!!! identify_filenames terminated with error: \n", err)
             ProgressBar._active = False
             x = Ui_MainWindow
@@ -1739,14 +1855,12 @@ class bcThread_ann(threading.Thread):
 
             # In case the progress bar is spinning, stop it
             global_ann.progressbar.setRange(0,1)
-            raise ValueError("identify_filenames error (" + str(err).strip() + "): "+" ".join(self.cmd))
-            exit(1)
         else:
             # Set the progresbar active flag so the other thread can
             # get out of the while loop.
             ProgressBar._active = False
 
-            print("\n>> Success!!! Annotated feature files created in the directory: ", self.outdir)
+            print("\n>> Success!!! AAAnnotated feature files created in the directory: ", self.outdir)
 
             # Set the progressbar maximum to > minimum so the spinning will stop
             global_ann.progressbar.setRange(0,1)
@@ -1755,6 +1869,13 @@ class bcThread_ann(threading.Thread):
 
             g_textEdit_anncmdlineoutput.append( sys.stdout.getvalue() )
             sys.stdout = x.oldstdout
+
+    def stop(self):
+        if self.process is not None:
+            print(">> Terminating the Thread for \"Annotate Files\"")
+            self.process.terminate()
+        else:
+            Popen.terminate(self.process)
 
 class bcThread_rep(threading.Thread):
     def __init__(self, PdfReport, FiwalkReport, \
@@ -1767,6 +1888,16 @@ class bcThread_rep(threading.Thread):
         self.repAnnDir = repAnnDir
         self.repOutDir = repOutDir
         self.repConfile = repConfile
+        super(bcThread_rep, self).__init__()
+        self.stoprequest = threading.Event()
+        self.process = None
+
+    def stopped(self):
+        return self.stoprequest.isSet()
+
+    def join(self, timeout=None):
+        self.stoprequest.set()
+        super(bcThread_rep, self).join(timeout)
 
     def run(self):
         # Generate the reports now.
@@ -1791,6 +1922,13 @@ class bcThread_rep(threading.Thread):
         # Terminate the redirecting of the stdout to the in-memory buffer.
         g_textEdit_repcmdlineoutput.append( sys.stdout.getvalue() )
         sys.stdout = x.oldstdout
+
+    def stop(self):
+        if self.process is not None:
+            print(">> Terminating the Thread for \"Reports\"")
+            self.process.terminate()
+        else:
+            Popen.terminate(self.process)
 
 # This is the thread which spins in a loop till the other thread which
 # does the work sets the flag once the task is completed.
@@ -1831,6 +1969,7 @@ class ProgressBar(QtGui.QWidget):
     def startLoop_bc(self, cmd_type):
         self._active = True
         ProgressBar._active = True 
+        cntr = 0
 
         if cmd_type == "fiwalk":
             global global_fw
@@ -1847,10 +1986,30 @@ class ProgressBar(QtGui.QWidget):
 
         while True:
             time.sleep(1.05)
+            cntr = cntr + 1
+            if cntr%5 == 0:
+                # print("D: CNTR: ", cntr)
+                # FIXME: Refine this 
+                print(">> Task Still running >>")
             QtGui.qApp.processEvents()
             #print("D: ProgressBar._active = ", ProgressBar._active)
             if not ProgressBar._active:
                 #print ("D: startLoop_bc thread detected flag = ", ProgressBar._active)
+                if cmd_type == "allrep":
+                    global g_thread1_allrep_all
+                    if g_thread1_allrep_all.stopped():
+                        ## print("D: startLoop_bc: Run All Thread Stopped ")
+                        g_thread1_allrep_all.stop()
+                if cmd_type == "fiwalk":
+                    global g_thread1_fw
+                    if g_thread1_fw.stopped():
+                        ## print("D: startLoop_bc: Fiwalk Thread Stopped ")
+                        g_thread1_fw.stop()
+                if cmd_type == "ann":
+                    global g_thread1_ann
+                    if g_thread1_ann.stopped():
+                        print("D: startLoop_bc: Ann Thread Stopped ")
+                        g_thread1_ann.stop()
                 break
         ProgressBar._active = False
 
