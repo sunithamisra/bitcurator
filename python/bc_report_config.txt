@@ -10,23 +10,40 @@
 #####################################################################
 #L:FinalBitCuratorLogo-NoText.png
 # Feature Files to report
-##F:junk_to_test:0
+F:accts:0
+F:aes:0
+F:base16:0
+F:base64:0
+F:ccn:0
+F:domain:100
+F:elf:0
+F:email:
+F:ether:0
+F:exif:0
+F:find:0
+F:gps:0
+F:gzip:0
+F:hiber:0
+F:ip:0
+F:json:0
+F:kml:0
+F:net:0
+F:pdf:0
+F:rar:0
+F:vcard:0
 F:rfc822:0
+F:tcp:0
 F:telephone:0
 F:aes_keys.txt:0
-F:json:0
-F:zip:0
-F:windirs:100
-F:domain:100
-F:email:
-F:exif:0
-F:url
+F:url:0
 F:winpe:0
-F:ccn:0
-F:ether:0
-F:ip:0
-F:tcp:0
+F:winpefetch:0
+F:windirs:100
 F:winprefetch:0
+F:zip:0
+F:bulk:0
+F:wordlist:0
+F:xor:0
 #
 #######################################
 # Fiwalk and Bulk Extractor Report files
@@ -37,24 +54,6 @@ R:FiwalkDeletedFiles:0
 R:BeReport:0
 R:
 #
-#######################################
-# File Format: List all the files with the following file formats
-# FIXME: The M-option is not supported as of now.
-##M:empty
-##M:data
-##M:none
-##M:AppleDouble encoded Macintosh file
-##M:XML document text
-##M:SQLite3x
-##M:nISO-EA-NLT
-##M:NISO-EA
-##M:Hitachi
-##M:PDP-11
-##M:ISO-8859
-##M:ISO-8859-NLT
-##M:ASCII
-M:PDF1.4
-##M:DOSCOM
 ####################################################
 # Miscellaneous optoins
 # Don't display special files - those starting from "."
