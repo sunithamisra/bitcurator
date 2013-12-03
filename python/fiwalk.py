@@ -58,13 +58,123 @@ def fiwalk_xml_version(filename=None):
     p.EndElementHandler    = end_element
     p.CharacterDataHandler = char_data
     try:
-        p.ParseFile(open(filename))
-    except XMLDone(e):
+        p.ParseFile(open(filename,'rb'))
+    #except XMLDone(e):
+    except XMLDone as e:
         return e.value
     except xml.parsers.expat.ExpatError:
         return None             # XML error
     return None
+
+class fiwalk_info:
+    def __init__(self):
+        self.cdata = ""
+        self.in_element = []
+        self.version = None
+    def start_element(self,name,attrs):
+        if(name=='volume'):     # too far?
+            raise XMLDone(None)
+        self.in_element += [name]
+        self.cdata = ""
+    def end_element_version(self,name):
+        if ("fiwalk" in self.in_element) and ("creator" in self.in_element) and ("version" in self.in_element):
+            raise XMLDone(self.cdata)
+        if ("fiwalk" in self.in_element) and ("fiwalk_version" in self.in_element):
+            raise XMLDone(self.cdata)
+        if ("version" in self.in_element) and ("dfxml" in self.in_element) and ("creator" in self.in_element):
+            raise XMLDone(self.cdata)
+        self.in_element.pop()
+        self.cdata = ""
+    def end_element_command_line(self,name):
+        if ("command_line" in self.in_element) and ("execution_environment" in self.in_element) and ("creator" in self.in_element) and ("dfxml" in self.in_element):
+            raise XMLDone(self.cdata)
+        self.in_element.pop()
+        self.cdata = ""
+
+    def end_element_start_time(self,name):
+        if ("start_time" in self.in_element) and ("execution_environment" in self.in_element) and ("creator" in self.in_element) and ("dfxml" in self.in_element):
+            raise XMLDone(self.cdata)
+        self.in_element.pop()
+        self.cdata = ""
+
+
+    def char_data(self,data):
+        self.cdata += data
+
+    def get_version(self,fn):
+        import xml.parsers.expat
+        p = xml.parsers.expat.ParserCreate()
+        p.StartElementHandler  = self.start_element
+        p.EndElementHandler    = self.end_element_version
+        p.CharacterDataHandler = self.char_data
+
+        try:
+            p.ParseFile(open(fn,'rb'))
+        except XMLDone as e:
+            return e.value
+        except xml.parsers.expat.ExpatError:
+            return None             # XML error
+
+    # Get the information associated with line "command_line" 
+    def get_command_line(self, fn):
+        import xml.parsers.expat
+        p = xml.parsers.expat.ParserCreate()
+        p.StartElementHandler  = self.start_element
+        p.EndElementHandler    = self.end_element_command_line
+        p.CharacterDataHandler = self.char_data
+
+        try:
+            p.ParseFile(open(fn,'rb'))
+        except XMLDone as e:
+            return e.value
+        except xml.parsers.expat.ExpatError:
+            return None             # XML error
     
+    # Get the information associated with line "start_time" 
+    def get_start_time(self, fn):
+        import xml.parsers.expat
+        p = xml.parsers.expat.ParserCreate()
+        p.StartElementHandler  = self.start_element
+        p.EndElementHandler    = self.end_element_start_time
+        p.CharacterDataHandler = self.char_data
+
+        try:
+            p.ParseFile(open(fn,'rb'))
+        except XMLDone as e:
+            return e.value
+        except xml.parsers.expat.ExpatError:
+            return None             # XML error
+    
+'''
+def fiwalk_xml_version(filename=None):
+    """Returns the fiwalk version that was used to create an XML file.
+    Uses the "quick and dirty" approach to getting to getting out the XML version."""
+
+    p = version()
+    return p.get_version(filename)
+'''
+
+def fiwalk_xml_version(filename=None):
+    """Returns the fiwalk version that was used to create an XML file.
+    Uses the "quick and dirty" approach to getting to getting out the XML version."""
+
+    p = fiwalk_info()
+    return p.get_version(filename)
+
+def fiwalk_xml_command_line(filename=None):
+    """Returns the fiwalk version that was used to create an XML file.
+    Uses the "quick and dirty" approach to getting to getting out the XML version."""
+
+    p = fiwalk_info()
+    return p.get_command_line(filename)
+
+def fiwalk_xml_start_time(filename=None):
+    """Returns the fiwalk version that was used to create an XML file.
+    Uses the "quick and dirty" approach to getting to getting out the XML version."""
+
+    p = fiwalk_info()
+    return p.get_start_time(filename)
+
 
 ################################################################
 def E01_glob(fn):

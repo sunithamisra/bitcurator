@@ -18,6 +18,7 @@ from PyQt4.Qt import *
 from subprocess import Popen,PIPE
 import sys, time
 import threading
+from bc_premis_genxml import BcPremisFile
 
 from generate_report import *
 from bc_utils import *
@@ -44,7 +45,6 @@ g_textEdit_fwcmdlineoutput = "null"
 g_xmlFwFilename = "null"
 global_ann = "null"
 g_textEdit_anncmdlineoutput = "null"
-
 
 class Ui_MainWindow(object):
     #def __init__(self, parent=None):
@@ -109,6 +109,8 @@ class Ui_MainWindow(object):
         self.tabWidget = QtGui.QTabWidget(self.centralwidget)
         self.tabWidget.setEnabled(True)
         self.tabWidget.setAutoFillBackground(True)
+        self.tabWidget.setCursor(QtGui.QCursor(QtCore.Qt.ArrowCursor))
+        self.tabWidget.setMovable(False)
         self.tabWidget.setObjectName(_fromUtf8("tabWidget"))
         self.tab_allrep = QtGui.QWidget()
         self.tab_allrep.setObjectName(_fromUtf8("tab_allrep"))
@@ -185,6 +187,10 @@ class Ui_MainWindow(object):
 
         self.textEdit_allrep = QtGui.QTextEdit(self.tab_allrep)
         self.textEdit_allrep.setAutoFillBackground(True)
+        self.textEdit_allrep.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
+        self.textEdit_allrep.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
+        self.textEdit_allrep.setMouseTracking(True)
+
         self.textEdit_allrep.setTextInteractionFlags(QtCore.Qt.TextSelectableByKeyboard|QtCore.Qt.TextSelectableByMouse)
         self.textEdit_allrep.setObjectName(_fromUtf8("textEdit_allrep"))
         self.gridLayout_5.addWidget(self.textEdit_allrep, 11, 0, 1, 5)
@@ -1480,6 +1486,7 @@ class Ui_MainWindow(object):
 
         return (0)
 
+    # BE Viewer launching routine
     def on_pushButton_bev_clicked(self):
         
         #cmd = ['/usr/bin/java -Xmx1g -jar /home/sunitha/BC/beviewer/BEViewer.jar']
@@ -1694,6 +1701,7 @@ class bcThread_allrep_all(threading.Thread):
             # Now run the identify_filenames cmd.
             p = self.process = Popen(self.anncmd, stdout=PIPE, stderr=PIPE)
             (data, err) = p.communicate()
+
             if p.returncode:
                 print(">> ERROR!!! identify_filenames terminated with error: \n", err)
                 ProgressBar._active = False
@@ -1761,6 +1769,7 @@ class bcThread_allrep_all(threading.Thread):
         else:
             Popen.terminate(self.process)
 
+
                 
 # Thread for running the fiwalk command
 class bcThread_fw(threading.Thread):
@@ -1786,6 +1795,12 @@ class bcThread_fw(threading.Thread):
            
            x = Ui_MainWindow
            print(">> ERROR!!! Fiwalk terminated with error: \n", err)
+
+           premis_outfile = self.allrepOutDir +"/premis.xml"
+           print(">> Generating Premis event in ", premis_outfile)
+
+           BcPremisFile.bcGenPremisXmlFiwalk(dfxmlfile, premis_outfile, False)
+        
            global g_textEdit_fwcmdlineoutput
            g_textEdit_fwcmdlineoutput.append( sys.stdout.getvalue() )
            sys.stdout = x.oldstdout
@@ -1808,9 +1823,20 @@ class bcThread_fw(threading.Thread):
             # Set the progressbar maximum to > minimum so the spinning will stop
             #global global_fw
             global_fw.progressbar.setRange(0,1)
-           
+
             global g_fwXmlFileName
             print(" o ", g_fwXmlFileName) 
+
+            print(">> Generating Premis event >>> ")
+
+            # If running from fowalk tab, use the same directory as ouput
+            # xml file directory to generate the premis event log.
+            ##premis_outfile = Ui_MainWindow.allrepOutDir +"/premis.xml"
+            xmlpath = os.path.dirname(g_fwXmlFileName)
+            premis_outfile = xmlpath+"/premis.xml"
+            print("D: Premis Outfile: ", premis_outfile)
+            a = BcPremisFile()
+            a.bcGenPremisXmlFiwalk(g_fwXmlFileName, premis_outfile, True)
 
             x = Ui_MainWindow
             # Note: setText for seme reason, wouldn't work when used with
@@ -2016,6 +2042,7 @@ class ProgressBar(QtGui.QWidget):
 if __name__ == "__main__":
     import sys
     app = QtGui.QApplication(sys.argv)
+
     MainWindow = QtGui.QMainWindow()
     ui = Ui_MainWindow()
     ui.setupUi(MainWindow)
