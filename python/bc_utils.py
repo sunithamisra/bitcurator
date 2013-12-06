@@ -124,9 +124,11 @@ def get_file_info(line, FiwalkReport):
         elif "d" in line1[1]:
             FiwalkReport.dirs = FiwalkReport.dirs + 1
     elif re.match("unalloc", line):
+        print("FFFFFFFFFFFFFound UNALLOC file")
         line1 = re.split(":", line)
         if int(line1[1]) == 1:
             FiwalkReport.deletedFiles = FiwalkReport.deletedFiles + 1
+            print("FFFF: Deleted files:", FiwalkReport.deletedFiles)
     elif re.match("libmagic", line):
         line1 = re.split(":", line)
         fileformat = normalize(line1[1])
@@ -182,7 +184,6 @@ def bc_get_reports(PdfReport, FiwalkReport, fiwalk_xmlfile, annotated_dir, outdi
             report_fi = FiwalkReport(args.fiwalk_xmlfile)
             report_fi.process_generate_report_fiwalk_from_xml(args)
 
-        
         # Delete the temporary file created: <outdir>.txt
         cmd = "/bin/rm " + args.outdir + ".txt"
 
@@ -191,3 +192,47 @@ def bc_get_reports(PdfReport, FiwalkReport, fiwalk_xmlfile, annotated_dir, outdi
         return
         ##exit(1)
 
+def bcGetImageInfo(image_name):
+    premis_img_info = {'version':0, 'acq_date':0, 'imagesize':0}
+    if image_name.endswith(".aff"):
+        # It is an AFF file
+        premis_img_info = bcGetAffInfo(image_name)
+    elif image_name.endswith(".E01"):
+        # It is a E01 file
+        premis_img_info = bcGetE01Info(image_name)
+    return premis_img_info
+         
+def bcGetAffInfo(image_name):
+    os.system('affinfo '+ image_name + '>/tmp/tmpaffinfofile')
+    tmpfile = open("/tmp/tmpaffinfofile", "r")
+    aff_info = {'version':0, 'acq_date':0, 'imagesize':0}
+    for line in tmpfile:
+        if "afflib_version" in line:
+            tmplist = line.split()
+            aff_info['version'] = tmplist[3]
+        elif "acquisition_date" in line:
+            tmplist = line.split()
+            aff_info['acq_date'] = tmplist[3]
+        elif "imagesize" in line:
+            tmplist = line.split()
+            aff_info['imagesize'] = tmplist[4]
+    tmpfile.close()
+    os.system('rm /tmp/tmpaffinfofile')
+    return aff_info
+
+def bcGetE01Info(image_name):
+    os.system('ewfinfo '+ image_name + '>/tmp/tmpe01infofile')
+    tmpfile = open("/tmp/tmpe01infofile", "r")
+    e01_info = {'version':0, 'acq_date':0, 'imagesize':0}
+    for line in tmpfile:
+        if "version" in line:
+            tmplist = line.split(':')
+            e01_info['version'] = tmplist[1]
+        elif "Acquisition date" in line:
+            tmplist = line.split(':')
+            e01_info['acq_date'] = tmplist[1]
+    e01_info['imagesize'] = os.system('sizeof('+image_name+')')
+    print("D: E01 Info", e01_info)
+    return e01_info
+    close(tmpfile)
+    os.system('rm /tmp/tmpe01infofile')
