@@ -1087,11 +1087,34 @@ class Ui_MainWindow(object):
             return
             ##exit (1)
 
-        print(">> Generating XML File for the image ", self.allrepImageFileName)
+        premis_img_info = {'version':0, 'acq_date':0, 'imagesize':0}
+
+        ## XXXXXX
+        # All set to go. Generate premis events for the disk image and BE
+        premis_img_info = bc_utils.bcGetImageInfo(self.allrepImageFileName)
 
         # Create the XML file in the given directory. If it already
         # exists, remove it before running the command
         os.mkdir(self.allrepOutDir)
+        genAllrepOutDir = self.allrepOutDir+"/reports"
+        os.mkdir(genAllrepOutDir)
+
+        ## NOTE: Since the directory "reports" is not yet created, the xml code
+        # is temporarily put directly under the output directory. Since the
+        # entire string is being written to reports/premis.xml in the end, 
+        # it doesn't matter. But this needs to be fixed. 
+        ## premis_outfile = self.allrepOutDir +"/reports/premis.xml"
+        premis_outfile = genAllrepOutDir +"/premis.xml"
+
+        ## print("D: >>> Generating diskImage part of the Premis File ", premis_outfile)
+        a = BcPremisFile()
+        a.bcGenPremisXmlDiskImage(self.allrepImageFileName, premis_img_info, premis_outfile)
+
+        print(">> Generating XML File for the image ", self.allrepImageFileName)
+
+        # Create the XML file in the given directory, if doesn't exist. 
+        if not os.path.exists(self.allrepOutDir):
+            os.mkdir(self.allrepOutDir)
         self.allrepXmlFileName = self.allrepOutDir + "/fiwalk-output.xml"
 
         global g_allrepXmlFileName
@@ -1122,8 +1145,10 @@ class Ui_MainWindow(object):
         # and signals the second one by setting a flag. 
         thread1 = bcThread_allrep_all(fwcmd, anncmd, self.allrepAnnDir, \
                                PdfReport, FiwalkReport, \
-                               self.allrepXmlFileName, \
-                               genrep_outdir, self.allrepConfile )
+                               self.allrepXmlFileName, self.allrepOutDir, \
+                               genrep_outdir, self.allrepConfile, \
+                               self.allrepBeFeatDir, \
+                               self.allrepImageFileName )
 
         # Save the thread handle for later use in cancel task.
         global g_thread1_allrep_all
@@ -1156,7 +1181,21 @@ class Ui_MainWindow(object):
             # Thread uses it. so copy to the global value
             global g_fwXmlFileName
             g_fwXmlFileName = self.fwXmlFileName
-            ## print("D: XML File Selected from the box: ", self.xmlFileName)
+
+        # PREMIS Event
+        premis_img_info = {'version':0, 'acq_date':0, 'imagesize':0}
+
+        # All set to go. Generate premis events for the disk image and BE
+        premis_img_info = bc_utils.bcGetImageInfo(self.fwImageFileName)
+
+        # If running from fowalk tab, use the same directory as ouput
+        # xml file directory to generate the premis event log.
+        xmlpath = os.path.dirname(g_fwXmlFileName)
+        premis_outfile = xmlpath+"/premis.xml"
+
+        ## print("D: Generating diskImage part of the Premis File ", premis_outfile)
+        a = BcPremisFile()
+        a.bcGenPremisXmlDiskImage(self.fwImageFileName, premis_img_info, premis_outfile)
 
         cmd = ['fiwalk', '-f', '-X', self.fwXmlFileName, self.fwImageFileName]
         print(">> Generating XML File ", self.fwXmlFileName)
@@ -1328,8 +1367,6 @@ class Ui_MainWindow(object):
         # QtCore.QCoreApplication.instance().quit()
 
     def bcRunCmd(self, cmd, err):
-        ## print("D: >> Executing Unix Cmd : ", cmd)
-
         (data, err) = Popen(cmd, stdout=PIPE, stderr=PIPE).communicate()
         if len(err) > 0:
             ## print("\n>> [D] bcRunCmd: Failure!!! command executed: ", cmd)
@@ -1440,12 +1477,10 @@ class Ui_MainWindow(object):
         # The direcotry that contains identify_filenames script is set
         # to default: 
         self.allrepBcpyDir = "/home/bcadmin/Tools/bulk_extractor/python"
-        # FIXME: For testing, I have set it to my path. Replace this
+        # FIXME-BEFORE COMMIT: For testing, I have set it to my path. Replace this
         # line with the line above before committing.
         #self.allrepBcpyDir = "/home/sunitha/Research/Tools/bulk_extractor/python"
-        self.allrepBcpyDir = "/home/bcadmin/Tools/bulk_extractor/python"
         return (0)
-
 
     def bc_allrep_check_parameters_old(self):
         
@@ -1623,11 +1658,19 @@ class Ui_MainWindow(object):
         self.actionShow_Help.setText(QtGui.QApplication.translate("MainWindow", "Show Help", None, QtGui.QApplication.UnicodeUTF8))
         self.actionExit.setText(QtGui.QApplication.translate("MainWindow", "Exit", None, QtGui.QApplication.UnicodeUTF8))
 
+
+def bc_tempFixXMLAttributes(premis_outfile): 
+    #of_premis.close()
+    with open('premis_outfile', 'w') as testfile:
+        testfile.writelines(['<?xml version="1.0" encoding="UTF-8"?>'] + testfile.readlines())
+    testfile.close()
+
+
 # Thread for running the allrep (run all) command
 class bcThread_allrep_all(threading.Thread):
     def __init__(self, fwcmd, anncmd, allrepAnnDir, PdfReport, FiwalkReport,\
-                 allrepXmlFileName, \
-                 genrep_outdir, allrepConfile ):
+                 allrepXmlFileName, allrepOutDir, genrep_outdir, \
+                 allrepConfile, allrepBeFeatDir, allrepImageFileName ):
         threading.Thread.__init__(self)
         self.fwcmd = fwcmd
         self.anncmd = anncmd
@@ -1636,8 +1679,11 @@ class bcThread_allrep_all(threading.Thread):
         self.FiwalkReport = FiwalkReport
         self.allrepXmlFileName = allrepXmlFileName
         self.allrepAnnDir = allrepAnnDir
-        self.allrepOutDir = genrep_outdir
+        self.allrepOutDir = allrepOutDir
+        self.genrepOutDir = genrep_outdir
         self.allrepConfile = allrepConfile
+        self.allrepBeFeatDir = allrepBeFeatDir
+        self.allrepImageFileName = allrepImageFileName
         super(bcThread_allrep_all, self).__init__()
         self.stoprequest = threading.Event()
         self.process = None
@@ -1684,6 +1730,22 @@ class bcThread_allrep_all(threading.Thread):
 
             global g_allrepXmlFileName
             print(" o ", g_allrepXmlFileName) 
+
+            # Generate the premis file in the reports directory: self.allrepOutDir
+            print(">> Generating Premis event for Fiwalk/GenrepAll in >>> ", self.allrepOutDir)
+            #if not os.path.exists(self.allrepOutDir):
+                #os.mkdir(self.allrepOutDir)
+            if not os.path.exists(self.genrepOutDir):
+                os.mkdir(self.genrepOutDir)
+            premis_outfile = self.genrepOutDir +"/premis.xml"
+
+            a = BcPremisFile()
+            a.bcGenPremisXmlFiwalk(self.allrepXmlFileName, premis_outfile, True)
+
+            a = BcPremisFile()
+            beReportsXmlFile = self.allrepBeFeatDir+'/report.xml'
+            ## print("D: BE reports XML FIle: ", beReportsXmlFile)
+            a.bcGenPremisXmlBulkExtractor(beReportsXmlFile, premis_outfile, False)
 
             print("\n>> Creating annotated Features \n")
 
@@ -1733,12 +1795,19 @@ class bcThread_allrep_all(threading.Thread):
                 ## print("D: bcThread_allrep_rep: AnnDir: ", self.allrepAnnDir)
                 ## print("D: bcThread_allrep_rep: Outdir: ", self.allrepOutDir)
                 ## print("D: bcThread_allrep_rep: Confile: ", self.allrepConfile)
+                '''
                 bc_get_reports(self.PdfReport, self.FiwalkReport, \
                                  self.allrepXmlFileName, \
                                  self.allrepAnnDir, \
                                  self.allrepOutDir, \
                                  self.allrepConfile)
+                '''
 
+                bc_get_reports(self.PdfReport, self.FiwalkReport, \
+                                 self.allrepXmlFileName, \
+                                 self.allrepAnnDir, \
+                                 self.genrepOutDir, \
+                                 self.allrepConfile)
                 # Set the progresbar active flag so the other thread can
                 # get out of the while loop.
                 ProgressBar._active = False
@@ -1748,7 +1817,8 @@ class bcThread_allrep_all(threading.Thread):
                 if self.stoprequest.isSet():
                     ## print("D: Breaking out of the loop - 3")
                     break
-                print("\n>> Success!!! BitCurator Reports generated in the directory: \n o ", self.allrepOutDir)
+                #print("\n>> Success!!! BitCurator Reports generated in the directory: \n o ", self.allrepOutDir)
+                print("\n>> Success!!! BitCurator Reports generated in the directory: \n o ", self.genrepOutDir)
 
                 # Set the progressbar maximum to > minimum so the spinning will stop
                 global_allrep.progressbar.setRange(0,1)
@@ -1796,10 +1866,15 @@ class bcThread_fw(threading.Thread):
            x = Ui_MainWindow
            print(">> ERROR!!! Fiwalk terminated with error: \n", err)
 
-           premis_outfile = self.allrepOutDir +"/premis.xml"
-           print(">> Generating Premis event in ", premis_outfile)
+           # print("D: >> Generating Premis event ")
+           # If running from fowalk tab, use the same directory as ouput
+           # xml file directory to generate the premis event log.
+           global g_fwXmlFileName
+           xmlpath = os.path.dirname(g_fwXmlFileName)
+           premis_outfile = xmlpath+"/premis.xml"
 
-           BcPremisFile.bcGenPremisXmlFiwalk(dfxmlfile, premis_outfile, False)
+           a = BcPremisFile()
+           a.bcGenPremisXmlFiwalk(g_fwXmlFileName, premis_outfile, True)
         
            global g_textEdit_fwcmdlineoutput
            g_textEdit_fwcmdlineoutput.append( sys.stdout.getvalue() )
@@ -1821,20 +1896,18 @@ class bcThread_fw(threading.Thread):
             print("\n>> Success!!! Fiwalk created the following file(s): \n")
 
             # Set the progressbar maximum to > minimum so the spinning will stop
-            #global global_fw
             global_fw.progressbar.setRange(0,1)
 
             global g_fwXmlFileName
             print(" o ", g_fwXmlFileName) 
 
-            print(">> Generating Premis event >>> ")
+            ## print("D: Generating Premis event >>> ")
 
             # If running from fowalk tab, use the same directory as ouput
             # xml file directory to generate the premis event log.
-            ##premis_outfile = Ui_MainWindow.allrepOutDir +"/premis.xml"
             xmlpath = os.path.dirname(g_fwXmlFileName)
             premis_outfile = xmlpath+"/premis.xml"
-            print("D: Premis Outfile: ", premis_outfile)
+            ## print("D: Premis Outfile: ", premis_outfile)
             a = BcPremisFile()
             a.bcGenPremisXmlFiwalk(g_fwXmlFileName, premis_outfile, True)
 
@@ -1886,7 +1959,7 @@ class bcThread_ann(threading.Thread):
             # get out of the while loop.
             ProgressBar._active = False
 
-            print("\n>> Success!!! AAAnnotated feature files created in the directory: ", self.outdir)
+            print("\n>> Success!!! Annotated feature files created in the directory: ", self.outdir)
 
             # Set the progressbar maximum to > minimum so the spinning will stop
             global_ann.progressbar.setRange(0,1)
