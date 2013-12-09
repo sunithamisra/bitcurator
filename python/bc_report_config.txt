@@ -15,9 +15,9 @@ F:aes:0
 F:base16:0
 F:base64:0
 F:ccn:0
-F:domain:100
+F:domain:0
 F:elf:0
-F:email:
+F:email:0
 F:ether:0
 F:exif:0
 F:find:0
@@ -38,7 +38,7 @@ F:aes_keys.txt:0
 F:url:0
 F:winpe:0
 F:winpefetch:0
-F:windirs:100
+F:windirs:0
 F:winprefetch:0
 F:zip:0
 F:bulk:0
@@ -57,7 +57,7 @@ R:
 ####################################################
 # Miscellaneous optoins
 # Don't display special files - those starting from "."
-S:REPORT_SPECIAL_FILES:NO
+S:REPORT_SPECIAL_FILES:YES
 #
 # User can set the maximum lines to report for the PDF file.
 S:MAX_LINES_TO_REPORT:500
