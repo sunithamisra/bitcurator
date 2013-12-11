@@ -1479,7 +1479,7 @@ class Ui_MainWindow(object):
         self.allrepBcpyDir = "/home/bcadmin/Tools/bulk_extractor/python"
         # FIXME-BEFORE COMMIT: For testing, I have set it to my path. Replace this
         # line with the line above before committing.
-        #self.allrepBcpyDir = "/home/sunitha/Research/Tools/bulk_extractor/python"
+        self.allrepBcpyDir = "/home/sunitha/Research/Tools/bulk_extractor/python"
         return (0)
 
     def bc_allrep_check_parameters_old(self):
@@ -1874,7 +1874,7 @@ class bcThread_fw(threading.Thread):
            premis_outfile = xmlpath+"/premis.xml"
 
            a = BcPremisFile()
-           a.bcGenPremisXmlFiwalk(g_fwXmlFileName, premis_outfile, True)
+           a.bcGenPremisXmlFiwalk(g_fwXmlFileName, premis_outfile, True, True)
         
            global g_textEdit_fwcmdlineoutput
            g_textEdit_fwcmdlineoutput.append( sys.stdout.getvalue() )
@@ -1909,14 +1909,16 @@ class bcThread_fw(threading.Thread):
             premis_outfile = xmlpath+"/premis.xml"
             ## print("D: Premis Outfile: ", premis_outfile)
             a = BcPremisFile()
-            a.bcGenPremisXmlFiwalk(g_fwXmlFileName, premis_outfile, True)
+            a.bcGenPremisXmlFiwalk(g_fwXmlFileName, premis_outfile, True, True)
 
             x = Ui_MainWindow
-            # Note: setText for seme reason, wouldn't work when used with
+            # Note: setText for some reason, wouldn't work when used with
             # global value. append seems to work
             # g_textEdit_fwcmdlineoutput.setText( sys.stdout.getvalue() )
             g_textEdit_fwcmdlineoutput.append( sys.stdout.getvalue() )
             sys.stdout = x.oldstdout
+            x.oldstdout = sys.stdout
+            sys.stdout = StringIO()
                 
     def stop(self):
         if self.process is not None:
