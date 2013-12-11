@@ -7,6 +7,15 @@ Real-World Collecting Institutions
 Copyright (C) 2011-2013
 All rights reserved.
 
+December 6, 2013:
+BitCurator 0.5.0 released
+- PREMIS event output initial commit
+- Improved GUI stability
+- Image mounting scripts
+
+September 30, 2013:
+BitCurator 0.4.0 released
+
 September 9, 2013:
 BitCurator 0.3.4 released
 - Updated GUI, threaded progress bars complete. Updated OK/Cancel buttons.
