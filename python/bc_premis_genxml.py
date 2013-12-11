@@ -28,7 +28,6 @@ root = "null"
 class BcPremisFile:
 
     # The first block of disk-image object 
-    ##def bcPremisGenXmlObject(self, root, image_name):
     def bcPremisGenXmlObject(self, image_name):
         global root
         object1 = etree.SubElement(root, 'object')
@@ -59,7 +58,7 @@ class BcPremisFile:
             # print("D: command_line as list: ", templist[2] )
             return templist[2]
 
-    def bcGenPremisEvent(self, root, eIdType, eIdVal, eType, eDateTime, eOutcome, eoDetail, of_premis, write_to_file = True):
+    def bcGenPremisEvent(self, root, eIdType, eIdVal, eType, eDateTime, eOutcome, eoDetail, of_premis, write_to_file = False):
         # Generate the Event:
         event = etree.SubElement(root, 'event')
         root.append(event)
@@ -101,23 +100,18 @@ class BcPremisFile:
         # pretty string: 
         s = etree.tounicode(root, pretty_print=True)
         
-        ## print(s)
+        #print(s)
         if (write_to_file == True):
             of_premis.write(bytes(s, 'UTF-8'))
  
     # Generate Object and event parts for the disk image
     def bcGenPremisXmlDiskImage(self, image_name, premis_image_info, premis_file):
-        # First check if the premis file exists. If not, create a new one.
-        ## print("D: bcGenPremisXmlDiskImage: Image: ", image_name)
-        ## print("D: bcGenPremisXmlDiskImage: Premis file: ", premis_file)
-        if os.path.exists(premis_file):
-            of_premis = open(premis_file,"ab")
-        else:
-            of_premis = open(premis_file,"wb")
+        # We will not create the output file till the last event.
+        of_premis = "null"
 
         # create XML 
         global root
-        root = etree.Element("premis")
+        root = etree.Element("premis", xmlns="info:lc/xmlns/premis-v2", xsi="http://www.w3c.org/2001/XMLSchema-instance", version="2.0")
         
         # Generate the disk image Object segment 
         self.bcPremisGenXmlObject(image_name)
@@ -143,37 +137,35 @@ class BcPremisFile:
 
         ## print("D: Geenrating disk image Event: ", root, image_name)
 
-        self.bcGenPremisEvent(root, eventIdType, eventIdVal, eventType, eDateTime, eOutcome, eoDetail, of_premis)
+        self.bcGenPremisEvent(root, eventIdType, eventIdVal, eventType, eDateTime, eOutcome, eoDetail, of_premis, False)
         return root
 
-    # Generate premix XML code for Fiwalk event
-    def bcGenPremisXmlFiwalk(self, dfxmlfile, premis_file, outcome=True):
+    # Generate premis XML code for Fiwalk event
+    def bcGenPremisXmlFiwalk(self, dfxmlfile, premis_file, outcome=True, fw_tab=False):
     
         # If dfxmlfile doesn't exist, Fiwalk command probably failed.
         # If outcome is False, it is confirmed to have failed.
         # Generate premis event accordingly.
         # FIXME: Add premis event for failed case here.
 
-        # First check if the premis file exists. If not, create a new one.
+        # We don't write to the file till the last event is done. If this
+        # routine is invoked by a Fiwalk-tab, this is the last event.
+        # For such a case, create a new file.
+
         ## print("D: bcGenPremisXmlFiwalk: XmlFile: ", dfxmlfile)
         ## print("D: bcGenPremisXmlFiwalk: Premis file: ", premis_file)
-        if os.path.exists(premis_file):
-            of_premis = open(premis_file,"ab")
-        else:
+        if fw_tab == True:
+          if os.path.exists(premis_file):
             of_premis = open(premis_file,"wb")
+            line1 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+            of_premis.write(bytes(line1, 'UTF-8'))
+        else:
+            of_premis = "null"
 
         # Get the image name from "command_line" part of dfxml file:
         dfxml_command_line = fiwalk.fiwalk_xml_command_line(dfxmlfile)
         image_name = self.extractImageName(dfxml_command_line, "fw")
         
-        '''
-        if root == "null":
-            # create XML 
-            root = etree.Element("premis")
-        
-            # Generate the disk image Object segment 
-            self.bcPremisGenXmlObject(root, dfxmlfile, image_name)
-        '''
         # Generate the Fiwalk Event:
         eventIdType = 0  # UUID
         eventIdVal = dfxml_command_line
@@ -184,47 +176,23 @@ class BcPremisFile:
         else:
             eOutcome = "Fiwalk Failure" 
 
-        print(">> Generating Premis Event: ", root, dfxmlfile)
+        ## print("D:bcGenPremisXmlFiwalk: Generating Premis Event: ", root, dfxmlfile)
 
-        self.bcGenPremisEvent(root, eventIdType, eventIdVal,  "File System Analysis", eDateTime, eOutcome, eoDetail, of_premis)
+        self.bcGenPremisEvent(root, eventIdType, eventIdVal,  "File System Analysis", eDateTime, eOutcome, eoDetail, of_premis, fw_tab)
         return root
 
     def bcGenPremisXmlBulkExtractor(self, beReportFile, premis_file, isFirstEvent=False):
-
-        ## print("D: bcGenPremisXmlBulkExtractor: XmlFile: ", beReportFile)
-        ## print("D: bcGenPremisXmlBulkExtractor: Premis file: ", premis_file)
-
         # Extract some values from the corresponding input XML file
         beReportXml_command_line = fiwalk.fiwalk_xml_command_line(beReportFile)
 
         image_name = self.extractImageName(beReportXml_command_line, "be")
         be_version = fiwalk.fiwalk_xml_version(beReportFile)
 
-        # Check if this is the first event in the xml file. If so, create the
-        # root and the header part of the xml file.
-        # FIXME: Revisit isFirstEvent part after making root a global var.
-
-        '''
-        if (isFirstEvent == True):
-            # create XML 
-            # Generate the disk image Object segment 
-            self.bcPremisGenXmlObject(image_name)
-           
-            # The output XML file has to be new: IOW can't be appended
-            # to an existing one. If it already exists, flag error
-            if os.path.exists(premis_file):
-                print(">>> Error: File exists. This cannot be the first event")
-                return
-            else: 
-                # Open the new premis file for writing.
-                of_premis = open(premis_file,"wb")
+        # BE is the last event. So open the outfile to write
+        if not os.path.exists(premis_file):
+            of_premis = open(premis_file,"wb")
         else:
-            # The header and root exist. So append to an existing xml file. 
-            of_premis = open(premis_file,"ab")
-            root = etree.Element("premis")
-        '''
-        of_premis = open(premis_file,"ab")
-        root = etree.Element("premis")
+            of_premis = "null"
 
         print(">>> Generating Bulk Extractor Premis Events XML ")
 
@@ -242,17 +210,11 @@ class BcPremisFile:
         # the report.xml file for generating premis events.
         eOutcome = "Bulk Extractor Output" 
 
-        self.bcGenPremisEvent(root, eventIdType, eventIdVal,  eventType, eDateTime, eOutcome, eoDetail, of_premis)
-        
-    def bcGenPremisXmlAllReports(self, dfxmlfile, premis_file):
-        print("Generating Fiwalk Premis Events XML ")
-        bcGenPremisXmlFiwalk(self, dfxmlfile, premis_file, outcome=True)
-        bcGenPremisXmlBulkExtractor(self, reportsFile, premis_file, outcome=True)
-        
-class XMLDone(Exception):
-    def __init__(self,value):
-        self.value = value
+        line1 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+        of_premis.write(bytes(line1, 'UTF-8'))
 
+        self.bcGenPremisEvent(root, eventIdType, eventIdVal,  eventType, eDateTime, eOutcome, eoDetail, of_premis, True)
+        
 if __name__=="__main__":
     import sys, time, re
 
