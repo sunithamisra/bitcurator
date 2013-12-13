@@ -1093,11 +1093,11 @@ class Ui_MainWindow(object):
         # All set to go. Generate premis events for the disk image and BE
         premis_img_info = bc_utils.bcGetImageInfo(self.allrepImageFileName)
 
-        # Create the XML file in the given directory. If it already
-        # exists, remove it before running the command
-        os.mkdir(self.allrepOutDir)
+        ## It is assumed that self.allrepOutDir exists - since it is 
+        ## created in check_parameters step.
         genAllrepOutDir = self.allrepOutDir+"/reports"
-        os.mkdir(genAllrepOutDir)
+        if not os.path.exists(genAllrepOutDir):
+            os.mkdir(genAllrepOutDir)
 
         ## NOTE: Since the directory "reports" is not yet created, the xml code
         # is temporarily put directly under the output directory. Since the
@@ -1414,6 +1414,8 @@ class Ui_MainWindow(object):
         if (os.path.exists(self.repOutDir)):
             print(">> Error: Output Directory %s exists. " %self.repOutDir)
             return (-1)
+        else:
+            os.mkdir(self.repOutDir)
 
         if ui.lineEdit_rep_confile.text() != self.repConfile:
             self.repConfile = ui.lineEdit_rep_confile.text()
@@ -1465,6 +1467,8 @@ class Ui_MainWindow(object):
         if (os.path.exists(self.allrepOutDir)):
             print(">> Error: Output Directory %s exists. " %self.allrepOutDir)
             return (-1)
+        else:
+            os.mkdir(self.allrepOutDir)
 
         # If config file is not provided by the user, user the default one
         # FIXME: Check for confile is already done earlier. So no need to 
@@ -1731,10 +1735,14 @@ class bcThread_allrep_all(threading.Thread):
             global g_allrepXmlFileName
             print(" o ", g_allrepXmlFileName) 
 
+            oldstdout = sys.stdout
+            sys.stdout = StringIO()
+
             # Generate the premis file in the reports directory: self.allrepOutDir
-            print(">> Generating Premis event for Fiwalk/GenrepAll in >>> ", self.allrepOutDir)
+            print(">> Generating Premis event for Fiwalk in:", self.allrepOutDir)
             #if not os.path.exists(self.allrepOutDir):
                 #os.mkdir(self.allrepOutDir)
+            
             if not os.path.exists(self.genrepOutDir):
                 os.mkdir(self.genrepOutDir)
             premis_outfile = self.genrepOutDir +"/premis.xml"
