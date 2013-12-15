@@ -1,10 +1,11 @@
 #!/bin/bash
 #: Title		: Safe Mount
-#: Date			: 05/12/2011
+#: Date			: 05/15/2011
 #: Author		: "John Lehr" <slo.sleuth@gmail.com>
-#: Version		: 1.0.0
+#: Version		: 1.0.1
 #: Description	: simplified mounting script for forensic analysis
 
+#: 05/15/2011	: v1.0.1 Bug fix, print_deviceinfo made Ubuntu compatible
 #: 05/13/2011	: v1.0.0 First release
 #: 05/12/2011	: v0.1.0 gui framework established
 
@@ -77,14 +78,12 @@ mount_fail ()
 
 print_deviceinfo ()
 {
-# here is your solution patched by me because the "<" and ">" give problems.
-		#DEVICEINFO=$(sudo blkid -o list | sed s/"<"// | sed s/">"// )
-# I prefer the fdsik -lu output so I can see the size of the disk and I can recognize them-
-DEVICEINFO=$(fdisk -lu)
-		yad --title="$TITLE" \
+	DEVICEINFO=$(sudo blkid -o list)
+	sudo fdisk -lu | yad --text-info --title="$TITLE" \
 		--image=gtk-dialog-info \
 		--dialog-sep \
-		--text="<tt>$DEVICEINFO</tt>" \
+		--text="<tt>${DEVICEINFO//<swap>/swap  }</tt>\n\nAddtional Disk Information:" \
+		--height=400 \
 		--button=gtk-ok
 }
 
@@ -103,7 +102,7 @@ write_warning ()
 ## Main application
 MESSAGE="Operation requires administrative privileges.
 Enter root password to continue:"
-gksudo -m "$MESSAGE" "echo -n"
+gksudo -m "$MESSAGE" echo >/dev/null
 
 DEVICES=$(sudo blkid -o device)
 
