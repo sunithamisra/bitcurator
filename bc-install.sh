@@ -6,8 +6,8 @@
 # BitCurator is free and open source. You can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License version 3. 
 #
-# You should have received a copy of the GNU General Public License
-# along with Archivematica. If not, see <http://www.gnu.org/licenses/>.
+# You should have received a copy of the GNU General Public License.
+# If not, see <http://www.gnu.org/licenses/>.
 
 # @package BitCurator 
 # @author Kam Woods <kamwoods@bitcurator.net>
