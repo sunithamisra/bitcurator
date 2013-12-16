@@ -47,7 +47,8 @@ read a
 if [[ $a == "Y" || $a == "y" ]]; then
 echo "Going to ${part_b} ..."
         #echo "sudo apt-get install bitcurator-dep_0.5.6_all.deb -y"
-        sudo dpkg -i debs/bitcurator-dep_0.5.6_all.deb
+        sudo dpkg -i debs/bc-meta/bitcurator-dep_0.5.6_all.deb
+        sudo apt-get -f install -y
 else
 echo "Not going to ${part}"
 fi
