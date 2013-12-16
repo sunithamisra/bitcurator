@@ -48,5 +48,16 @@ else
 echo "Skipping: ${seq}"
 fi
 
+seq="pull down the current BitCurator source code"
+echo -n "\"Would you like to ${seq}?\" (y/N) "
+read a
+if [[ $a == "Y" || $a == "y" ]]; then
+echo "Going to ${seq} ..."
+        #echo "sudo apt-get install git -y"
+        git clone https://github.com/kamwoods/bitcurator
+else
+echo "Skipping: ${seq}"
+fi
+
 exit
 
