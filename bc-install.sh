@@ -25,6 +25,7 @@ echo "We'll be installing some software in ${user_home}."
 # Check for next available UID
 uid_avail=`awk -F: '{uid[$3]=1}END{for(x=1000; x<=1100; x++) {if(uid[x] != ""){}else{print x; exit;}}}' /etc/passwd`
 echo "Next UID available: ${uid_avail}"
+echo ""
 
 # Need to add nopasswdlogin here
 seq="create the default BitCurator user (bcadmin)"
@@ -36,8 +37,10 @@ echo "Going to ${seq} ..."
         #echo "sudo gpasswd -a $USER bcadmin"
         sudo adduser --uid ${uid_avail} --group --system --home /home/bcadmin bcadmin
         sudo gpasswd -a $USER bcadmin
+        echo ""
 else
 echo "Skipping: ${seq}"
+echo ""
 fi
 
 seq_a="install BitCurator dependencies (this may take some time)"
@@ -49,8 +52,10 @@ echo "Going to ${seq_b} ..."
         #echo "sudo apt-get install bitcurator-dep_0.5.6_all.deb -y"
         sudo dpkg -i ${curr_dir}/debs/bc-meta/bitcurator-dep_0.5.6_all.deb
         sudo apt-get -f install -y
+        echo ""
 else
 echo "Skipping: ${seq_b}"
+echo ""
 fi
 
 seq="add the Guymager repository and install the latest version"
@@ -61,8 +66,10 @@ if [[ $a == "Y" || $a == "y" ]]; then
 	wget -q http://deb.pinguin.lu/debsign_public.key -O- | sudo apt-key add -
 	sudo apt-get update
 	sudo apt-get install guymager-beta
+        echo ""
 else
 echo "Skipping: ${seq}"
+echo ""
 fi
 
 seq="add the YaD PPA repository and install YaD"
@@ -73,8 +80,10 @@ if [[ $a == "Y" || $a == "y" ]]; then
         sudo apt-add-repository ppa:webupd8team/y-ppa-manager
         sudo apt-get update
         sudo apt-get install yad
+	echo ""
 else
 echo "Skipping: ${seq}"
+echo ""
 fi
 
 seq="copy BitCurator folders and shortcuts to the desktop"
@@ -82,8 +91,10 @@ echo -n " -- Would you like to ${seq}? -- (y/N) "
 read a
 if [[ $a == "Y" || $a == "y" ]]; then
 	cp -r ${curr_dir}/env/desktop-folders/* ${user_home}/Desktop
+	echo ""
 else
 echo "Skipping: ${seq}"
+echo ""
 fi
 
 exit
