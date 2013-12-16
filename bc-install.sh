@@ -28,7 +28,7 @@ echo "Next UID available: ${uid_avail}"
 
 # Need to add nopasswdlogin here
 seq="create the default BitCurator user (bcadmin)"
-echo -n "\"Would you like to ${part}?\" (y/N) "
+echo -n " -- Would you like to ${seq}? -- (y/N) "
 read a
 if [[ $a == "Y" || $a == "y" ]]; then
 echo "Going to ${seq} ..."
@@ -42,7 +42,7 @@ fi
 
 seq_a="install BitCurator dependencies (this may take some time)"
 seq_b="install BitCurator dependencies"
-echo -n "\"Would you like to ${seq_a}?\" (y/N) "
+echo -n " -- Would you like to ${seq_a}? -- (y/N) "
 read a
 if [[ $a == "Y" || $a == "y" ]]; then
 echo "Going to ${seq_b} ..."
@@ -54,7 +54,7 @@ echo "Skipping: ${seq_b}"
 fi
 
 seq="add the Guymager repository and install the latest version"
-echo -n "\"Would you like to ${seq}?\" (y/N) "
+echo -n " -- Would you like to ${seq}? -- (y/N) "
 read a
 if [[ $a == "Y" || $a == "y" ]]; then
 	sudo wget -nH -rP /etc/apt/sources.list.d/ http://deb.pinguin.lu/pinguin.lu.list        
@@ -66,7 +66,7 @@ echo "Skipping: ${seq}"
 fi
 
 seq="add the YaD PPA repository and install YaD"
-echo -n "\"Would you like to ${seq}?\" (y/N) "
+echo -n " -- Would you like to ${seq}? -- (y/N) "
 read a
 if [[ $a == "Y" || $a == "y" ]]; then
         sudo apt-get install python-software-properties -y
@@ -78,7 +78,7 @@ echo "Skipping: ${seq}"
 fi
 
 seq="copy BitCurator folders and shortcuts to the desktop"
-echo -n "\"Would you like to ${seq}?\" (y/N) "
+echo -n " -- Would you like to ${seq}? -- (y/N) "
 read a
 if [[ $a == "Y" || $a == "y" ]]; then
 	cp -r ${curr_dir}/env/desktop-folders/* ${user_home}/Desktop
