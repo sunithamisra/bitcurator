@@ -97,5 +97,16 @@ echo "Skipping: ${seq}"
 echo ""
 fi
 
+seq="set the desktop background to the BitCurator logo"
+echo -n " -- Would you like to ${seq}? -- (y/N) "
+read a
+if [[ $a == "Y" || $a == "y" ]]; then
+	gsettings set org.gnome.desktop.background picture-uri ${curr_dir}/env/images/bc400px-1280full.png
+	echo ""
+else
+echo "Skipping: ${seq}"
+echo ""
+fi
+
 exit
 
