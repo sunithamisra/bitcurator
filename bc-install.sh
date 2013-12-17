@@ -112,9 +112,9 @@ echo "Skipping: ${seq}"
 echo ""
 fi
 
-# -----------------
-# EXTERNAL SOFTWARE
-# -----------------
+# ----------------------
+# SOFTWARE INSTALLATIONS
+# ----------------------
 
 seq="install Apache Thrift"
 echo -n " -- Would you like to ${seq}? -- (y/N) "
@@ -141,6 +141,34 @@ else
 echo "Skipping: ${seq}"
 echo ""
 fi
+
+# -----------------
+# ENVIRONMENT SETUP
+# -----------------
+
+seq="copy the disk mounting scripts to /usr/local/bin and /usr/sbin"
+echo -n " -- Would you like to ${seq}? -- (y/N) "
+read a
+if [[ $a == "Y" || $a == "y" ]]; then
+	sudo cp -r env/usr/local/bin/* /usr/local/bin
+	sudo cp -r env/usr/sbin/* /usr/sbin
+	echo ""
+else
+echo "Skipping: ${seq}"
+echo ""
+fi
+
+seq="copy support items to /usr/share"
+echo -n " -- Would you like to ${seq}? -- (y/N) "
+read a
+if [[ $a == "Y" || $a == "y" ]]; then
+	sudo cp -r env/share/pixmaps/* /usr/share/pixmaps
+	echo ""
+else
+echo "Skipping: ${seq}"
+echo ""
+fi
+
 
 exit
 
