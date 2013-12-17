@@ -1,3 +1,36 @@
+2013-11-02    <a.nelson@prometheuscomputing.com>
+
+	* idifference.py: Imported null-variable tests, and corrected a variable reference, to help idifference to be used as a module
+	* idifference.py: Imported extra, granular counters on disk state changes
+
+2013-11-01    <a.nelson@prometheuscomputing.com>
+
+	* cat_fileobjects.py: Allow for differential DFXML repeating
+	* Unit tests: Adjusted cleanup, and tested differential DFXML repeating
+
+2013-10-24    <a.nelson@prometheuscomputing.com>
+
+	* dfxml.py: Add null-argument test on content_for_run
+	* dfxml.py: Add image reference to iterative reader
+	* idifference.py: Promote delta namespace to DFXML library
+
+2013-09-19    <a.nelson@prometheuscomputing.com>
+
+	* idifference: Remove redundant, faulty annotation attempt
+
+2013-09-18    <a.nelson@prometheuscomputing.com>
+
+	* Python: Run timeline test on differencing input XML; add hand-validated line count check
+	* fiwalk.py: Correct Fiwalk fallback call
+
+2013-09-17    <a.nelson@prometheuscomputing.com>
+
+	* dfxml: Add an ElementTree tostring() function wrapper that removes redundant namespace declarations, with unit tests for new regular expression
+	* idifference: Update unit tests to include vetted count of fileobjects generated
+	* idifference: Correct a fileobject counting bug (where a counter reset was forgotten)
+	* idifference, icat: Add some XML namespace handling logic, found necessary but missed until the last unit test updates
+	* cat_fileobjects.py: Add debug flag
+
 2013-09-13    <a.nelson@prometheuscomputing.com>
 
 	* idifference.py: Switch XML namespace for differencing to forensicswiki page

@@ -14,12 +14,15 @@ Process:
 4. Replace the old maps with the new maps
 """
 
-__version__ = "0.2.0rfc1"
+__version__ = "0.2.0rfc4"
 
 import sys,fiwalk,dfxml,time
 import copy
 if sys.version_info < (3,1):
     raise RuntimeError("idifference.py now requires Python 3.1 or above")
+
+#Global variable, to be adjusted later
+options = None
 
 def ignore_filename(fn, include_dotdirs=False):
     """
@@ -34,17 +37,18 @@ def ptime(t):
     global options
     if t is None:
         return "null"
-    if options.timestamp:
+    if options and options.timestamp:
         return str(t.timestamp())
     else:
         return str(t.iso8601())
 
 def dprint(x):
     global options
-    if options.debug: print(x)
+    if options and options.debug: print(x)
 
 def header():
-    if options.html:
+    global options
+    if options and options.html:
         print("""<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <body>
@@ -57,14 +61,14 @@ body  { font-family: Sans-serif;}
 
 def h1(title):
     global options
-    if options.html:
+    if options and options.html:
         print("<h1>%s</h1>" % title)
         return
     print("\n\n%s\n" % title)
 
 def h2(title):
     global options
-    if options.html:
+    if options and options.html:
         print("<h2>%s</h2>" % title)
         return
     print("\n\n%s\n%s" % (title,"="*len(title)))
@@ -85,7 +89,7 @@ def table(rows,styles=None,break_on_change=False):
             return "{0:>12}".format(x)
         return str(x)
             
-    if options.html:
+    if options and options.html:
         print("<table>")
         for row in rows:
             print("<tr>")
@@ -125,6 +129,14 @@ class DiskState:
         self.notimeline = notimeline
         self.summary = summary
         self.include_dotdirs = include_dotdirs
+        self.changed_mtime_tally = 0
+        self.changed_atime_tally = 0
+        self.changed_ctime_tally = 0
+        self.changed_crtime_tally = 0
+        self.changed_dir_sha1_tally = 0
+        self.changed_file_sha1_tally = 0
+        self.changed_filesize_tally = 0
+        self.changed_first_byterun_tally = 0
         self.next()
         
     def next(self):
@@ -135,14 +147,25 @@ class DiskState:
         self.fi_tally = self.new_fi_tally
         self.new_fnames = dict()
         self.new_inodes = dict()
+        #Reset sets
         self.new_files          = set()     # set of file objects
         self.renamed_files      = set()     # set of (oldfile,newfile) file objects
         self.changed_content    = set()     # set of (oldfile,newfile) file objects
         self.changed_properties = set()     # list of (oldfile,newfile) file objects
+        #Reset counters
+        self.new_fi_tally = 0
         if self.notimeline:
             self.timeline = None
         else:
             self.timeline = set()
+        self.changed_mtime_tally = 0
+        self.changed_atime_tally = 0
+        self.changed_ctime_tally = 0
+        self.changed_crtime_tally = 0
+        self.changed_dir_sha1_tally = 0
+        self.changed_file_sha1_tally = 0
+        self.changed_filesize_tally = 0
+        self.changed_first_byterun_tally = 0
 
     def process_fi(self,fi):
         global options
@@ -166,15 +189,51 @@ class DiskState:
         ofi = self.fnames.get(fi.filename(),None)
         if ofi:
             dprint("   found ofi")
+            any_diff = False
             if ofi.sha1()!=fi.sha1():
                 dprint("      >>> sha1 changed")
                 self.changed_content.add((ofi,fi))
+                any_diff = True
             elif ofi.atime() != fi.atime() or \
                     ofi.mtime() != fi.mtime() or \
                     ofi.crtime() != fi.crtime() or \
                     ofi.ctime() != fi.ctime():
                 dprint("      >>> time changed")
                 self.changed_properties.add((ofi,fi))
+                any_diff = True
+
+            if any_diff:
+                #Count the types of changes that happened
+                if ofi.filesize() != fi.filesize():
+                    self.changed_filesize_tally += 1
+                if ofi.sha1() != fi.sha1():
+                    if ofi.is_dir():
+                        self.changed_dir_sha1_tally += 1
+                    elif ofi.is_file():
+                        self.changed_file_sha1_tally += 1
+                if ofi.mtime() != fi.mtime():
+                    self.changed_mtime_tally += 1
+                if ofi.atime() != fi.atime():
+                    self.changed_atime_tally += 1
+                if ofi.ctime() != fi.ctime():
+                    self.changed_ctime_tally += 1
+                if ofi.crtime() != fi.crtime():
+                    self.changed_crtime_tally += 1
+                if ofi.byte_runs() and fi.byte_runs():
+                    brdiff = 0
+                    ofirstbr = ofi.byte_runs()[0]
+                    nfirstbr =  fi.byte_runs()[0]
+                    try:
+                        if ofirstbr.file_offset == nfirstbr.file_offset:
+                            brdiff = 1
+                        if ofirstbr.img_offset == nfirstbr.img_offset:
+                            brdiff = 1
+                        if ofirstbr.fs_offset == nfirstbr.fs_offset:
+                            brdiff = 1
+                    except:
+                        pass
+                    self.changed_first_byterun_tally += brdiff
+          
 
         # If a new file, note that (and optionally add to the timeline)
         if not ofi:
@@ -200,11 +259,11 @@ class DiskState:
         self.prior_fname = self.current_fname
         self.current_fname = fname
         if fname.endswith("xml"):
-            with open(infile,'rb') as xmlfile:
+            with open(fname,'rb') as xmlfile:
                 for fi in dfxml.iter_dfxml(xmlfile, preserve_elements=True):
                     self.process_fi(fi)
         else:
-            fiwalk.fiwalk_using_sax(imagefile=open(infile,'rb'), flags=fiwalk.ALLOC_ONLY, callback=self.process_fi)
+            fiwalk.fiwalk_using_sax(imagefile=open(fname,'rb'), flags=fiwalk.ALLOC_ONLY, callback=self.process_fi)
 
     def print_fis(self,title,fis):
         h2(title)
@@ -259,11 +318,16 @@ class DiskState:
 
     def to_xml(self):
         import xml.etree.ElementTree as ET
+        
+        ET.register_namespace("delta", dfxml.XMLNS_DELTA)
+        
         if not options.xmlfilename:
             sys.stderr.write("XML output filename not specified.\n")
             exit(1)
 
         metadict = dict()
+        metadict["XMLNS_DFXML"] = dfxml.XMLNS_DFXML
+        metadict["XMLNS_DELTA"] = dfxml.XMLNS_DELTA
         metadict["program"] = sys.argv[0]
         metadict["version"] = __version__
         metadict["commandline"] = " ".join(sys.argv)
@@ -275,9 +339,9 @@ class DiskState:
 <?xml version="1.0" encoding="UTF-8"?>
 <dfxml
   version="1.0"
-  xmlns='http://www.forensicswiki.org/wiki/Category:Digital_Forensics_XML'
+  xmlns='%(XMLNS_DFXML)s'
   xmlns:dc='http://purl.org/dc/elements/1.1/'
-  xmlns:delta='http://www.forensicswiki.org/wiki/Forensic_Disk_Differencing'
+  xmlns:delta='%(XMLNS_DELTA)s'
   xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'>
   <metadata>
     <dc:type>Disk Image Difference Manifest</dc:type>
@@ -298,19 +362,30 @@ class DiskState:
         def _annotate_changes(tmpel, ofi, fi):
             """
             Adds "delta:changed_property" attributes to elements that changed their values.
-            Returns number of annotations added.
+            Returns number of annotations needed.
             """
             retval = 0
-            # Triplets: Old value, new value, XPath to find element to annotate
-            for (oval, nval, xpath) in [
-              (ofi.filename(), fi.filename(), "./filename"),
-              (ofi.sha1(), fi.sha1(), "./hashdigest[@type='sha1']"),
-              (ofi.md5(), fi.md5(), "./hashdigest[@type='md5']"),
-              (ofi.mtime(), fi.mtime(), "./mtime"),
-              (ofi.atime(), fi.atime(), "./atime"),
-              (ofi.ctime(), fi.ctime(), "./ctime"),
-              (ofi.crtime(), fi.crtime(), "./crtime"),
-              (ofi.filesize(), fi.filesize(), "./filesize")
+            def _xpaths(xp):
+                """
+                Returns a list of xpaths: First, with an xmlns; second, as input.
+
+                @param xp
+                An xpath expression where all elements and attributes needing a namespace declaration are prefixed with "{0}" (for Python string formatting).
+                """
+                retval = []
+                for nsprefix in ["{" + dfxml.XMLNS_DFXML + "}", ""]:
+                    retval.append(xp.format(nsprefix))
+                return retval
+            # Triplets: Old value, new value, XPaths to find element to annotate
+            for (oval, nval, xpaths) in [
+              (ofi.filename(), fi.filename(), _xpaths("./{0}filename")),
+              (ofi.sha1(), fi.sha1(), _xpaths("./{0}hashdigest[@type='sha1']")),
+              (ofi.md5(), fi.md5(), _xpaths("./{0}hashdigest[@type='md5']")),
+              (ofi.mtime(), fi.mtime(), _xpaths("./{0}mtime")),
+              (ofi.atime(), fi.atime(), _xpaths("./{0}atime")),
+              (ofi.ctime(), fi.ctime(), _xpaths("./{0}ctime")),
+              (ofi.crtime(), fi.crtime(), _xpaths("./{0}crtime")),
+              (ofi.filesize(), fi.filesize(), _xpaths("./{0}filesize"))
             ]:
                 #Find and flag the changed properties
 
@@ -320,9 +395,13 @@ class DiskState:
 
                 if oval != nval:
                     retval += 1
-                    propertyel = tmpel.find(xpath)
+                    #Find first namespace match for the property element 
+                    for xp in xpaths:
+                        propertyel = tmpel.find(xp)
+                        if not propertyel is None:
+                            break
                     if propertyel is None:
-                        comment = ET.Comment("Tried to note a changed property with the XPath query %r; however, could not find the element." % xpath)
+                        comment = ET.Comment("Warning: Tried to note a changed property with the XPath queries %r; however, could not find the element." % xpaths)
                         tmpel.insert(0, comment)
                     else:
                         propertyel.attrib["delta:changed_property"] = "1"
@@ -334,7 +413,7 @@ class DiskState:
             xmlfile.write("  ")
             tmpel = copy.copy(fi.xml_element)
             tmpel.attrib["delta:new_file"] = "1"
-            xmlfile.write(ET.tostring(tmpel, encoding="unicode"))
+            xmlfile.write(dfxml.ET_tostring(tmpel, encoding="unicode"))
             xmlfile.write("\n")
         #List deleted files
         for fi in self.fnames.values():
@@ -345,14 +424,12 @@ class DiskState:
             tmpchild = copy.copy(fi.xml_element)
             tmpchild.tag = "delta:original_fileobject"
             tmpel.insert(-1, tmpchild)
-            xmlfile.write(ET.tostring(tmpel, encoding="unicode"))
+            xmlfile.write(dfxml.ET_tostring(tmpel, encoding="unicode"))
             xmlfile.write("\n")
         #List renamed files
         for (ofi, fi) in self.renamed_files:
             #xmlfile.write("<!-- ! %s -> %s -->\n" % (ofi.filename(), fi.filename()))
             tmpel = copy.copy(fi.xml_element)
-            propertyel = tmpel.find("filename")
-            propertyel.attrib["delta:changed_property"] = "1"
             annos = _annotate_changes(tmpel, ofi, fi)
             tmpoldel = copy.copy(ofi.xml_element)
             tmpoldel.tag = "delta:original_fileobject"
@@ -360,7 +437,7 @@ class DiskState:
             tmpel.attrib["delta:renamed_file"] = "1"
             if annos > 1:
                 tmpel.attrib["delta:changed_file"] = "1"
-            xmlfile.write(ET.tostring(tmpel, encoding="unicode"))
+            xmlfile.write(dfxml.ET_tostring(tmpel, encoding="unicode"))
             xmlfile.write("\n")
         #List files with with modified data or metadata
         changed_files = set.union(set(self.changed_content), set(self.changed_properties))
@@ -373,7 +450,7 @@ class DiskState:
             tmpoldel.tag = "delta:original_fileobject"
             tmpel.append(tmpoldel)
             tmpel.attrib["delta:changed_file"] = "1"
-            xmlfile.write(ET.tostring(tmpel, encoding="unicode"))
+            xmlfile.write(dfxml.ET_tostring(tmpel, encoding="unicode"))
             xmlfile.write("\n")
         xmlfile.write("</dfxml>\n")
         xmlfile.close()

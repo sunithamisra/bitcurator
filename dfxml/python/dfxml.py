@@ -29,6 +29,7 @@ where encoding, if present, is 0 for raw, 1 for NTFS compressed.
 
 """
 import sys
+import re
 from sys import stderr
 from subprocess import Popen,PIPE
 import base64
@@ -39,6 +40,9 @@ import datetime
 __version__ = "1.0.1"
 
 tsk_virtual_filenames = set(['$FAT1','$FAT2'])
+
+XMLNS_DFXML = "http://www.forensicswiki.org/wiki/Category:Digital_Forensics_XML"
+XMLNS_DELTA = "http://www.forensicswiki.org/wiki/Forensic_Disk_Differencing"
 
 def isone(x):
     """Return true if something is one (number or string)"""
@@ -82,7 +86,6 @@ def parse_iso8601(ts):
     raise RuntimeError("parse_iso8601: ISO8601 format {} not recognized".format(ts))
 
 
-import re
 rx_iso8601 = re.compile("(\d\d\d\d)-(\d\d)-(\d\d)[T ](\d\d):(\d\d):(\d\d)(\.\d+)?(Z|[-+]\d\d:?\d\d)?")
 def iso8601Tdatetime(s):
     """SLG's conversion of ISO8601 to datetime"""
@@ -747,8 +750,10 @@ class fileobject:
     def content_for_run(self,run=None,imagefile=None):
         """ Returns the content for a specific run. This is a convenience feature
         which does not touch the file object if an imagefile is provided."""
-        if imagefile==None: imagefile=self.imagefile
-        if run.len== -1:
+        if imagefile is None: imagefile=self.imagefile
+        if run is None: raise ValueError("content_for_run called without a 'run' argument.")
+
+        if run.len == -1:
             return chr(0) * run.len
         elif hasattr(run,'fill'):
             return chr(run.fill) * run.len
@@ -1403,7 +1408,7 @@ def read_dfxml(xmlfile=None,imagefile=None,flags=0,callback=None,preserve_fis=Fa
     r.process_xml_stream(xmlfile,callback,preserve_fis)
     return r
 
-def iter_dfxml(xmlfile, preserve_elements=False):
+def iter_dfxml(xmlfile, preserve_elements=False, imagefile=None):
     """Returns an interator that yields fileobjects from a DFXML file.
     
     @param preserve_elements
@@ -1416,14 +1421,35 @@ def iter_dfxml(xmlfile, preserve_elements=False):
     preserve_elements, and about 650MB with.  
     
     This function might be extended in the future to call Fiwalk (and
-    thus become what fileobjects_iter was supposed to be)."""
+    thus become what fileobjects_iter was supposed to be).
+
+    Note that to serialize the fileobjects to strings, you may wish to
+    use the ET_tostring wrapper function in this module.  The
+    ET.tostring function will print XML namespaces if the input XML has
+    an affiliated namespace.  This is presently necessary from the
+    repeated use of the DFXML sax code, but might not be necessary in
+    the future.
+    ElementTree-and-namespace references:
+      Reading with XML namespaces:
+        http://effbot.org/zone/element-namespaces.htm
+        http://stackoverflow.com/a/13475333/1207160
+        http://stackoverflow.com/a/1319417/1207160
+        http://stackoverflow.com/a/14853417/1207160
+      Writing with XML namespaces:
+        http://stackoverflow.com/a/3895958/1207160
+"""
     import io
     import xml.etree.ElementTree as ET
+
+    ET.register_namespace("", XMLNS_DFXML)
+
     if not xmlfile:
         raise ValueError("xmlfile must be specified")
+    qtagname = "{%s}fileobject" % XMLNS_DFXML
     for event, elem in ET.iterparse(xmlfile, ("start","end")):
         if event == "end":
-            if elem.tag == "fileobject":
+            #Note that ElementTree qualifies tag names if possible.  Thus, the paired check.
+            if elem.tag in ["fileobject", qtagname]:
                 xmlstring = ET.tostring(elem)
                 pseudof = io.BytesIO()
                 pseudof.write(xmlstring)
@@ -1432,10 +1458,28 @@ def iter_dfxml(xmlfile, preserve_elements=False):
                     #TODO The volumeobject isn't populated this way; need to catch with iterparse.
                     if preserve_elements:
                         fi.xml_element = elem
-                reader = read_dfxml(pseudof, callback=temp_callback, preserve_fis=True)
+                reader = read_dfxml(xmlfile=pseudof, imagefile=imagefile, callback=temp_callback, preserve_fis=True)
                 yield reader.fi_history[0]
                 if not preserve_elements:
                     elem.clear()
+
+
+#This regular expression removes xmlns declarations from elements.
+#Note it will fail if the namespace includes a quote character.
+rx_xmlns = r"""\sxmlns(:\S+)?=['"][^'"]+['"]"""
+
+def ET_tostring(*pargs, **kwargs):
+    """
+    The ElementTree XML interface produces redundant namespace
+    declarations if you print an element at a time.  This method simply
+    removes all xmlns delcarations from the string.
+    """
+    global rx_xmlns
+    import xml.etree.ElementTree as ET
+    tempstring = ET.tostring(*pargs, **kwargs)
+    retval = re.sub(rx_xmlns, "", tempstring)
+    return retval
+
 
 def read_regxml(xmlfile=None,flags=0,callback=None):
     """Processes an image using expat, calling a callback for node encountered."""
@@ -1594,3 +1638,8 @@ if __name__=="__main__":
         assert db.intersects(byte_run(-1,1))==None
         assert db.intersects(byte_run(10,1))==None
         print("Overlap engine good!")
+        assert re.sub(rx_xmlns, "", """<fileobject xmlns="http://www.forensicswiki.org/wiki/Category:Digital_Forensics_XML">""") == "<fileobject>"
+        assert re.sub(rx_xmlns, "", """<fileobject xmlns:dfxml="http://www.forensicswiki.org/wiki/Category:Digital_Forensics_XML">""") == "<fileobject>"
+        assert re.sub(rx_xmlns, "", """<fileobject delta:new_file="1">""") == """<fileobject delta:new_file="1">"""
+        assert re.sub(rx_xmlns, "", """<fileobject xmlns="http://www.forensicswiki.org/wiki/Category:Digital_Forensics_XML" attr="1">""") == """<fileobject attr="1">"""
+        print("XML namespace regex good!")
