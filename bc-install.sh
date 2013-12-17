@@ -122,6 +122,10 @@ read a
 if [[ $a == "Y" || $a == "y" ]]; then
 	wget archive.apache.org/dist/thrift/0.9.1/thrift-0.9.1.tar.gz -O /tmp/thrift-0.9.1.tar.gz
 	tar zxvf /tmp/thrift-0.9.1.tar.gz -C /tmp
+	cd /tmp/thrift-0.9.1
+	make
+	sudo make install
+	cd ~
 	# UPDATE FOR FINAL INSTALL
 	echo ""
 else
