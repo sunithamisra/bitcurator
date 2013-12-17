@@ -1,7 +1,14 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 # coding=UTF-8
-
+#
+# BitCurator
+# Copyright (C) 2012
+# All rights reserved.
+#
+# This code is distributed under the terms of the GNU General Public
+# License, Version 3. See the text file "COPYING" for further details
+# about the terms of this license.
 #
 # Created: Sun May 26 15:35:39 2013
 #      by: PyQt4 UI code generator 4.9.1, modified manually

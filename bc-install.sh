@@ -22,6 +22,10 @@ echo ""
 echo "It looks like your current working directory is ${curr_dir}."
 echo "We'll be installing some software in ${user_home}."
 
+# -----------
+# BASIC SETUP
+# -----------
+
 # Check for next available UID
 uid_avail=`awk -F: '{uid[$3]=1}END{for(x=1000; x<=1100; x++) {if(uid[x] != ""){}else{print x; exit;}}}' /etc/passwd`
 echo "Next UID available: ${uid_avail}"
@@ -102,6 +106,36 @@ echo -n " -- Would you like to ${seq}? -- (y/N) "
 read a
 if [[ $a == "Y" || $a == "y" ]]; then
 	gsettings set org.gnome.desktop.background picture-uri ${curr_dir}/env/images/bc400px-1280full.png
+	echo ""
+else
+echo "Skipping: ${seq}"
+echo ""
+fi
+
+# -----------------
+# EXTERNAL SOFTWARE
+# -----------------
+
+seq="install Apache Thrift"
+echo -n " -- Would you like to ${seq}? -- (y/N) "
+read a
+if [[ $a == "Y" || $a == "y" ]]; then
+	wget archive.apache.org/dist/thrift/0.9.1/thrift-0.9.1.tar.gz
+	tar zxvf thrift-0.9.1.tar.gz
+	# UPDATE FOR FINAL INSTALL
+	echo ""
+else
+echo "Skipping: ${seq}"
+echo ""
+fi
+
+seq="install libewf"
+echo -n " -- Would you like to ${seq}? -- (y/N) "
+read a
+if [[ $a == "Y" || $a == "y" ]]; then
+	wget https://googledrive.com/host/0B3fBvzttpiiSMTdoaVExWWNsRjg/libewf-20130416.tar.gz
+	tar zxvf libewf-20130416.tar.gz
+	# UPDATE FOR FINAL INSTALL
 	echo ""
 else
 echo "Skipping: ${seq}"
