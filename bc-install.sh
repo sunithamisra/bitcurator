@@ -54,7 +54,7 @@ read a
 if [[ $a == "Y" || $a == "y" ]]; then
 echo "Going to ${seq_b} ..."
         #echo "sudo apt-get install bitcurator-dep_0.5.6_all.deb -y"
-        sudo dpkg -i ${curr_dir}/debs/bc-meta/bitcurator-dep_0.5.6_all.deb
+        sudo dpkg -i ${curr_dir}/debs/bc-meta/bitcurator-deps_0.5.6_all.deb
         sudo apt-get -f install -y
         echo ""
 else
