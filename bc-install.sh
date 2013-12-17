@@ -121,7 +121,7 @@ echo -n " -- Would you like to ${seq}? -- (y/N) "
 read a
 if [[ $a == "Y" || $a == "y" ]]; then
 	wget archive.apache.org/dist/thrift/0.9.1/thrift-0.9.1.tar.gz -O /tmp/thrift-0.9.1.tar.gz
-	tar zxvf thrift-0.9.1.tar.gz
+	tar zxvf /tmp/thrift-0.9.1.tar.gz
 	# UPDATE FOR FINAL INSTALL
 	echo ""
 else
@@ -134,7 +134,7 @@ echo -n " -- Would you like to ${seq}? -- (y/N) "
 read a
 if [[ $a == "Y" || $a == "y" ]]; then
 	wget https://googledrive.com/host/0B3fBvzttpiiSMTdoaVExWWNsRjg/libewf-20130416.tar.gz -O /tmp/libewf-20130416.tar.gz
-	tar zxvf libewf-20130416.tar.gz
+	tar zxvf /tmp/libewf-20130416.tar.gz
 	# UPDATE FOR FINAL INSTALL
 	echo ""
 else
@@ -162,8 +162,8 @@ seq="copy the disk mounting scripts to /usr/local/bin and /usr/sbin"
 echo -n " -- Would you like to ${seq}? -- (y/N) "
 read a
 if [[ $a == "Y" || $a == "y" ]]; then
-	sudo cp -r env/usr/local/bin/* /usr/local/bin
-	sudo cp -r env/usr/sbin/* /usr/sbin
+	sudo cp -r ${curr_dir}/env/usr/local/bin/* /usr/local/bin
+	sudo cp -r ${curr_dir}/env/usr/sbin/* /usr/sbin
 	echo ""
 else
 echo "Skipping: ${seq}"
