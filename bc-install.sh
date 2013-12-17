@@ -120,7 +120,7 @@ seq="install Apache Thrift"
 echo -n " -- Would you like to ${seq}? -- (y/N) "
 read a
 if [[ $a == "Y" || $a == "y" ]]; then
-	wget archive.apache.org/dist/thrift/0.9.1/thrift-0.9.1.tar.gz
+	wget archive.apache.org/dist/thrift/0.9.1/thrift-0.9.1.tar.gz -O /tmp/thrift-0.9.1.tar.gz
 	tar zxvf thrift-0.9.1.tar.gz
 	# UPDATE FOR FINAL INSTALL
 	echo ""
@@ -133,8 +133,20 @@ seq="install libewf"
 echo -n " -- Would you like to ${seq}? -- (y/N) "
 read a
 if [[ $a == "Y" || $a == "y" ]]; then
-	wget https://googledrive.com/host/0B3fBvzttpiiSMTdoaVExWWNsRjg/libewf-20130416.tar.gz
+	wget https://googledrive.com/host/0B3fBvzttpiiSMTdoaVExWWNsRjg/libewf-20130416.tar.gz -O /tmp/libewf-20130416.tar.gz
 	tar zxvf libewf-20130416.tar.gz
+	# UPDATE FOR FINAL INSTALL
+	echo ""
+else
+echo "Skipping: ${seq}"
+echo ""
+fi
+
+seq="install AFFLIB"
+echo -n " -- Would you like to ${seq}? -- (y/N) "
+read a
+if [[ $a == "Y" || $a == "y" ]]; then
+	git clone https://github.com/simsong/AFFLIBv3 /tmp/AFFLIBv3
 	# UPDATE FOR FINAL INSTALL
 	echo ""
 else
