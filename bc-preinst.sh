@@ -38,25 +38,29 @@ echo "It looks like your current working directory is ${curr_dir}."
 echo "We'll be installing some software in ${user_home}."
 
 seq="install git, in order to download BitCurator"
-echo -n "\"Would you like to ${seq}?\" (y/N) "
+echo -n " -- Would you like to ${seq}? -- (y/N) "
 read a
 if [[ $a == "Y" || $a == "y" ]]; then
 echo "Going to ${seq} ..."
         #echo "sudo apt-get install git -y"
         sudo apt-get install git -y
+        echo ""
 else
 echo "Skipping: ${seq}"
+echo ""
 fi
 
 seq="pull down the current BitCurator source code"
-echo -n "\"Would you like to ${seq}?\" (y/N) "
+echo -n " -- Would you like to ${seq}? -- (y/N) "
 read a
 if [[ $a == "Y" || $a == "y" ]]; then
 echo "Going to ${seq} ..."
         #echo "sudo apt-get install git -y"
         git clone https://github.com/kamwoods/bitcurator
+        echo ""
 else
 echo "Skipping: ${seq}"
+echo ""
 fi
 
 exit
