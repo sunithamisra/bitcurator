@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 #
-# disk_access --dfxmlfile <file> --filename <oufile>
+# bc_disk_access --dfxmlfile <file> --filename <oufile>
 #
 # Ex: Cat: 
 # python3 bc_disk_access.py --image ~/aaa/charlie-work-usb-2009-12-11.aff \ 
@@ -19,34 +19,203 @@ import os, fiwalk, sys
 from PyQt4 import QtCore, QtGui
 
 try:
+    _fromUtf8 = QtCore.QString.fromUtf8
+except AttributeError:
+    _fromUtf8 = lambda s: s
+
+try:
     from argparse import ArgumentParser
 except ImportError:
     raise ImportError("This script requires ArgumentParser which is in Python 2.7 or Python 3.0")
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-app = QtGui.QApplication(sys.argv)
+## app = QtGui.QApplication(sys.argv)
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # init widgets
-view = QtGui.QTreeView()
-view.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
-model = QtGui.QStandardItemModel()
-##model.setHorizontalHeaderLabels(['col1', 'col2', 'col3'])
-view.setModel(model)
-view.setUniformRowHeights(True)
+
+global g_model
+global g_image
+global g_dfxmlfile
+
+class Ui_MainWindow(object):
+    def setupUi(self, MainWindow):
+        MainWindow.setObjectName(_fromUtf8("MainWindow"))
+        MainWindow.resize(540, 565)
+        self.centralwidget = QtGui.QWidget(MainWindow)
+        self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
+        self.DirectoryTree = QtGui.QTreeView(self.centralwidget)
+        self.DirectoryTree.setGeometry(QtCore.QRect(10, 40, 521, 401))
+        self.DirectoryTree.setObjectName(_fromUtf8("DirectoryTree"))
+
+        self.DirectoryTree.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
+        self.model = QtGui.QStandardItemModel()
+        self.DirectoryTree.setModel(self.model)
+        self.DirectoryTree.setUniformRowHeights(True)
+        global g_model 
+        g_model = self.model
+
+        g_model.setHorizontalHeaderLabels(['File Structure'])
+
+        self.pushButton_export = QtGui.QPushButton(self.centralwidget)
+        self.pushButton_export.setGeometry(QtCore.QRect(420, 460, 98, 27))
+        self.pushButton_export.setObjectName(_fromUtf8("pushButton_export"))
+        self.pushButton_close = QtGui.QPushButton(self.centralwidget)
+        self.pushButton_close.setGeometry(QtCore.QRect(290, 460, 98, 27))
+        self.pushButton_close.setObjectName(_fromUtf8("pushButton_close"))
+        MainWindow.setCentralWidget(self.centralwidget)
+        self.menubar = QtGui.QMenuBar(MainWindow)
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 540, 25))
+        self.menubar.setObjectName(_fromUtf8("menubar"))
+        self.menuFile = QtGui.QMenu(self.menubar)
+        self.menuFile.setObjectName(_fromUtf8("menuFile"))
+        self.menuHelp = QtGui.QMenu(self.menubar)
+        self.menuHelp.setObjectName(_fromUtf8("menuHelp"))
+        MainWindow.setMenuBar(self.menubar)
+        self.statusbar = QtGui.QStatusBar(MainWindow)
+        self.statusbar.setObjectName(_fromUtf8("statusbar"))
+        MainWindow.setStatusBar(self.statusbar)
+        self.actionExit = QtGui.QAction(MainWindow)
+        self.actionExit.setObjectName(_fromUtf8("actionExit"))
+        self.actionSelect_All = QtGui.QAction(MainWindow)
+        self.actionSelect_All.setObjectName(_fromUtf8("actionSelect_All"))
+        self.actionDeSelect_All = QtGui.QAction(MainWindow)
+        self.actionDeSelect_All.setObjectName(_fromUtf8("actionDeSelect_All"))
+        self.menuFile.addAction(self.actionExit)
+        self.menuHelp.addAction(self.actionSelect_All)
+        self.menuHelp.addAction(self.actionDeSelect_All)
+        self.menubar.addAction(self.menuFile.menuAction())
+        self.menubar.addAction(self.menuHelp.menuAction())
+
+        self.actionExit.triggered.connect(self.exitMenu)
+        self.actionSelect_All.triggered.connect(self.selectAllMenu)
+        self.actionDeSelect_All.triggered.connect(self.deSelectAllMenu)
+
+        # File navigation for Export
+        QtCore.QObject.connect(self.pushButton_export, QtCore.SIGNAL(_fromUtf8("clicked()")), self.buttonClickedExport)
+
+        # Handle the Close button
+        QtCore.QObject.connect(self.pushButton_close, QtCore.SIGNAL(_fromUtf8("clicked()")), self.buttonClickedClose)
+
+        self.retranslateUi(MainWindow)
+        QtCore.QMetaObject.connectSlotsByName(MainWindow)
+
+    def exitMenu(self):
+        QtCore.QCoreApplication.instance().quit()
+
+    def selectAllMenu(self):
+        #QtCore.QCoreApplication.instance().setCheckState(2)
+        #current_item.setCheckState(0)
+        BcFileStructure.bcCheckAllFiles(BcFileStructure, 1, None)
+        
+    def deSelectAllMenu(self):
+        #QtCore.QCoreApplication.instance().quit()
+        #QtCore.QCoreApplication.instance().setCheckState(0)
+        BcFileStructure.bcCheckAllFiles(BcFileStructure, 0, None)
+
+    def buttonClickedClose(self):
+        QtCore.QCoreApplication.instance().quit()
+
+    def buttonClickedExport(self):
+        # First navigate through file menu to choose the directory
+        exportDir = QtGui.QFileDialog.getSaveFileName()
+
+        print(">> Output Directory Selected: ", exportDir)
+        
+        # Now loop through the checked files and dump them in this directory
+        BcFileStructure.bcCheckAllFiles(BcFileStructure, 2, exportDir)
+
+    def retranslateUi(self, MainWindow):
+        MainWindow.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Disk Image Access Interface", None, QtGui.QApplication.UnicodeUTF8))
+        self.pushButton_export.setText(QtGui.QApplication.translate("MainWindow", "Export", None, QtGui.QApplication.UnicodeUTF8))
+        self.pushButton_close.setText(QtGui.QApplication.translate("MainWindow", "Close", None, QtGui.QApplication.UnicodeUTF8))
+        self.menuFile.setTitle(QtGui.QApplication.translate("MainWindow", "File", None, QtGui.QApplication.UnicodeUTF8))
+        self.menuHelp.setTitle(QtGui.QApplication.translate("MainWindow", "Edit", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionExit.setText(QtGui.QApplication.translate("MainWindow", "Exit", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionSelect_All.setText(QtGui.QApplication.translate("MainWindow", "Select All", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionDeSelect_All.setText(QtGui.QApplication.translate("MainWindow", "DeSelect All", None, QtGui.QApplication.UnicodeUTF8))
+
 
 class BcFileStructure:
 
     acc_dict_array = ["filename", "partition", "inode", "name_type", "filesize"]
     fiDictList = []
     parentlist = []
+    file_item_of = dict()
+    path_of = dict()
     
+    # bcCheckAllFiles()
+    # Iterate through the leaves of the file structure and check/uncheck
+    # all the files based on whether "check" is True or False.
+    # This same routine is reused with the parameter "cehck" set to 2, 
+    # to dump the contents of the "checked" files to the specified output 
+    # directory. 
+    def bcCheckAllFiles(self, check, exportDir):
+        ## print(">>D: LENGTH of fiDictList: ", len(self.fiDictList))
+        for i in range(0, len(self.fiDictList) - 1):
+            path = self.fiDictList[i]['filename']
+            if self.fiDictList[i]['name_type'] == 'd':
+                isdir = True
+            else:
+                isdir = False
+            pathlist = path.split('/')
+            pathlen = len(pathlist)
+            ## print("D: Path LiSt: ", pathlist, len(pathlist))
+            ## print("D: =================")
+            last_elem = pathlist[pathlen-1]
+            if last_elem == "." or last_elem == "..":
+                # Ignore . and ..
+                continue 
 
+            if isdir == False:
+                # First get the name of the current file
+                current_fileordir = pathlist[pathlen-1]
+
+                # Now using the dict of files, file_item_of, get the item 
+                # for this file
+                current_item = self.file_item_of[current_fileordir]
+                if check == 1:
+                    ## print("D: Setting File to Checked_state ", current_fileordir) 
+                    current_item.setCheckState(2)
+                elif check == 0:
+                    current_item.setCheckState(0)
+                elif check == 2:
+                    # If "check" is 2, we use this routine to dump the 
+                    # contents of the specified file to the specified output
+                    # file. 
+                    # If this file is "checked", download its contents.
+                    # item.checkState has 0 if not checked, 1 if partially
+                    # checked and 2 if checked. 
+                    # http://qt.developpez.com/doc/4.6/qt/#checkstate-enum
+
+                    if current_item.checkState() == 2:
+                        ## print(">> D: File %s is Checked" %current_fileordir)
+                        if not os.path.exists(exportDir):
+                            os.mkdir(exportDir)
+                        outfile = exportDir + '/'+current_fileordir
+                        print(">> D: Writing to Outfile: ", outfile)
+                        
+                        filestr.bcCatFile(path, g_image, g_dfxmlfile, True, outfile)
+                    #else:
+                        #print("File %s is NOT Checked" %current_fileordir)
+
+    # bcExtractFileStr()
+    # This routine extracts the file structure given a disk image and the
+    # corresponding dfxml file.
     def bcExtractFileStr(self, image, dfxmlfile, outfile):
-        self.bcProcessDfxmlFileUsingSax(dfxmlfile)
-        print("D: Length of dictionary fiDictList: ", len(self.fiDictList))
+        # Extract the information from dfxml file to create the 
+        # dictionary only if it is not done before.
+        if len(self.fiDictList) == 0:
+            self.bcProcessDfxmlFileUsingSax(dfxmlfile)
+            ## print("D: Length of dictionary fiDictList: ", len(self.fiDictList))
+
         parent0 = QtGui.QStandardItem('Disk Image: {}'.format(image))
         current_fileordir = image
         parent_dir_item = parent0
+
+        global g_image
+        global g_dfxmlfile
+        g_image = image
+        g_dfxmlfile = dfxmlfile
 
         # A dictionary item_of{} is maintained which contains each file/
         # directory and its corresponding " tree item" as its value.
@@ -86,11 +255,14 @@ class BcFileStructure:
                 # File: The file could be in any level - top level is the
                 # child of parent0 (disk img). The level is sensed by the
                 # pathlen 
-                ## print("D: FILE = ", pathlist[pathlen-1])
-                ## print("D: PARENT: Pathlen ", pathlist[pathlen-2], pathlen)
                 current_fileordir = pathlist[pathlen-1]
                 current_item = QtGui.QStandardItem(current_fileordir)
                 current_item.setCheckable(True)
+                current_item.setCheckState(0)
+
+                # save the "item" of each file
+                self.file_item_of[current_fileordir] = current_item
+
                 ## print("D: Adding child to parent: ", pathlist[pathlen-2], parent0)
 
                 if pathlen > 1:
@@ -101,20 +273,24 @@ class BcFileStructure:
                 parent_dir_item.appendRow(current_item)
 
             parent = parent_dir_item
-            model.appendRow(parent)
+            #Ui_MainWindow.setupUi.model.appendRow(parent)
+            global g_model
+            g_model.appendRow(parent)
             
-    def bcCatFile(self, filename, image, dfxmlfile):
+    def bcCatFile(self, filename, image, dfxmlfile, redirect_file, outfile):
         # Traverse the XML file, get the file_name, extract the inode number
         # of the file and run icat to extract the data.
         print("bcCatFile: Filename: ", filename)
         print("bcCatFile: image: ", image)
         print("bcCatFile: dfxmlfile: ", dfxmlfile)
+        print("bcCatFile: outfile: ", outfile)
 
-        # First traverse through fdxmlfile to get the block containing "filename"
+        # First traverse through dfxmlfile to get the block containing "filename"
         # to extract the inode.
 
-        self.bcProcessDfxmlFileUsingSax(dfxmlfile)
-        ## print("D: Length of fiDictList ", len(self.fiDictList))
+        if len(self.fiDictList) == 0:
+            self.bcProcessDfxmlFileUsingSax(dfxmlfile)
+            print("D: Length of fiDictList ", len(self.fiDictList))
 
         # Dictionary is formed. Now traverse through the array and 
         # in each dictionary, get the inode and call iCat command.
@@ -134,18 +310,30 @@ class BcFileStructure:
                 f = os.popen(mmls_cmd)
                 part2 = f.read()
                 ## print("D: Extracting partition-2: ", part2)
+
                 part2_list = part2.split()
                 part2_start = part2_list[2]
-                ## print("D: Start offset of Partition-2: ", part2_start)
 
+                ## print("D: Start offset of Partition-2: ", part2_start)
                 ## icat_cmd ex: icat -o 1 ~/aaa/charlie-work-usb-2009-12-11.aff 130 
                 icat_cmd = "icat -o "+part2_start+ " "+ image + " " + self.fiDictList[i]['inode']
-                print("D: Executing iCAT command: ", icat_cmd)
+                ## print(">> D: Executing iCAT command: ", icat_cmd)
 
                 f2 = os.popen(icat_cmd)
-                icat_out = f2.read()
-                print(">>> Contents of file :", filename)
-                print(icat_out)
+                if (redirect_file == True):
+                    # redirect_file is set to True if the contents need to be 
+                    # written to a file.
+                    icat_out = f2.read()
+                    of=open(outfile, 'w')
+                    print(">>D:  Writing to file ", outfile)
+                    of.write(icat_out)
+                    
+                    ## print(icat_out)
+                else:
+                    icat_out = f2.read()
+                    print(">>> Contents of file :", filename)
+                    print(icat_out)
+                return
  
     def cb(self, fi):
         self.fiDictList.append({self.acc_dict_array[0]:fi.filename(), \
@@ -162,7 +350,7 @@ class BcFileStructure:
 if __name__=="__main__":
     import sys, time, re
 
-    parser = ArgumentParser(prog='bc_premis_genxml.py', description='Generate PREMIS XML file for BitCurator events')
+    parser = ArgumentParser(prog='bc_disk_access.py', description='File Access')
     parser.add_argument('--image', action='store', help="Image file ")
     parser.add_argument('--dfxmlfile', action='store', help="DFXML file ")
     parser.add_argument('--cat',action='store_true',help='list contents ')
@@ -195,7 +383,7 @@ if __name__=="__main__":
             print(">> File %s doesnot exist " %args.dfxmlfile) 
             exit(0)
 
-        filestr.bcCatFile(args.filename, args.image, args.dfxmlfile)
+        filestr.bcCatFile(args.filename, args.image, args.dfxmlfile, False, None)
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # expand third container
@@ -211,9 +399,11 @@ if __name__=="__main__":
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     if (args.listfiles == True):
+        app = QtGui.QApplication(sys.argv)
+        MainWindow = QtGui.QMainWindow()
+        ui = Ui_MainWindow()
+        ui.setupUi(MainWindow)
         filestr.bcExtractFileStr(args.image, args.dfxmlfile, args.outfile)
-
-        view.show()
+        MainWindow.show()
         sys.exit(app.exec_())
 
-    
