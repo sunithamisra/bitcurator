@@ -1,5 +1,8 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
+
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
 #
 # BitCurator
 # Copyright (C) 2012
