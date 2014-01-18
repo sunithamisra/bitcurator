@@ -1132,7 +1132,7 @@ class Ui_MainWindow(object):
         os.mkdir(self.allrepAnnDir)
 
         identify_cmd = self.allrepBcpyDir + '/' + 'identify_filenames.py'
-        anncmd = ['python3',identify_cmd,'--all','--imagefile',\
+        anncmd = ['python3',identify_cmd,'--all','--image_filename',\
           self.allrepImageFileName, self.allrepBeFeatDir, self.allrepAnnDir]
 
     
