@@ -17,6 +17,7 @@
 
 import os, fiwalk, sys
 from PyQt4 import QtCore, QtGui
+import subprocess
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -194,7 +195,6 @@ class BcFileStructure:
                         # in the path, if they don't already exist.
                         for k in range(0, len(pathlist)-1):
                             newDir = oldDir + '/' + pathlist[k]
-                            print("pathlisg-k = {0}, path-k: {1}, Dir: {2} ".format(k, pathlist[k], newDir))
                             if not os.path.exists(newDir):
                                 os.mkdir(newDir)
                             oldDir = newDir
@@ -291,8 +291,8 @@ class BcFileStructure:
         ## print(">>D: bcCatFile: dfxmlfile: ", dfxmlfile)
         ## print(">>D: bcCatFile: outfile: ", outfile)
 
-        # First traverse through dfxmlfile to get the block containing "filename"
-        # to extract the inode. Do this just once.
+        # First traverse through dfxmlfile to get the block containing 
+        # "filename" to extract the inode. Do this just once.
 
         if len(self.fiDictList) == 0:
             self.bcProcessDfxmlFileUsingSax(dfxmlfile)
@@ -306,6 +306,7 @@ class BcFileStructure:
                 ##                  filename, self.fiDictList[i]['inode']) 
                 # First get the offset of the 2nd partition using mmls cmd
                 # ex: mmls -i aff ~/aaa/jo-favorites-usb-2009-12-11.aff
+
                 if image.endswith(".E01") or image.endswith(".e01"):
                     imgtype = 'ewf'
                 elif image.endswith(".aff") or image.endswith(".AFF"):
@@ -313,24 +314,31 @@ class BcFileStructure:
                 mmls_cmd = "mmls -i " + imgtype +" "+image +" | grep \"02:\""
 
                 ## print("D: Executing mmls command: ", mmls_cmd) 
-                f = os.popen(mmls_cmd)
-                part2 = f.read()
+                part2 = subprocess.check_output(mmls_cmd, shell=True)
                 ## print("D: Extracting partition-2: ", part2)
 
                 part2_list = part2.split()
-                part2_start = part2_list[2]
+                part2_start = int(part2_list[2])
 
                 ## print("D: Start offset of Partition-2: ", part2_start)
                 ## icat_cmd ex: icat -o 1 ~/aaa/charlie-work-usb-2009-12-11.aff 130 
                 outfile = outfile.replace("$", "\$")
+                outfile = outfile.replace(" ", "\ ")
 
                 # redirect_file is set to True if the contents need to be 
                 # written to a file.
                 if (redirect_file == True):
-                    icat_cmd = "icat -o "+part2_start+ " "+ image + " " + self.fiDictList[i]['inode'] + ' > ' + outfile
+                    icat_cmd = "icat -o "+str(part2_start)+ " "+ \
+                                image + " " + \
+                                self.fiDictList[i]['inode'] + ' > ' + outfile
                     ## print(">> D: Executing iCAT command: ", icat_cmd)
                     f2 = os.popen(icat_cmd)
-                    print(">> Writing to file ", outfile)
+ 
+                    # FIXME: Using subprocess.check_output is making icat_cmd
+                    # fail for some instances. Revisit this. Till then the
+                    # older call os.popen is used, which seems to work fine.
+                    # subprocess.check_output(icat_cmd, shell=True)
+                    ## print(">> Writing to file ", outfile)
                 else:
                     icat_cmd = "icat -o "+part2_start+ " "+ image + " " + self.fiDictList[i]['inode']
                     ## print(">> D: Executing iCAT command: ", icat_cmd)
