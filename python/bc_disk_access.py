@@ -29,6 +29,11 @@ try:
 except ImportError:
     raise ImportError("This script requires ArgumentParser which is in Python 2.7 or Python 3.0")
 
+try:
+    from io import StringIO
+except ImportError:
+    from cStringIO import StringIO
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ## app = QtGui.QApplication(sys.argv)
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -41,14 +46,43 @@ global g_dfxmlfile
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName(_fromUtf8("MainWindow"))
-        MainWindow.resize(540, 565)
+        MainWindow.resize(835, 565)
+
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(MainWindow.sizePolicy().hasHeightForWidth())
+        MainWindow.setSizePolicy(sizePolicy)
+        
+
         self.centralwidget = QtGui.QWidget(MainWindow)
         self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
+
+        self.gridLayout = QtGui.QGridLayout(self.centralwidget)
+        self.gridLayout.setObjectName(_fromUtf8("gridLayout"))
+
+        self.pushButton_close = QtGui.QPushButton(self.centralwidget)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.pushButton_close.sizePolicy().hasHeightForWidth())
+        self.pushButton_close.setSizePolicy(sizePolicy)
+        self.pushButton_close.setObjectName(_fromUtf8("pushButton_close"))
+        self.gridLayout.addWidget(self.pushButton_close, 2, 0, 1, 1)
+
+
         self.DirectoryTree = QtGui.QTreeView(self.centralwidget)
-        self.DirectoryTree.setGeometry(QtCore.QRect(10, 40, 521, 401))
+
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Ignored, QtGui.QSizePolicy.Ignored)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.DirectoryTree.sizePolicy().hasHeightForWidth())
+        self.DirectoryTree.setSizePolicy(sizePolicy)
         self.DirectoryTree.setObjectName(_fromUtf8("DirectoryTree"))
 
         self.DirectoryTree.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
+        self.gridLayout.addWidget(self.DirectoryTree, 1, 0, 1, 3)
+
         self.model = QtGui.QStandardItemModel()
         self.DirectoryTree.setModel(self.model)
         self.DirectoryTree.setUniformRowHeights(True)
@@ -58,14 +92,48 @@ class Ui_MainWindow(object):
         g_model.setHorizontalHeaderLabels(['File Structure'])
 
         self.pushButton_export = QtGui.QPushButton(self.centralwidget)
-        self.pushButton_export.setGeometry(QtCore.QRect(420, 460, 98, 27))
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.pushButton_export.sizePolicy().hasHeightForWidth())
+        self.pushButton_export.setSizePolicy(sizePolicy)
         self.pushButton_export.setObjectName(_fromUtf8("pushButton_export"))
-        self.pushButton_close = QtGui.QPushButton(self.centralwidget)
-        self.pushButton_close.setGeometry(QtCore.QRect(290, 460, 98, 27))
-        self.pushButton_close.setObjectName(_fromUtf8("pushButton_close"))
+        self.gridLayout.addWidget(self.pushButton_export, 2, 1, 1, 1)
+        self.pushButton_dump = QtGui.QPushButton(self.centralwidget)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.pushButton_dump.sizePolicy().hasHeightForWidth())
+        self.pushButton_dump.setSizePolicy(sizePolicy)
+        self.pushButton_dump.setObjectName(_fromUtf8("pushButton_dump"))
+        self.gridLayout.addWidget(self.pushButton_dump, 2, 2, 1, 1)
+
+        self.label = QtGui.QLabel(self.centralwidget)
+        font = QtGui.QFont()
+        font.setBold(True)
+        font.setWeight(75)
+        self.label.setFont(font)
+        self.label.setObjectName(_fromUtf8("label"))
+        self.gridLayout.addWidget(self.label, 0, 3, 1, 1)
+        
+        self.textEdit = QtGui.QTextEdit(self.centralwidget)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Ignored, QtGui.QSizePolicy.Expanding)
+        sizePolicy.setHeightForWidth(self.textEdit.sizePolicy().hasHeightForWidth())
+        self.textEdit.setSizePolicy(sizePolicy)
+        self.textEdit.setAutoFillBackground(True)
+        self.textEdit.setStyleSheet(_fromUtf8("background-color: rgb(200, 206, 200);\n"
+"border-color: rgb(170, 0, 0);"))
+        self.textEdit.setTextInteractionFlags(QtCore.Qt.TextSelectableByKeyboard|QtCore.Qt.TextSelectableByMouse)
+        self.textEdit.setObjectName(_fromUtf8("textEdit"))
+        self.gridLayout.addWidget(self.textEdit, 1, 3, 1, 1)
+        
+        
+        global g_textEdit
+        g_textEdit = self.textEdit
+
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 540, 25))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 835, 25))
         self.menubar.setObjectName(_fromUtf8("menubar"))
         self.menuFile = QtGui.QMenu(self.menubar)
         self.menuFile.setObjectName(_fromUtf8("menuFile"))
@@ -97,6 +165,9 @@ class Ui_MainWindow(object):
         # Handle the Close button
         QtCore.QObject.connect(self.pushButton_close, QtCore.SIGNAL(_fromUtf8("clicked()")), self.buttonClickedClose)
 
+        # Handle the Dump button
+        QtCore.QObject.connect(self.pushButton_dump, QtCore.SIGNAL(_fromUtf8("clicked()")), self.buttonClickedDump)
+
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
@@ -114,17 +185,29 @@ class Ui_MainWindow(object):
 
     def buttonClickedExport(self):
         # First navigate through file menu to choose the directory
-        exportDir = QtGui.QFileDialog.getSaveFileName()
+        exportDir = QtGui.QFileDialog.getSaveFileName(caption="Select an Output Directory to export files")
 
-        print(">> Output Directory Selected: ", exportDir)
+        ## print(">> Output Directory Selected: ", exportDir)
         
+        self.oldstdout = sys.stdout
+        sys.stdout = StringIO()
         # Now loop through the checked files and dump them in this directory
         BcFileStructure.bcCheckAllFiles(BcFileStructure, 2, exportDir)
+
+        print(">> Copied files to the directory: ", exportDir)
+        global g_textEdit
+        g_textEdit.setText( sys.stdout.getvalue() )
+        sys.stdout = self.oldstdout
+
+    def buttonClickedDump(self):
+        BcFileStructure.bcCheckAllFiles(BcFileStructure, 3, None)
 
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Disk Image Access Interface", None, QtGui.QApplication.UnicodeUTF8))
         self.pushButton_export.setText(QtGui.QApplication.translate("MainWindow", "Export", None, QtGui.QApplication.UnicodeUTF8))
         self.pushButton_close.setText(QtGui.QApplication.translate("MainWindow", "Close", None, QtGui.QApplication.UnicodeUTF8))
+        self.pushButton_dump.setText(QtGui.QApplication.translate("MainWindow", "Dump", None, QtGui.QApplication.UnicodeUTF8))
+        self.label.setText(QtGui.QApplication.translate("MainWindow", "File Dump", None, QtGui.QApplication.UnicodeUTF8))
         self.menuFile.setTitle(QtGui.QApplication.translate("MainWindow", "File", None, QtGui.QApplication.UnicodeUTF8))
         self.menuHelp.setTitle(QtGui.QApplication.translate("MainWindow", "Edit", None, QtGui.QApplication.UnicodeUTF8))
         self.actionExit.setText(QtGui.QApplication.translate("MainWindow", "Exit", None, QtGui.QApplication.UnicodeUTF8))
@@ -145,7 +228,8 @@ class BcFileStructure:
     # all the files based on whether "check" is True or False.
     # This same routine is reused with the parameter "cehck" set to 2, 
     # to dump the contents of the "checked" files to the specified output 
-    # directory. 
+    # directory. It is again used with check=3 to dump the contents of a
+    # file to the textEdit window. 
     def bcCheckAllFiles(self, check, exportDir):
         ## print(">>D: LENGTH of fiDictList: ", len(self.fiDictList))
         for i in range(0, len(self.fiDictList) - 1):
@@ -204,6 +288,46 @@ class BcFileStructure:
                         filestr.bcCatFile(path, g_image, g_dfxmlfile, True, outfile)
                     #else:
                         #print("File %s is NOT Checked" %current_fileordir)
+                elif check == 3:
+                    # Dump the first checked File in textEdit window
+                    if current_item.checkState() == 2:
+                        print(">> D: File %s is Checked" %current_fileordir)
+
+                        self.oldstdout = sys.stdout
+                        sys.stdout = StringIO()
+                        
+                        ## print("D: >> Dumping the contents of the file ", path)
+                        filestr.bcCatFile(path, g_image, g_dfxmlfile, False, None)
+                         
+                        global g_textEdit
+                        g_textEdit.setText( sys.stdout.getvalue() )
+                        sys.stdout = self.oldstdout
+                        
+                        # We list only the first checked file.
+                        return
+
+    def bcHandleSpecialChars(self, filename):
+        filename = filename.replace("$", "\$")
+        filename = filename.replace(" ", "\ ")
+        filename = filename.replace("(", "\(")
+        filename = filename.replace(")", "\)")
+        return filename
+                    
+    def bcGetFilenameFromPath(self, path):
+        pathlist = path.split('/')
+        pathlen = len(pathlist)
+
+        filename = pathlist[pathlen-1]
+
+        # Prepend special characters with backslash
+        '''
+        filename = filename.replace("$", "\$")
+        filename = filename.replace(" ", "\ ")
+        filename = filename.replace("(", "\(")
+        filename = filename.replace(")", "\)")
+        '''
+        filename = self.bcHandleSpecialChars(filename)
+        return filename
 
     # bcExtractFileStr()
     # This routine extracts the file structure given a disk image and the
@@ -296,7 +420,7 @@ class BcFileStructure:
 
         if len(self.fiDictList) == 0:
             self.bcProcessDfxmlFileUsingSax(dfxmlfile)
-            print("D: Length of fiDictList ", len(self.fiDictList))
+            ## print("D: Length of fiDictList ", len(self.fiDictList))
 
         # Dictionary is formed. Now traverse through the array and 
         # in each dictionary, get the inode and call iCat command.
@@ -322,12 +446,17 @@ class BcFileStructure:
 
                 ## print("D: Start offset of Partition-2: ", part2_start)
                 ## icat_cmd ex: icat -o 1 ~/aaa/charlie-work-usb-2009-12-11.aff 130 
-                outfile = outfile.replace("$", "\$")
-                outfile = outfile.replace(" ", "\ ")
-
                 # redirect_file is set to True if the contents need to be 
                 # written to a file.
                 if (redirect_file == True):
+                    '''
+                    outfile = outfile.replace("$", "\$")
+                    outfile = outfile.replace(" ", "\ ")
+                    outfile = outfile.replace("(", "\(")
+                    outfile = outfile.replace(")", "\)")
+                    '''
+                    outfile = self.bcHandleSpecialChars(outfile)
+
                     icat_cmd = "icat -o "+str(part2_start)+ " "+ \
                                 image + " " + \
                                 self.fiDictList[i]['inode'] + ' > ' + outfile
@@ -340,14 +469,36 @@ class BcFileStructure:
                     # subprocess.check_output(icat_cmd, shell=True)
                     ## print(">> Writing to file ", outfile)
                 else:
-                    icat_cmd = "icat -o "+part2_start+ " "+ image + " " + self.fiDictList[i]['inode']
-                    ## print(">> D: Executing iCAT command: ", icat_cmd)
-                    f2 = os.popen(icat_cmd)
-                    icat_out = f2.read()
-                    print(">>> Contents of file :", filename)
-                    print(icat_out)
+                    # Only printable files are dumped on the textEdit wondow.
+                    # The rest are redirected to a file in /tmp
+                    if (filename.endswith('txt') or filename.endswith('xml')):
+                        icat_cmd = "icat -o "+str(part2_start)+ " "+ image + " " + self.fiDictList[i]['inode']
+                        ## print(">> D: Executing iCAT command: ", icat_cmd)
+                        f2 = os.popen(icat_cmd)
+                        icat_out = f2.read()
+                        print(">> Dumping Contents of the file :", filename)
+                        print("\n")
+                        print(icat_out)
+
+                    else:
+                        # Strip the path to extract just the name of the file.
+                        justFilename = self.bcGetFilenameFromPath(filename)                
+                        icat_cmd = "icat -o "+str(part2_start)+ " "+ \
+                                image + " " + \
+                                self.fiDictList[i]['inode'] + ' > /tmp/'+justFilename
+                        f2 = os.popen(icat_cmd)
+
+                        # Open the file in the pdf reader if it is a PDF file
+                        # else copy it to a file in /tmp
+                        if justFilename.endswith('pdf'):
+                            print(">>> Opening the PDF file /tmp/",justFilename)  
+                            os.system('evince /tmp/'+justFilename)
+                        else:
+                            print(">>> File copied to: ", '/tmp/'+justFilename)
+
                 return
  
+    # Callback function for SAX processing of the dfxml file.
     def cb(self, fi):
         self.fiDictList.append({self.acc_dict_array[0]:fi.filename(), \
                            self.acc_dict_array[1]:fi.partition(), \
@@ -356,6 +507,8 @@ class BcFileStructure:
                            self.acc_dict_array[4]:fi.filesize() })
 
         
+    # The fiwalk utility fiwalk_using_sax is invoked with a callback
+    # to process the dfxml file contents.
     def bcProcessDfxmlFileUsingSax(self, dfxmlfile):
         fiwalk.fiwalk_using_sax(xmlfile=open(dfxmlfile, 'rb'),callback=self.cb)
        
@@ -380,9 +533,7 @@ if __name__=="__main__":
     print("D: output file", args.outfile)
     # FIXME: If dfxmlfile not given, this should run the fiwalk cmd to
     # extract the dfxml file
-
     filestr = BcFileStructure()
-
 
     # The following call is just to test bcCatFile, giving a filename
     # from the dfxml file. In reality, it will be invoked from a click on 
