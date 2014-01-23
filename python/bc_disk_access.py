@@ -18,6 +18,7 @@
 import os, fiwalk, sys
 from PyQt4 import QtCore, QtGui
 import subprocess
+from subprocess import Popen,PIPE
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -320,12 +321,6 @@ class BcFileStructure:
         filename = pathlist[pathlen-1]
 
         # Prepend special characters with backslash
-        '''
-        filename = filename.replace("$", "\$")
-        filename = filename.replace(" ", "\ ")
-        filename = filename.replace("(", "\(")
-        filename = filename.replace(")", "\)")
-        '''
         filename = self.bcHandleSpecialChars(filename)
         return filename
 
@@ -449,12 +444,6 @@ class BcFileStructure:
                 # redirect_file is set to True if the contents need to be 
                 # written to a file.
                 if (redirect_file == True):
-                    '''
-                    outfile = outfile.replace("$", "\$")
-                    outfile = outfile.replace(" ", "\ ")
-                    outfile = outfile.replace("(", "\(")
-                    outfile = outfile.replace(")", "\)")
-                    '''
                     outfile = self.bcHandleSpecialChars(outfile)
 
                     icat_cmd = "icat -o "+str(part2_start)+ " "+ \
@@ -512,6 +501,30 @@ class BcFileStructure:
     def bcProcessDfxmlFileUsingSax(self, dfxmlfile):
         fiwalk.fiwalk_using_sax(xmlfile=open(dfxmlfile, 'rb'),callback=self.cb)
        
+# Generate the XML file using the Fiwalk cmd
+def bcGenerateDfxmlFile(image):
+    # First check if the file image exists
+    if not os.path.exists(image):
+        print(">> Error. Image %s does not exist" %image)
+        return None
+    # Get the directory where "image" exists
+    directory = os.path.dirname(image)
+    dfxmlfile = directory+'/dfxmlfile.xml'
+
+    cmd = ['fiwalk', '-f', '-X', dfxmlfile, image]
+    print(">> Generating XML File ", dfxmlfile)
+    print(">> Invoking command for Fiwalk = ", cmd)
+
+    ## subprocess.check_output(cmd, shell=True)
+    p = Popen(cmd, stdout=PIPE, stderr=PIPE)
+    (data, err) = p.communicate()
+    if p.returncode:
+        print(">>> Fiwalk command failed for image %s " %image)
+        return None
+    else:
+        print(">>> Generated the file %s " %dfxmlfile)
+        return dfxmlfile
+    
 
 if __name__=="__main__":
     import sys, time, re
@@ -526,28 +539,37 @@ if __name__=="__main__":
 
     args = parser.parse_args()
 
-    print("D: dfxmlfile: ", args.dfxmlfile)
-    print("D: cat: ", args.cat)
-    print("D: listfiles: ", args.listfiles)
-    print("D: filename: ", args.filename)
-    print("D: output file", args.outfile)
-    # FIXME: If dfxmlfile not given, this should run the fiwalk cmd to
-    # extract the dfxml file
+    ## print("D: Image: ", args.image)
+    ## print("D: dfxmlfile: ", args.dfxmlfile)
+    ## print("D: cat: ", args.cat)
+    ## print("D: listfiles: ", args.listfiles)
+    ## print("D: filename: ", args.filename)
+    ## print("D: output file", args.outfile)
+    # If dfxmlfile not given, run the fiwalk cmd to extract the dfxml file
+
+    if (args.dfxmlfile == None):
+        dfxmlfile = bcGenerateDfxmlFile(args.image)
+        if dfxmlfile == None:
+            print(">> Error: Fiwalk generation failed")
+            exit(0)
+    else:
+        dfxmlfile = args.dfxmlfile
+
     filestr = BcFileStructure()
 
     # The following call is just to test bcCatFile, giving a filename
     # from the dfxml file. In reality, it will be invoked from a click on 
     # a file in the web browser.
     if (args.cat == True):
-        if args.filename == None or args.dfxmlfile == None:
+        if args.filename == None or dfxmlfile == None:
             print(">> Filename or dfxml file not provided. Exiting")
             exit(0) 
 
-        if not os.path.exists(args.dfxmlfile):
-            print(">> File %s doesnot exist " %args.dfxmlfile) 
+        if not os.path.exists(dfxmlfile):
+            print(">> File %s doesnot exist " %dfxmlfile) 
             exit(0)
 
-        filestr.bcCatFile(args.filename, args.image, args.dfxmlfile, False, None)
+        filestr.bcCatFile(args.filename, args.image, dfxmlfile, False, None)
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # expand third container
@@ -567,7 +589,7 @@ if __name__=="__main__":
         MainWindow = QtGui.QMainWindow()
         ui = Ui_MainWindow()
         ui.setupUi(MainWindow)
-        filestr.bcExtractFileStr(args.image, args.dfxmlfile, args.outfile)
+        filestr.bcExtractFileStr(args.image, dfxmlfile, args.outfile)
         MainWindow.show()
         sys.exit(app.exec_())
 
