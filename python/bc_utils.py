@@ -201,8 +201,16 @@ def bcGetImageInfo(image_name):
         # It is a E01 file
         premis_img_info = bcGetE01Info(image_name)
     return premis_img_info
+
+def bcHandleSpecialChars(filename):
+        filename = filename.replace("$", "\$")
+        filename = filename.replace(" ", "\ ")
+        filename = filename.replace("(", "\(")
+        filename = filename.replace(")", "\)")
+        return filename
          
 def bcGetAffInfo(image_name):
+    image_name = bcHandleSpecialChars(image_name) 
     os.system('affinfo '+ image_name + '>/tmp/tmpaffinfofile')
     tmpfile = open("/tmp/tmpaffinfofile", "r")
     aff_info = {'version':0, 'acq_date':0, 'imagesize':0}
