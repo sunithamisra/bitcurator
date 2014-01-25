@@ -1483,7 +1483,7 @@ class Ui_MainWindow(object):
         self.allrepBcpyDir = "/home/bcadmin/Tools/bulk_extractor/python"
         # FIXME-BEFORE COMMIT: For testing, I have set it to my path. Replace this
         # line with the line above before committing.
-        # self.allrepBcpyDir = "/home/sunitha/Research/Tools/bulk_extractor/python"
+        self.allrepBcpyDir = "/home/sunitha/Research/Tools/bulk_extractor/python"
         return (0)
 
     def bc_allrep_check_parameters_old(self):
@@ -1735,11 +1735,11 @@ class bcThread_allrep_all(threading.Thread):
             global g_allrepXmlFileName
             print(" o ", g_allrepXmlFileName) 
 
-            oldstdout = sys.stdout
-            sys.stdout = StringIO()
+            ##oldstdout = sys.stdout
+            ##sys.stdout = StringIO()
 
             # Generate the premis file in the reports directory: self.allrepOutDir
-            print(">> Generating Premis event for Fiwalk in:", self.allrepOutDir)
+            print("\n>> Generating Premis event for Fiwalk in:", self.allrepOutDir)
             #if not os.path.exists(self.allrepOutDir):
                 #os.mkdir(self.allrepOutDir)
             
