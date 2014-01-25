@@ -4,8 +4,14 @@ Tools for Digital Forensics Methods and Workflows in
 Real-World Collecting Institutions
 ----------------------------------------------------
 
-Copyright (C) 2011-2013
+Copyright (C) 2011-2014
 All rights reserved.
+
+January 25, 2014
+BitCurator 0.6.4 released
+- Fixed a bug that prevented operation when using filenames with special characters
+- Updated pyExifToolGUI
+- System update
 
 December 20, 2013
 BitCurator 0.5.8 released
