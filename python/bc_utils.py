@@ -210,7 +210,7 @@ def bcHandleSpecialChars(filename):
         return filename
          
 def bcGetAffInfo(image_name):
-    image_name = bcHandleSpecialChars(image_name) 
+    image_name = re.escape(image_name) 
     os.system('affinfo '+ image_name + '>/tmp/tmpaffinfofile')
     tmpfile = open("/tmp/tmpaffinfofile", "r")
     aff_info = {'version':0, 'acq_date':0, 'imagesize':0}
@@ -229,6 +229,7 @@ def bcGetAffInfo(image_name):
     return aff_info
 
 def bcGetE01Info(image_name):
+    image_name = re.escape(image_name)
     os.system('ewfinfo '+ image_name + '>/tmp/tmpe01infofile')
     tmpfile = open("/tmp/tmpe01infofile", "r")
     e01_info = {'version':0, 'acq_date':0, 'imagesize':0}
