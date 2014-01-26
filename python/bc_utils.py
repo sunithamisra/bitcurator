@@ -184,13 +184,13 @@ def bc_get_reports(PdfReport, FiwalkReport, fiwalk_xmlfile, annotated_dir, outdi
             report_fi = FiwalkReport(args.fiwalk_xmlfile)
             report_fi.process_generate_report_fiwalk_from_xml(args)
 
+        outdir = re.escape(args.outdir) 
         # Delete the temporary file created: <outdir>.txt
-        cmd = "/bin/rm " + args.outdir + ".txt"
+        cmd = "/bin/rm " + outdir + ".txt"
 
         # print("D: Deleting temp file", args.outdir, cmd)
         os.system(cmd)
         return
-        ##exit(1)
 
 def bcGetImageInfo(image_name):
     premis_img_info = {'version':0, 'acq_date':0, 'imagesize':0}
@@ -210,8 +210,8 @@ def bcHandleSpecialChars(filename):
         return filename
          
 def bcGetAffInfo(image_name):
-    image_name = re.escape(image_name) 
-    os.system('affinfo '+ image_name + '>/tmp/tmpaffinfofile')
+    mod_image_name = re.escape(image_name)
+    os.system('affinfo ' + mod_image_name + '>/tmp/tmpaffinfofile')
     tmpfile = open("/tmp/tmpaffinfofile", "r")
     aff_info = {'version':0, 'acq_date':0, 'imagesize':0}
     for line in tmpfile:
@@ -229,8 +229,8 @@ def bcGetAffInfo(image_name):
     return aff_info
 
 def bcGetE01Info(image_name):
-    image_name = re.escape(image_name)
-    os.system('ewfinfo '+ image_name + '>/tmp/tmpe01infofile')
+    mod_image_name = re.escape(image_name)
+    os.system('ewfinfo ' + mod_image_name + '>/tmp/tmpe01infofile')
     tmpfile = open("/tmp/tmpe01infofile", "r")
     e01_info = {'version':0, 'acq_date':0, 'imagesize':0}
     for line in tmpfile:
