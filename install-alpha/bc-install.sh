@@ -158,6 +158,18 @@ echo "Skipping: ${seq}"
 echo ""
 fi
 
+seq="install bulk_extractor"
+echo -n " -- Would you like to ${seq}? -- (y/N) "
+read a
+if [[ $a == "Y" || $a == "y" ]]; then
+	git clone https://github.com/simsong/bulk_extractor /tmp/bulk_extractor
+	# UPDATE FOR FINAL INSTALL
+	echo ""
+else
+echo "Skipping: ${seq}"
+echo ""
+fi
+
 # -----------------
 # ENVIRONMENT SETUP
 # -----------------
