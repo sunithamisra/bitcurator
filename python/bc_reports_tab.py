@@ -106,6 +106,8 @@ class Ui_MainWindow(object):
     g_allrepXmlFileName =  allrepXmlFileName
 
     def setupUi(self, MainWindow):
+        # Save the current working directory
+        self.cwd = os.getcwd()
         # Set the directory to user's home directory
         os.chdir(os.environ["HOME"])
 
@@ -1153,15 +1155,8 @@ class Ui_MainWindow(object):
         global g_acc_outdir
         g_acc_outdir = self.accOutdirName
 
-        if os.path.exists(self.accOutdirName):
-            raise RuntimeError(acc_outdir+" exists")
-
-            self.textEdit_acc.setText( sys.stdout.getvalue() )
-            sys.stdout = self.oldstdout
-
-            ##exit(1)
-
-        os.mkdir(self.accOutdirName)
+        if not os.path.exists(self.accOutdirName):
+            os.mkdir(self.accOutdirName)
 
     def getAnnBcpyDir(self):
         # Navigation
@@ -1598,7 +1593,10 @@ class Ui_MainWindow(object):
         self.oldstdout = sys.stdout
         sys.stdout = StringIO()
         
-        cmd2 = ['python3', '/home/sunitha/BC/bc_access/bitcurator/python/bc_disk_access.py', '--image', self.accImageFileName, '--dfxmlfile', dfxmlfile, '--listfiles']
+        scriptdir = self.cwd
+        disk_access_script = scriptdir+'/bc_disk_access.py'
+        cmd2 = ['python3', disk_access_script, '--image', self.accImageFileName, '--dfxmlfile', dfxmlfile, '--outdir', self.accOutdirName, '--listfiles']
+
         # Start two threads - one for executing the above command and
         # a second one to start a progress bar on the gui which keeps
         # spinning till the first thread finishes the command execution
