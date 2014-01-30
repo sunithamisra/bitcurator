@@ -1476,7 +1476,7 @@ class Ui_MainWindow(object):
         identify_cmd = self.annBcpyDir + '/' + 'identify_filenames.py'
         #print("D: annBcpyDir: ", self.annBcpyDir)
 
-        cmd = ['python3',identify_cmd,'--all','--imagefile',\
+        cmd = ['python3',identify_cmd,'--all','--image_filename',\
           self.annImageFileName, self.annBeFeatDir, self.annOutputDirName]
         print("\n>> Running identify_filanames script : ", cmd)
 
