@@ -54,13 +54,17 @@ read a
 if [[ $a == "Y" || $a == "y" ]]; then
 echo "Going to ${seq_b} ..."
         #echo "sudo apt-get install bitcurator-dep_0.5.6_all.deb -y"
-        sudo dpkg -i ${curr_dir}/debs/bc-meta/bitcurator-deps_0.5.6_all.deb
+        sudo dpkg -i ${curr_dir}/debs/bc-meta/bitcurator-deps_0.6.4_all.deb
         sudo apt-get -f install -y
         echo ""
 else
 echo "Skipping: ${seq_b}"
 echo ""
 fi
+
+# ----------------------
+# EXTERNAL REPOSITORIES
+# ----------------------
 
 seq="add the Guymager repository and install the latest version"
 echo -n " -- Would you like to ${seq}? -- (y/N) "
@@ -89,6 +93,10 @@ else
 echo "Skipping: ${seq}"
 echo ""
 fi
+
+# -------------------------
+# ENVIRONMENT CUSTOMIZATION
+# -------------------------
 
 seq="copy BitCurator folders and shortcuts to the desktop"
 echo -n " -- Would you like to ${seq}? -- (y/N) "
@@ -140,6 +148,10 @@ if [[ $a == "Y" || $a == "y" ]]; then
 	wget https://googledrive.com/host/0B3fBvzttpiiSMTdoaVExWWNsRjg/libewf-20130416.tar.gz -O /tmp/libewf-20130416.tar.gz
 	tar zxvf /tmp/libewf-20130416.tar.gz -C /tmp
 	# UPDATE FOR FINAL INSTALL
+	cd /tmp/libewf-20130416
+	./configure
+	make
+	sudo make install
 	echo ""
 else
 echo "Skipping: ${seq}"
@@ -152,6 +164,10 @@ read a
 if [[ $a == "Y" || $a == "y" ]]; then
 	git clone https://github.com/simsong/AFFLIBv3 /tmp/AFFLIBv3
 	# UPDATE FOR FINAL INSTALL
+	cd /tmp/AFFLIBv3
+	./configure
+	make
+	sudo make install
 	echo ""
 else
 echo "Skipping: ${seq}"
@@ -162,17 +178,21 @@ seq="install bulk_extractor"
 echo -n " -- Would you like to ${seq}? -- (y/N) "
 read a
 if [[ $a == "Y" || $a == "y" ]]; then
-	git clone https://github.com/simsong/bulk_extractor /tmp/bulk_extractor
+	git clone --recursive https://github.com/simsong/bulk_extractor /tmp/bulk_extractor
 	# UPDATE FOR FINAL INSTALL
+	cd /tmp/bulk_extractor
+	./configure
+	make
+	sudo make install
 	echo ""
 else
 echo "Skipping: ${seq}"
 echo ""
 fi
 
-# -----------------
-# ENVIRONMENT SETUP
-# -----------------
+# ----------------------
+# MORE ENVIRONMENT SETUP
+# ----------------------
 
 seq="copy the disk mounting scripts to /usr/local/bin and /usr/sbin"
 echo -n " -- Would you like to ${seq}? -- (y/N) "
