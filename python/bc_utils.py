@@ -241,7 +241,7 @@ def bcGetE01Info(image_name):
             tmplist = line.split(':')
             e01_info['acq_date'] = tmplist[1]
     e01_info['imagesize'] = os.system('sizeof('+image_name+')')
-    print("D: E01 Info", e01_info)
+    ## print("D: E01 Info", e01_info)
     return e01_info
     close(tmpfile)
     os.system('rm /tmp/tmpe01infofile')

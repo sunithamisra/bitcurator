@@ -22,6 +22,7 @@ from bc_premis_genxml import BcPremisFile
 
 from generate_report import *
 from bc_utils import *
+from bc_disk_access import *
 #from PyQt4.Qsci import *
 
 try:
@@ -40,11 +41,16 @@ except AttributeError:
 # GUI attributes are initialized only once by the main routine.
 global_allrep = "null"
 global_fw = "null"
+global_acc = "null"
 g_textEdit_allrepcmdlineoutput = "null"
 g_textEdit_fwcmdlineoutput = "null"
+g_textEdit_acc = "null"
 g_xmlFwFilename = "null"
 global_ann = "null"
 g_textEdit_anncmdlineoutput = "null"
+g_acc_outdir = "null"
+g_acc_dfxmlfile = "null"
+g_acc_image = "null"
 
 class Ui_MainWindow(object):
     #def __init__(self, parent=None):
@@ -55,6 +61,7 @@ class Ui_MainWindow(object):
     fwImageFileName = "null"
     beImageFileName = "null"
     annImageFileName = "null"
+    accImageFileName = "null"
     xmlFileName = "null"
     fwXmlFileName = "null"
     allrepXmlFileName = "null"
@@ -71,6 +78,7 @@ class Ui_MainWindow(object):
     configFileName = "null"
     reportsDir = "null"
     annOutputDirName = "null"
+    accOutdirName = "null"
     annBeFeatDir = "null"
     repFwXmlFileName = "null"
     repOutDir = "null"
@@ -78,6 +86,7 @@ class Ui_MainWindow(object):
     allrepConfile = "null"
     repAnnDir = "null"
     progressBar_fw = "null"
+    progressBar_acc = "null"
     progressBar_allrep = "null"
 
     # The standard output from this point is placed by an in-memory
@@ -296,7 +305,7 @@ class Ui_MainWindow(object):
         self.gridLayout_3.addWidget(self.progressBar_fw, 10, 0, 1, 1)
         self.textEdit_fwcmdlineoutput = QtGui.QTextEdit(self.tab_fw)
 
-        #.#
+        # Save some class-specific vars in global vars for later use in threads
         global g_textEdit_fwcmdlineoutput
         g_textEdit_fwcmdlineoutput = self.textEdit_fwcmdlineoutput
 
@@ -600,6 +609,102 @@ class Ui_MainWindow(object):
         self.textEdit_rep.setObjectName(_fromUtf8("textEdit_rep"))
         self.gridLayout_2.addWidget(self.textEdit_rep, 10, 0, 1, 4)
         self.tabWidget.addTab(self.tab_rep, _fromUtf8(""))
+
+        # Add the File-Access Tab:
+        self.tab_acc = QtGui.QWidget()
+        self.tab_acc.setObjectName(_fromUtf8("tab_acc"))
+        self.gridLayout_5 = QtGui.QGridLayout(self.tab_acc)
+        self.gridLayout_5.setObjectName(_fromUtf8("gridLayout_5"))
+        self.label_acc_hdr = QtGui.QLabel(self.tab_acc)
+        font = QtGui.QFont()
+        font.setPointSize(10)
+        font.setItalic(True)
+        self.label_acc_hdr.setFont(font)
+        self.label_acc_hdr.setWordWrap(True)
+        self.label_acc_hdr.setObjectName(_fromUtf8("label_acc_hdr"))
+        self.gridLayout_5.addWidget(self.label_acc_hdr, 0, 0, 1, 5)
+        self.label_acc_image = QtGui.QLabel(self.tab_acc)
+        font = QtGui.QFont()
+        font.setPointSize(10)
+        font.setBold(True)
+        font.setWeight(75)
+        self.label_acc_image.setFont(font)
+        self.label_acc_image.setObjectName(_fromUtf8("label_acc_image"))
+        self.gridLayout_5.addWidget(self.label_acc_image, 1, 0, 1, 1)
+        self.lineEdit_acc_image = QtGui.QLineEdit(self.tab_acc)
+        self.lineEdit_acc_image.setObjectName(_fromUtf8("lineEdit_acc_image"))
+        self.gridLayout_5.addWidget(self.lineEdit_acc_image, 2, 0, 1, 4)
+        self.toolButton_acc_img = QtGui.QToolButton(self.tab_acc)
+        self.toolButton_acc_img.setObjectName(_fromUtf8("toolButton_acc_img"))
+        self.gridLayout_5.addWidget(self.toolButton_acc_img, 2, 4, 1, 1)
+        self.label_acc_outfile = QtGui.QLabel(self.tab_acc)
+        font = QtGui.QFont()
+        font.setPointSize(10)
+        font.setBold(True)
+        font.setWeight(75)
+        self.label_acc_outfile.setFont(font)
+        self.label_acc_outfile.setObjectName(_fromUtf8("label_acc_outfile"))
+        self.gridLayout_5.addWidget(self.label_acc_outfile, 3, 0, 1, 1)
+        self.lineEdit_acc_outdir = QtGui.QLineEdit(self.tab_acc)
+        self.lineEdit_acc_outdir.setObjectName(_fromUtf8("lineEdit_acc_outdir"))
+        self.gridLayout_5.addWidget(self.lineEdit_acc_outdir, 4, 0, 1, 4)
+        self.toolButton_acc_outdir = QtGui.QToolButton(self.tab_acc)
+        self.toolButton_acc_outdir.setObjectName(_fromUtf8("toolButton_acc_outdir"))
+        self.gridLayout_5.addWidget(self.toolButton_acc_outdir, 4, 4, 1, 1)
+        self.label_acc_cmdlineoutput = QtGui.QLabel(self.tab_acc)
+        font = QtGui.QFont()
+        font.setPointSize(10)
+        font.setBold(True)
+        font.setWeight(75)
+        self.label_acc_cmdlineoutput.setFont(font)
+        self.label_acc_cmdlineoutput.setObjectName(_fromUtf8("label_acc_cmdlineoutput"))
+        self.gridLayout_5.addWidget(self.label_acc_cmdlineoutput, 5, 0, 1, 1)
+        self.textEdit_acc = QtGui.QTextEdit(self.tab_acc)
+        self.textEdit_acc.setAutoFillBackground(True)
+        self.textEdit_acc.setTextInteractionFlags(QtCore.Qt.TextSelectableByKeyboard|QtCore.Qt.TextSelectableByMouse)
+        self.textEdit_acc.setObjectName(_fromUtf8("textEdit_acc"))
+        self.gridLayout_5.addWidget(self.textEdit_acc, 6, 0, 1, 5)
+
+        # ProgressBar for File Access:
+        #self.progressBar_acc = QtGui.QProgressBar(self.tab_acc)
+        self.progressBar_acc = ProgressBar()
+        global global_acc
+        global_acc =  self.progressBar_acc
+
+        self.progressBar_acc.setProperty("value", 1)
+        self.progressBar_acc.setObjectName(_fromUtf8("progressBar_acc"))
+        self.gridLayout_5.addWidget(self.progressBar_acc, 7, 0, 1, 1)
+        self.pb_acc_close = QtGui.QPushButton(self.tab_acc)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.pb_acc_close.sizePolicy().hasHeightForWidth())
+        self.pb_acc_close.setSizePolicy(sizePolicy)
+        self.pb_acc_close.setObjectName(_fromUtf8("pb_acc_close"))
+        self.gridLayout_5.addWidget(self.pb_acc_close, 7, 1, 1, 1)
+        self.pb_acc_cancel = QtGui.QPushButton(self.tab_acc)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.pb_acc_cancel.sizePolicy().hasHeightForWidth())
+        self.pb_acc_cancel.setSizePolicy(sizePolicy)
+        self.pb_acc_cancel.setObjectName(_fromUtf8("pb_acc_cancel"))
+        self.gridLayout_5.addWidget(self.pb_acc_cancel, 7, 2, 1, 1)
+        self.pb_acc_run = QtGui.QPushButton(self.tab_acc)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.pb_acc_run.sizePolicy().hasHeightForWidth())
+        self.pb_acc_run.setSizePolicy(sizePolicy)
+        self.pb_acc_run.setObjectName(_fromUtf8("pb_acc_run"))
+        self.gridLayout_5.addWidget(self.pb_acc_run, 7, 3, 1, 2)
+        self.tabWidget.addTab(self.tab_acc, _fromUtf8(""))
+
+        # Save some class-specific vars in global vars for later use in threads
+        global g_textEdit_acc
+        g_textEdit_acc = self.textEdit_acc
+        # End Tab File-access
+          
         self.gridLayout.addWidget(self.tabWidget, 0, 0, 1, 1)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MainWindow)
@@ -677,6 +782,14 @@ class Ui_MainWindow(object):
         QtCore.QObject.connect(self.pb_rep_run, QtCore.SIGNAL(_fromUtf8("clicked()")), self.buttonClickedOkRep)
         QtCore.QObject.connect(self.pb_rep_close, QtCore.SIGNAL(_fromUtf8("clicked()")), self.buttonClickedClose)
         QtCore.QObject.connect(self.pb_rep_cancel, QtCore.SIGNAL(_fromUtf8("clicked()")), self.buttonClickedCancel_rep)
+
+        # File navigation for File Access Tab
+        QtCore.QObject.connect(self.toolButton_acc_img, QtCore.SIGNAL(_fromUtf8("clicked()")), self.getAccImgFileName)
+        QtCore.QObject.connect(self.toolButton_acc_outdir, QtCore.SIGNAL(_fromUtf8("clicked()")), self.getAccOutdir)
+
+        QtCore.QObject.connect(self.pb_acc_run, QtCore.SIGNAL(_fromUtf8("clicked()")), self.buttonClickedOkAcc)
+        QtCore.QObject.connect(self.pb_acc_close, QtCore.SIGNAL(_fromUtf8("clicked()")), self.buttonClickedClose)
+        QtCore.QObject.connect(self.pb_acc_cancel, QtCore.SIGNAL(_fromUtf8("clicked()")), self.buttonClickedCancel_acc)
 
         self.actionExit.triggered.connect(self.exitMenu)
         self.actionCopy.triggered.connect(self.copyMenu)
@@ -834,6 +947,26 @@ class Ui_MainWindow(object):
         global g_thread1_ann
         g_thread1_ann.join()
 
+    def buttonClickedCancel_acc(self):
+        print(">> File Access Task Cancelled ")
+        # Set the progressbar maximum to > minimum so the spinning will stop
+        global global_acc
+        global_acc.progressbar.setRange(0,1)
+
+        # Set the active flag to False
+        ProgressBar._active = False
+
+        x = Ui_MainWindow
+        global g_textEdit_acc
+        g_textEdit_acc.append( sys.stdout.getvalue() )
+        sys.stdout = x.oldstdout
+
+        x.oldstdout = sys.stdout
+        sys.stdout = StringIO()
+
+        # Set the flag in the thread to signal thread termination
+        global g_thread1_acc
+        g_thread1_acc.join()
 
     #
     # buttonClickCancel_rep: Handle Cancel button for Reports tab 
@@ -902,6 +1035,19 @@ class Ui_MainWindow(object):
         self.lineEdit_ann_image.setText(image_file)
         
         self.annImageFileName = image_file
+
+    def getAccImgFileName(self):
+        # Navigation
+        image_file = QtGui.QFileDialog.getOpenFileName(caption="Select an image file")
+        print(">> Image File Selected: ", image_file)
+
+        self.lineEdit_acc_image.setText(image_file)
+        
+        self.accImageFileName = image_file
+ 
+        # Save it globally for use by the thread
+        global g_acc_image
+        g_acc_image = self.accImageFileName
 
     def getbcpyDir(self):
         # Navigation
@@ -979,7 +1125,7 @@ class Ui_MainWindow(object):
         ann_outdir = QtGui.QFileDialog.getSaveFileName(caption="Create a directory for the annotation")
 
         ## print(">> Annotated files Directory Selected by navigating: ", ann_outdir)
-        print(">> Output Directory Selected for Bulk Extractor ", ann_outdir)
+        print(">> Output Directory Selected for Annotated Output ", ann_outdir)
         self.lineEdit_ann_annDir.setText(ann_outdir)
         self.annOutputDirName = ann_outdir
 
@@ -992,6 +1138,31 @@ class Ui_MainWindow(object):
             ##exit(1)
 
         os.mkdir(self.annOutputDirName)
+
+    def getAccOutdir(self):
+        # Since This directory should not exist, use getSaveFileName
+        # to let the user create a new directory.
+        acc_outdir = QtGui.QFileDialog.getSaveFileName(caption="Create a directory for the File Access")
+
+
+        print(">> Output Directory Selected for File Access ", acc_outdir)
+        self.lineEdit_acc_outdir.setText(acc_outdir)
+        self.accOutdirName = acc_outdir
+
+        # Save it in global var for use by the thread
+        global g_acc_outdir
+        g_acc_outdir = self.accOutdirName
+
+        if os.path.exists(self.accOutdirName):
+            raise RuntimeError(acc_outdir+" exists")
+
+            self.textEdit_acc.setText( sys.stdout.getvalue() )
+            sys.stdout = self.oldstdout
+
+            ##exit(1)
+
+        os.mkdir(self.accOutdirName)
+
     def getAnnBcpyDir(self):
         # Navigation
         bcpyDir = QtGui.QFileDialog.getExistingDirectory(caption="")
@@ -1089,7 +1260,6 @@ class Ui_MainWindow(object):
 
         premis_img_info = {'version':0, 'acq_date':0, 'imagesize':0}
 
-        ## XXXXXX
         # All set to go. Generate premis events for the disk image and BE
         premis_img_info = bc_utils.bcGetImageInfo(self.allrepImageFileName)
 
@@ -1188,7 +1358,7 @@ class Ui_MainWindow(object):
         # All set to go. Generate premis events for the disk image and BE
         premis_img_info = bc_utils.bcGetImageInfo(self.fwImageFileName)
 
-        # If running from fowalk tab, use the same directory as ouput
+        # If running from fiwalk tab, use the same directory as ouput
         # xml file directory to generate the premis event log.
         xmlpath = os.path.dirname(g_fwXmlFileName)
         premis_outfile = xmlpath+"/premis.xml"
@@ -1198,8 +1368,8 @@ class Ui_MainWindow(object):
         a.bcGenPremisXmlDiskImage(self.fwImageFileName, premis_img_info, premis_outfile)
 
         cmd = ['fiwalk', '-f', '-X', self.fwXmlFileName, self.fwImageFileName]
-        print(">> Generating XML File ", self.fwXmlFileName)
-        print(">> Invoking command for Fiwalk = ", cmd)
+        print("\n>> Generating XML File ", self.fwXmlFileName)
+        print("\n>> Invoking command for Fiwalk = ", cmd)
 
         self.textEdit_fwcmdlineoutput.setText( sys.stdout.getvalue() )
         sys.stdout = self.oldstdout
@@ -1332,11 +1502,11 @@ class Ui_MainWindow(object):
     # buttonClickedOkRep: Routine invoked when the "Run" (formerly OK) 
     # button on the Reports tab is pressed.
     def buttonClickedOkRep(self):
+        import fiwalk
         self.oldstdout = sys.stdout
         sys.stdout = StringIO()
         use_config_file = True
 
-        ### FIXME: self.setEnabled(False)
         # The standard output from this point is placed by an in-memory
         # buffer.
         self.oldstdout = sys.stdout
@@ -1350,6 +1520,31 @@ class Ui_MainWindow(object):
             self.textEdit_rep.setText( sys.stdout.getvalue() )
             sys.stdout = self.oldstdout
             return
+        
+        ## It is assumed that self.repOutDir exists - since it is 
+        ## created in check_parameters step.
+        genRepOutDir = self.repOutDir+"/reports"
+        if not os.path.exists(genRepOutDir):
+            os.mkdir(genRepOutDir)
+
+        premis_outfile = genRepOutDir + "/premis.xml"
+        
+        # Get the image fullpath from "command_line" part of dfxml file:
+        a = BcPremisFile()
+        dfxml_command_line = fiwalk.fiwalk_xml_command_line(self.repFwXmlFileName)
+        imageName = a.extractImageName(dfxml_command_line, "fw")
+
+        # Now we have the image location, generate premis events for
+        # disk image
+        premis_img_info = bc_utils.bcGetImageInfo(imageName)
+        premis_outfile = genRepOutDir +"/premis.xml"
+
+        print(">> REP: Generating Premis events for Diskimage")
+        a.bcGenPremisXmlDiskImage(imageName, premis_img_info, premis_outfile)
+
+        print(">> REP: Generating FW Premis : ", self.repFwXmlFileName)
+        # Also generate Fiwalk premis events as we have the xml available:
+        a.bcGenPremisXmlFiwalk(self.repFwXmlFileName, premis_outfile, False)
 
         # Start two threads - one for executing the above command and
         # a second one to start a progress bar on the gui which keeps
@@ -1357,14 +1552,66 @@ class Ui_MainWindow(object):
         # and signals the second one by setting a flag. 
         thread1 = bcThread_rep(PdfReport, FiwalkReport, \
                                self.repFwXmlFileName,self.repAnnDir, \
-                               self.repOutDir, self.repConfile )
+                               self.repOutDir, self.repConfile)
         thread2 = guiThread("rep")
         thread1.start()
         thread2.start()
 
-        # We will not quit from the Gui window until the user clicks
-        # on Close.
-        # QtCore.QCoreApplication.instance().quit()
+
+    # buttonClickedOkAcc: Routine invoked when File Access Tab's Run 
+    # button is clicked.
+    def buttonClickedOkAcc(self):
+        self.oldstdout = sys.stdout
+        sys.stdout = StringIO()
+
+        # If Image file is not selected through menu, see if it is
+        # typed in the text box:
+        if ui.lineEdit_acc_image.text() != self.accImageFileName:
+            self.accImageFileName = ui.lineEdit_acc_image.text()
+
+        # If output Outdir is not selected through menu, see if it is
+        # typed in the text box:
+        if ui.lineEdit_acc_outdir.text() != self.accOutdirName:
+            self.accOutdirName = ui.lineEdit_acc_outdir.text()
+
+        # Generte the dfxml file using Fiwalk, in the same directory
+        # as where the image resides.
+        dfxmlpath = os.path.dirname(self.accImageFileName)
+        dfxmlfile = dfxmlpath + '/dfxml.xml'
+
+        if os.path.exists(dfxmlfile):
+            print(">> Removing the existing file ", dfxmlfile)
+            os.system('rm '+ dfxmlfile)
+
+        # Thread uses it. so copy to the global value. We use the same
+        # global var as the fw tab uses as we are piggybacking on it.
+        global g_accXmlFileName
+        g_accXmlFileName = dfxmlfile
+            
+        cmd1 = ['fiwalk', '-f', '-X', dfxmlfile, self.accImageFileName]
+        print(">> Generating XML File ", dfxmlfile)
+        print(">> Invoking command for Fiwalk = ", cmd1)
+        
+        self.textEdit_acc.setText( sys.stdout.getvalue() )
+        sys.stdout = self.oldstdout
+
+        self.oldstdout = sys.stdout
+        sys.stdout = StringIO()
+        
+        cmd2 = ['python3', '/home/sunitha/BC/bc_access/bitcurator/python/bc_disk_access.py', '--image', self.accImageFileName, '--dfxmlfile', dfxmlfile, '--listfiles']
+        # Start two threads - one for executing the above command and
+        # a second one to start a progress bar on the gui which keeps
+        # spinning till the first thread finishes the command execution
+        # and signals the second one by setting a flag. 
+        thread1 = bcThread_acc(cmd1, cmd2)
+
+        # Save the thread handle for later use in cancel task.
+        global g_thread1_acc
+        g_thread1_acc = thread1
+
+        thread2 = guiThread("acc")
+        thread1.start()
+        thread2.start()
 
     def bcRunCmd(self, cmd, err):
         (data, err) = Popen(cmd, stdout=PIPE, stderr=PIPE).communicate()
@@ -1483,7 +1730,7 @@ class Ui_MainWindow(object):
         self.allrepBcpyDir = "/home/bcadmin/Tools/bulk_extractor/python"
         # FIXME-BEFORE COMMIT: For testing, I have set it to my path. Replace this
         # line with the line above before committing.
-        #self.allrepBcpyDir = "/home/sunitha/Research/Tools/bulk_extractor/python"
+        self.allrepBcpyDir = "/home/sunitha/Research/Tools/bulk_extractor/python"
         return (0)
 
     def bc_allrep_check_parameters_old(self):
@@ -1539,7 +1786,6 @@ class Ui_MainWindow(object):
         # startDetached apparently seems to fix that issue.
 
         QtCore.QProcess.startDetached(cmdstr)
-        #self.textEdit_allrep.setText( sys.stdout.getvalue() )
         self.textEdit_allrep.append(sys.stdout.getvalue() )
         sys.stdout = self.oldstdout
 
@@ -1646,6 +1892,20 @@ class Ui_MainWindow(object):
         self.label_anncmdlineoutput.setText(QtGui.QApplication.translate("MainWindow", "Command Line Output", None, QtGui.QApplication.UnicodeUTF8))
         self.label_annhdr.setText(QtGui.QApplication.translate("MainWindow", "Produces reports that identify which bulk extractor features are contained within files in a disk image.", None, QtGui.QApplication.UnicodeUTF8))
 
+        # file Access Tab
+        self.label_acc_hdr.setText(QtGui.QApplication.translate("MainWindow", "Displays the directory structure and allows user to dump file contents", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_acc_image.setText(QtGui.QApplication.translate("MainWindow", "<html><head/><body><p><span style=\" font-size:10pt; font-weight:600;\">Image File</span></p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
+        self.lineEdit_acc_image.setPlaceholderText(QtGui.QApplication.translate("MainWindow", "/Path/To/File", None, QtGui.QApplication.UnicodeUTF8))
+        self.toolButton_acc_img.setText(QtGui.QApplication.translate("MainWindow", "...", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_acc_outfile.setText(QtGui.QApplication.translate("MainWindow", "Output Directory", None, QtGui.QApplication.UnicodeUTF8))
+        self.lineEdit_acc_outdir.setPlaceholderText(QtGui.QApplication.translate("MainWindow", "/Path/To/File", None, QtGui.QApplication.UnicodeUTF8))
+        self.toolButton_acc_outdir.setText(QtGui.QApplication.translate("MainWindow", "...", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_acc_cmdlineoutput.setText(QtGui.QApplication.translate("MainWindow", "Command Line Output", None, QtGui.QApplication.UnicodeUTF8))
+        self.pb_acc_close.setText(QtGui.QApplication.translate("MainWindow", "Close", None, QtGui.QApplication.UnicodeUTF8))
+        self.pb_acc_cancel.setText(QtGui.QApplication.translate("MainWindow", "Cancel", None, QtGui.QApplication.UnicodeUTF8))
+        self.pb_acc_run.setText(QtGui.QApplication.translate("MainWindow", "Run", None, QtGui.QApplication.UnicodeUTF8))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_acc), QtGui.QApplication.translate("MainWindow", "File Access", None, QtGui.QApplication.UnicodeUTF8))
+        
 
         self.menuFile.setTitle(QtGui.QApplication.translate("MainWindow", "File", None, QtGui.QApplication.UnicodeUTF8))
         self.menuEdit.setTitle(QtGui.QApplication.translate("MainWindow", "Edit", None, QtGui.QApplication.UnicodeUTF8))
@@ -1735,13 +1995,8 @@ class bcThread_allrep_all(threading.Thread):
             global g_allrepXmlFileName
             print(" o ", g_allrepXmlFileName) 
 
-            ##oldstdout = sys.stdout
-            ##sys.stdout = StringIO()
-
             # Generate the premis file in the reports directory: self.allrepOutDir
-            print("\n>> Generating Premis event for Fiwalk in:", self.allrepOutDir)
-            #if not os.path.exists(self.allrepOutDir):
-                #os.mkdir(self.allrepOutDir)
+            print(">> Generating Premis event for Fiwalk in:", self.genrepOutDir)
             
             if not os.path.exists(self.genrepOutDir):
                 os.mkdir(self.genrepOutDir)
@@ -1801,7 +2056,7 @@ class bcThread_allrep_all(threading.Thread):
 
                 ## print("D: bcThread_allrep_rep: XmlFile: ", self.allrepXmlFileName)
                 ## print("D: bcThread_allrep_rep: AnnDir: ", self.allrepAnnDir)
-                ## print("D: bcThread_allrep_rep: Outdir: ", self.allrepOutDir)
+                ## print("D: bcThreadprevails_allrep_rep: Outdir: ", self.allrepOutDir)
                 ## print("D: bcThread_allrep_rep: Confile: ", self.allrepConfile)
                 '''
                 bc_get_reports(self.PdfReport, self.FiwalkReport, \
@@ -1872,7 +2127,11 @@ class bcThread_fw(threading.Thread):
            ProgressBar._active = False
            
            x = Ui_MainWindow
-           print(">> ERROR!!! Fiwalk terminated with error: \n", err)
+
+           # We don't want to display this as an error as pressing the cancel
+           # button could bring us here as well.
+           ## print(">> D: ERROR!!! Fiwalk terminated with error: \n", err)
+           print(">> Fiwalk terminated \n")
 
            # print("D: >> Generating Premis event ")
            # If running from fowalk tab, use the same directory as ouput
@@ -1906,7 +2165,6 @@ class bcThread_fw(threading.Thread):
             # Set the progressbar maximum to > minimum so the spinning will stop
             global_fw.progressbar.setRange(0,1)
 
-            global g_fwXmlFileName
             print(" o ", g_fwXmlFileName) 
 
             ## print("D: Generating Premis event >>> ")
@@ -1927,6 +2185,77 @@ class bcThread_fw(threading.Thread):
             sys.stdout = x.oldstdout
             x.oldstdout = sys.stdout
             sys.stdout = StringIO()
+                
+# Thread for running the fiwalk command for file-access
+class bcThread_acc(threading.Thread):
+    def __init__(self, cmd1, cmd2):
+        threading.Thread.__init__(self)
+        self.cmd1 = cmd1
+        self.cmd2 = cmd2
+        super(bcThread_acc, self).__init__()
+        self.stoprequest = threading.Event()
+        self.process = None
+
+    def stopped(self):
+        return self.stoprequest.isSet()
+
+    def join(self, timeout=None):
+        self.stoprequest.set()
+        super(bcThread_acc, self).join(timeout)
+
+    def run(self):
+        p = self.process = Popen(self.cmd1, stdout=PIPE, stderr=PIPE)
+        (data, err) = p.communicate()
+        if p.returncode:
+           ProgressBar._active = False
+           
+           x = Ui_MainWindow
+           print(">> ERROR!!! Fiwalk terminated with error: \n", err)
+
+           global g_textEdit_acc
+           g_textEdit_acc.append( sys.stdout.getvalue() )
+           sys.stdout = x.oldstdout
+
+           # Set the progressbar maximum to > minimum so the spinning will stop
+           global global_acc
+           global_acc.progressbar.setRange(0,1)
+
+           x.oldstdout = sys.stdout
+           sys.stdout = StringIO()
+        else:
+            # Set the progresbar active flag so the other thread can
+            # get out of the while loop.
+            ProgressBar._active = False
+            #print("D: bcThread_acc: Progressbar Active Flag Set to: ", ProgressBar._active)
+
+            print("\n>> Success!!! Fiwalk created the following file(s): \n")
+
+
+            # Set the progressbar maximum to > minimum so the spinning will stop
+            global_acc.progressbar.setRange(0,1)
+
+            global g_accXmlFileName
+            print(" o ", g_accXmlFileName) 
+
+            x = Ui_MainWindow
+            # Note: setText for some reason, wouldn't work when used with
+            # global value. append seems to work
+            # g_textEdit_fwcmdlineoutput.setText( sys.stdout.getvalue() )
+            g_textEdit_acc.append( sys.stdout.getvalue() )
+            sys.stdout = x.oldstdout
+
+            x.oldstdout = sys.stdout
+            sys.stdout = StringIO()
+            
+            # Now invoke File access GUI.
+            print(">> Launching File Access Interface")
+            g_textEdit_acc.append( sys.stdout.getvalue() )
+            sys.stdout = x.oldstdout
+     
+            (data, err) = Popen(self.cmd2, stdout=PIPE, stderr=PIPE).communicate()
+            if len(err) > 0:
+                raise ValueError("Launch error (" + str(err).strip() + "): "+" ".join(self.cmd2))
+                
                 
     def stop(self):
         if self.process is not None:
@@ -1989,7 +2318,7 @@ class bcThread_ann(threading.Thread):
 class bcThread_rep(threading.Thread):
     def __init__(self, PdfReport, FiwalkReport, \
                        repFwXmlFileName,repAnnDir, \
-                       repOutDir, repConfile ):
+                       repOutDir, repConfile):
         threading.Thread.__init__(self)
         self.PdfReport = PdfReport
         self.FiwalkReport = FiwalkReport
@@ -2024,7 +2353,7 @@ class bcThread_rep(threading.Thread):
         # Set the progressbar maximum to > minimum so the spinning will stop
         global global_rep
         global_rep.progressbar.setRange(0,1)
-           
+
         x = Ui_MainWindow
         global g_textEdit_repcmdlineoutput
 
@@ -2059,6 +2388,9 @@ class guiThread(threading.Thread):
         elif self.cmd_type == "allrep":
             global global_allrep
             progressbar = global_allrep
+        elif self.cmd_type == "acc":
+            global global_acc
+            progressbar = global_acc
 
         progressbar.startLoop_bc(self.cmd_type)
 
@@ -2092,14 +2424,24 @@ class ProgressBar(QtGui.QWidget):
         elif cmd_type == "allrep":
             global global_allrep
             global_allrep.progressbar.setRange(0,0)
+        elif cmd_type == "acc":
+            global global_acc
+            global_acc.progressbar.setRange(0,0)
 
         while True:
             time.sleep(1.05)
             cntr = cntr + 1
-            if cntr%5 == 0:
+              
+            '''
+            # Note: If we need to periodically display something when the process
+            # bar is spinning, the following can be uncommented, but we need
+            # a routing to empty the textEdit buffer for each textEdit window.
+            ## if cntr%5 == 0:
                 # print("D: CNTR: ", cntr)
                 # FIXME: Refine this 
-                print(">> Task Still running >>")
+                ## print(">> Task Still running >>")
+            '''
+
             QtGui.qApp.processEvents()
             #print("D: ProgressBar._active = ", ProgressBar._active)
             if not ProgressBar._active:
@@ -2117,8 +2459,13 @@ class ProgressBar(QtGui.QWidget):
                 if cmd_type == "ann":
                     global g_thread1_ann
                     if g_thread1_ann.stopped():
-                        print("D: startLoop_bc: Ann Thread Stopped ")
+                        ## print("D: startLoop_bc: Ann Thread Stopped ")
                         g_thread1_ann.stop()
+                if cmd_type == "acc":
+                    global g_thread1_acc
+                    if g_thread1_acc.stopped():
+                        ## print("D: startLoop_bc: Access Thread Stopped ")
+                        g_thread1_acc.stop()
                 break
         ProgressBar._active = False
 
