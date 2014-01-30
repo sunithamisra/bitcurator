@@ -3,17 +3,27 @@
 #
 # bc_disk_access --dfxmlfile <file> --filename <oufile>
 #
-# Ex: Cat: 
+# 1. Ex: Cat: 
 # python3 bc_disk_access.py --image ~/aaa/charlie-work-usb-2009-12-11.aff \ 
-#   --dfxmlfile ~/aaa/charlie_xml --filename \
+#   [--dfxmlfile ~/aaa/charlie_xml] --filename \
 #    Email/Charlie_2009-12-04_0941_Sent.txt --cat
 #
-# Ex: filelist:
-# SILS-SUNITHA:$ python3 bc_disk_access.py 
+# 2. Ex: filelist:
+# $ python3 bc_disk_access.py 
 #    --image ~/aaa/charlie-work-usb-2009-12-11.aff 
-#    --dfxmlfile ~/aaa/charlie_xml \
+#    [--dfxmlfile ~/aaa/charlie_xml] \
 #    --listfiles
-# 
+# 3. Invoked through BitCurator GUI
+#################################################################### 
+# The basic GUI is designed using PyQT4 Designer. Code manually added
+# to QTreeView and for the functionality of all widgets.
+# From the DFXML file, the "filename" attribute is read using 
+# fiwalk.fiwalk_using_sax() API. The list of file-paths is stored in 
+# the dictionary fiDictList. 
+# To store the Tree structure of the directory hierarchy, the QStandardItemModel
+# class of the QtPy4's Model/View framework is used:
+# http://pyqt.sourceforge.net/Docs/PyQt4/qstandarditemmodel.html#details
+#################################################################### 
 
 import os, fiwalk, sys
 from PyQt4 import QtCore, QtGui
@@ -43,8 +53,12 @@ except ImportError:
 global g_model
 global g_image
 global g_dfxmlfile
+global isGenDfxmlFile
 
 class Ui_MainWindow(object):
+    def __init__(self, outdir=None):
+        self.outdir = outdir
+
     def setupUi(self, MainWindow):
         MainWindow.setObjectName(_fromUtf8("MainWindow"))
         MainWindow.resize(835, 565)
@@ -69,20 +83,57 @@ class Ui_MainWindow(object):
         sizePolicy.setHeightForWidth(self.pushButton_close.sizePolicy().hasHeightForWidth())
         self.pushButton_close.setSizePolicy(sizePolicy)
         self.pushButton_close.setObjectName(_fromUtf8("pushButton_close"))
-        self.gridLayout.addWidget(self.pushButton_close, 2, 0, 1, 1)
+        self.gridLayout.addWidget(self.pushButton_close, 5, 0, 1, 1)
 
+        self.label = QtGui.QLabel(self.centralwidget)
+        font = QtGui.QFont()
+        font.setBold(True)
+        font.setWeight(75)
+        self.label.setFont(font)
+        self.label.setObjectName(_fromUtf8("label"))
+        self.gridLayout.addWidget(self.label, 0, 6, 1, 1)
+        
+        self.textEdit = QtGui.QTextEdit(self.centralwidget)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Ignored, QtGui.QSizePolicy.Expanding)
+        sizePolicy.setHorizontalStretch(20)
+        sizePolicy.setVerticalStretch(100)
+        sizePolicy.setHeightForWidth(self.textEdit.sizePolicy().hasHeightForWidth())
+        self.textEdit.setSizePolicy(sizePolicy)
+        self.textEdit.setAutoFillBackground(True)
+        self.textEdit.setStyleSheet(_fromUtf8("background-color: rgb(200, 206, 200);\n"
+"border-color: rgb(170, 0, 0);"))
+        self.textEdit.setTextInteractionFlags(QtCore.Qt.TextSelectableByKeyboard|QtCore.Qt.TextSelectableByMouse)
+        self.textEdit.setObjectName(_fromUtf8("textEdit"))
+        self.gridLayout.addWidget(self.textEdit, 1, 6, 1, 1)
+
+        global g_textEdit
+        g_textEdit = self.textEdit
 
         self.DirectoryTree = QtGui.QTreeView(self.centralwidget)
 
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Ignored, QtGui.QSizePolicy.Ignored)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Ignored)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.DirectoryTree.sizePolicy().hasHeightForWidth())
+
+        # Note:
+        # The following line was added in an attempt to get the horizontal
+        # scroll bar automatically when there is text longer than the window size.
+        # But with or without this line, it still needs one to drag the top bar
+        # to the right to make the scroll bar start working. Could be a bug with 
+        # pyQT4 implementation.
+        self.DirectoryTree.header().setResizeMode(0, QtGui.QHeaderView.ResizeToContents)
+
         self.DirectoryTree.setSizePolicy(sizePolicy)
+        self.DirectoryTree.setSizeIncrement(QtCore.QSize(0, 0))
+        self.DirectoryTree.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
+        self.DirectoryTree.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
+
+
         self.DirectoryTree.setObjectName(_fromUtf8("DirectoryTree"))
 
         self.DirectoryTree.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
-        self.gridLayout.addWidget(self.DirectoryTree, 1, 0, 1, 3)
+        self.gridLayout.addWidget(self.DirectoryTree, 1, 0, 1, 6)
 
         self.model = QtGui.QStandardItemModel()
         self.DirectoryTree.setModel(self.model)
@@ -93,45 +144,32 @@ class Ui_MainWindow(object):
         g_model.setHorizontalHeaderLabels(['File Structure'])
 
         self.pushButton_export = QtGui.QPushButton(self.centralwidget)
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Maximum)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.pushButton_export.sizePolicy().hasHeightForWidth())
         self.pushButton_export.setSizePolicy(sizePolicy)
         self.pushButton_export.setObjectName(_fromUtf8("pushButton_export"))
-        self.gridLayout.addWidget(self.pushButton_export, 2, 1, 1, 1)
-        self.pushButton_dump = QtGui.QPushButton(self.centralwidget)
+        self.gridLayout.addWidget(self.pushButton_export, 5, 1, 1, 2)
+
+        self.pushButton_dsall = QtGui.QPushButton(self.centralwidget)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.pushButton_dump.sizePolicy().hasHeightForWidth())
-        self.pushButton_dump.setSizePolicy(sizePolicy)
-        self.pushButton_dump.setObjectName(_fromUtf8("pushButton_dump"))
-        self.gridLayout.addWidget(self.pushButton_dump, 2, 2, 1, 1)
+        sizePolicy.setHeightForWidth(self.pushButton_dsall.sizePolicy().hasHeightForWidth())
+        self.pushButton_dsall.setSizePolicy(sizePolicy)
+        self.pushButton_dsall.setObjectName(_fromUtf8("pushButton_dsall"))
+        self.gridLayout.addWidget(self.pushButton_dsall, 5, 3, 1, 1)
 
-        self.label = QtGui.QLabel(self.centralwidget)
-        font = QtGui.QFont()
-        font.setBold(True)
-        font.setWeight(75)
-        self.label.setFont(font)
-        self.label.setObjectName(_fromUtf8("label"))
-        self.gridLayout.addWidget(self.label, 0, 3, 1, 1)
+        self.pushButton_sall = QtGui.QPushButton(self.centralwidget)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.pushButton_sall.sizePolicy().hasHeightForWidth())
+        self.pushButton_sall.setSizePolicy(sizePolicy)
+        self.pushButton_sall.setObjectName(_fromUtf8("pushButton_sall"))
+        self.gridLayout.addWidget(self.pushButton_sall, 5, 4, 1, 2)
         
-        self.textEdit = QtGui.QTextEdit(self.centralwidget)
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Ignored, QtGui.QSizePolicy.Expanding)
-        sizePolicy.setHeightForWidth(self.textEdit.sizePolicy().hasHeightForWidth())
-        self.textEdit.setSizePolicy(sizePolicy)
-        self.textEdit.setAutoFillBackground(True)
-        self.textEdit.setStyleSheet(_fromUtf8("background-color: rgb(200, 206, 200);\n"
-"border-color: rgb(170, 0, 0);"))
-        self.textEdit.setTextInteractionFlags(QtCore.Qt.TextSelectableByKeyboard|QtCore.Qt.TextSelectableByMouse)
-        self.textEdit.setObjectName(_fromUtf8("textEdit"))
-        self.gridLayout.addWidget(self.textEdit, 1, 3, 1, 1)
-        
-        
-        global g_textEdit
-        g_textEdit = self.textEdit
-
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 835, 25))
@@ -166,8 +204,16 @@ class Ui_MainWindow(object):
         # Handle the Close button
         QtCore.QObject.connect(self.pushButton_close, QtCore.SIGNAL(_fromUtf8("clicked()")), self.buttonClickedClose)
 
+        # Handle the Select button
+        QtCore.QObject.connect(self.pushButton_sall, QtCore.SIGNAL(_fromUtf8("clicked()")), self.buttonClickedSelectAll)
+
+        # Handle the DeSelect button
+        QtCore.QObject.connect(self.pushButton_dsall, QtCore.SIGNAL(_fromUtf8("clicked()")), self.buttonClickedDeSelectAll)
+
+        '''
         # Handle the Dump button
         QtCore.QObject.connect(self.pushButton_dump, QtCore.SIGNAL(_fromUtf8("clicked()")), self.buttonClickedDump)
+        '''
 
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
@@ -176,45 +222,64 @@ class Ui_MainWindow(object):
         QtCore.QCoreApplication.instance().quit()
 
     def selectAllMenu(self):
-        BcFileStructure.bcCheckAllFiles(BcFileStructure, 1, None)
+        BcFileStructure.bcOperateOnFiles(BcFileStructure, 1, None)
         
     def deSelectAllMenu(self):
-        BcFileStructure.bcCheckAllFiles(BcFileStructure, 0, None)
+        BcFileStructure.bcOperateOnFiles(BcFileStructure, 0, None)
 
     def buttonClickedClose(self):
+        # if dfxml file was internally generated, remove it.
+        global isGenDfxmlFile
+        if isGenDfxmlFile == True:
+            os.system('rm '+g_dfxmlfile)
         QtCore.QCoreApplication.instance().quit()
 
     def buttonClickedExport(self):
-        # First navigate through file menu to choose the directory
-        exportDir = QtGui.QFileDialog.getSaveFileName(caption="Select an Output Directory to export files")
+        # If invoked thorugh reports_tab gui, the outdir provided is the 
+        # exportDir and so there is no need to choose again. If invoked 
+        # through command line, output directory to export the checked files
+        # needs to be provided now, through file navigation
+        if self.outdir == None:
+            os.chdir(os.environ["HOME"])
+            exportDir = QtGui.QFileDialog.getExistingDirectory(caption="Select an Output Directory to export files")
+        else:
+            exportDir = self.outdir
 
-        ## print(">> Output Directory Selected: ", exportDir)
+        ## print(">> D: Output Directory Selected: ", exportDir)
         
         self.oldstdout = sys.stdout
         sys.stdout = StringIO()
-        # Now loop through the checked files and dump them in this directory
-        BcFileStructure.bcCheckAllFiles(BcFileStructure, 2, exportDir)
 
-        print(">> Copied files to the directory: ", exportDir)
+        # Now loop through the checked files and dump them in this directory
+        BcFileStructure.bcOperateOnFiles(BcFileStructure, 2, exportDir)
+
+        print(">> Copied Checked files to the directory: ", exportDir)
         global g_textEdit
         g_textEdit.setText( sys.stdout.getvalue() )
         sys.stdout = self.oldstdout
 
+    '''
     def buttonClickedDump(self):
-        BcFileStructure.bcCheckAllFiles(BcFileStructure, 3, None)
+        BcFileStructure.bcOperateOnFiles(BcFileStructure, 3, None)
+    '''
+    def buttonClickedSelectAll(self):
+        BcFileStructure.bcOperateOnFiles(BcFileStructure, 1, None)
+
+    def buttonClickedDeSelectAll(self):
+        BcFileStructure.bcOperateOnFiles(BcFileStructure, 0, None)
 
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Disk Image Access Interface", None, QtGui.QApplication.UnicodeUTF8))
         self.pushButton_export.setText(QtGui.QApplication.translate("MainWindow", "Export", None, QtGui.QApplication.UnicodeUTF8))
         self.pushButton_close.setText(QtGui.QApplication.translate("MainWindow", "Close", None, QtGui.QApplication.UnicodeUTF8))
-        self.pushButton_dump.setText(QtGui.QApplication.translate("MainWindow", "Dump", None, QtGui.QApplication.UnicodeUTF8))
-        self.label.setText(QtGui.QApplication.translate("MainWindow", "File Dump", None, QtGui.QApplication.UnicodeUTF8))
+        self.pushButton_sall.setText(QtGui.QApplication.translate("MainWindow", "Select All", None, QtGui.QApplication.UnicodeUTF8))
+        self.pushButton_dsall.setText(QtGui.QApplication.translate("MainWindow", "DeSelect All", None, QtGui.QApplication.UnicodeUTF8))
+        self.label.setText(QtGui.QApplication.translate("MainWindow", "Command Line Output", None, QtGui.QApplication.UnicodeUTF8))
         self.menuFile.setTitle(QtGui.QApplication.translate("MainWindow", "File", None, QtGui.QApplication.UnicodeUTF8))
         self.menuHelp.setTitle(QtGui.QApplication.translate("MainWindow", "Edit", None, QtGui.QApplication.UnicodeUTF8))
         self.actionExit.setText(QtGui.QApplication.translate("MainWindow", "Exit", None, QtGui.QApplication.UnicodeUTF8))
         self.actionSelect_All.setText(QtGui.QApplication.translate("MainWindow", "Select All", None, QtGui.QApplication.UnicodeUTF8))
         self.actionDeSelect_All.setText(QtGui.QApplication.translate("MainWindow", "DeSelect All", None, QtGui.QApplication.UnicodeUTF8))
-
 
 class BcFileStructure:
 
@@ -224,14 +289,14 @@ class BcFileStructure:
     file_item_of = dict()
     path_of = dict()
     
-    # bcCheckAllFiles()
+    # bcOperateOnFiles()
     # Iterate through the leaves of the file structure and check/uncheck
     # all the files based on whether "check" is True or False.
     # This same routine is reused with the parameter "cehck" set to 2, 
     # to dump the contents of the "checked" files to the specified output 
     # directory. It is again used with check=3 to dump the contents of a
     # file to the textEdit window. 
-    def bcCheckAllFiles(self, check, exportDir):
+    def bcOperateOnFiles(self, check, exportDir):
         ## print(">>D: LENGTH of fiDictList: ", len(self.fiDictList))
         for i in range(0, len(self.fiDictList) - 1):
             path = self.fiDictList[i]['filename']
@@ -287,8 +352,11 @@ class BcFileStructure:
                         ## print(">> D: Writing to Outfile: ", outfile, path)
                         
                         filestr.bcCatFile(path, g_image, g_dfxmlfile, True, outfile)
-                    #else:
-                        #print("File %s is NOT Checked" %current_fileordir)
+                    elif current_item.checkState() == 1:
+                        print("Partially checked state: ",current_item.checkState()) 
+                        print("File %s is NOT Checked" %current_fileordir)
+                        g_textEdit.setText( sys.stdout.getvalue() )
+                        sys.stdout = self.oldstdout
                 elif check == 3:
                     # Dump the first checked File in textEdit window
                     if current_item.checkState() == 2:
@@ -300,19 +368,23 @@ class BcFileStructure:
                         ## print("D: >> Dumping the contents of the file ", path)
                         filestr.bcCatFile(path, g_image, g_dfxmlfile, False, None)
                          
-                        global g_textEdit
                         g_textEdit.setText( sys.stdout.getvalue() )
                         sys.stdout = self.oldstdout
                         
                         # We list only the first checked file.
                         return
+                    elif current_item.checkState() == 1:
+                        print("Partially checked state: ",current_item.checkState()) 
+                        print("File %s is NOT Checked" %current_fileordir)
+                        g_textEdit.setText( sys.stdout.getvalue() )
+                        sys.stdout = self.oldstdout
 
     def bcHandleSpecialChars(self, filename):
-        filename = filename.replace("$", "\$")
-        filename = filename.replace(" ", "\ ")
-        filename = filename.replace("(", "\(")
-        filename = filename.replace(")", "\)")
-        return filename
+        #filename = filename.replace("$", "\$")
+        #filename = filename.replace(" ", "\ ")
+        #filename = filename.replace("(", "\(")
+        #filename = filename.replace(")", "\)")
+        return re.escape(filename)
                     
     def bcGetFilenameFromPath(self, path):
         pathlist = path.split('/')
@@ -327,7 +399,7 @@ class BcFileStructure:
     # bcExtractFileStr()
     # This routine extracts the file structure given a disk image and the
     # corresponding dfxml file.
-    def bcExtractFileStr(self, image, dfxmlfile, outfile):
+    def bcExtractFileStr(self, image, dfxmlfile, outdir):
         # Extract the information from dfxml file to create the 
         # dictionary only if it is not done before.
         if len(self.fiDictList) == 0:
@@ -374,7 +446,7 @@ class BcFileStructure:
                 ## print("D: Set Current_dir to: ", current_dir)
                 current_dir_item = QtGui.QStandardItem(current_dir)
                 parent_dir_item.appendRow(current_dir_item)
-             
+
                 # Save the item of this directory
                 item_of[current_dir] = current_dir_item
             else:
@@ -502,14 +574,15 @@ class BcFileStructure:
         fiwalk.fiwalk_using_sax(xmlfile=open(dfxmlfile, 'rb'),callback=self.cb)
        
 # Generate the XML file using the Fiwalk cmd
-def bcGenerateDfxmlFile(image):
+# It generates a temporary file <image_path>/dfxmlfile.xml
+# If such a file exists, the script terminates indicating the reason.
+# User can remove it or rename it to continue.
+# The Close routine removes this temporary file.
+def bcGenerateDfxmlFile(image, dfxmlfile):
     # First check if the file image exists
     if not os.path.exists(image):
         print(">> Error. Image %s does not exist" %image)
         return None
-    # Get the directory where "image" exists
-    directory = os.path.dirname(image)
-    dfxmlfile = directory+'/dfxmlfile.xml'
 
     cmd = ['fiwalk', '-f', '-X', dfxmlfile, image]
     print(">> Generating XML File ", dfxmlfile)
@@ -524,7 +597,6 @@ def bcGenerateDfxmlFile(image):
     else:
         print(">>> Generated the file %s " %dfxmlfile)
         return dfxmlfile
-    
 
 if __name__=="__main__":
     import sys, time, re
@@ -535,7 +607,7 @@ if __name__=="__main__":
     parser.add_argument('--cat',action='store_true',help='list contents ')
     parser.add_argument('--listfiles',action='store_true',help='list file structure ')
     parser.add_argument('--filename',action='store',help='File name to list contents of ')
-    parser.add_argument('--outfile',action='store',help='Output File ')
+    parser.add_argument('--outdir',action='store',help='Output Directory ')
 
     args = parser.parse_args()
 
@@ -547,13 +619,43 @@ if __name__=="__main__":
     ## print("D: output file", args.outfile)
     # If dfxmlfile not given, run the fiwalk cmd to extract the dfxml file
 
+    # First check if the file image exists
+    if not os.path.exists(args.image):
+        print("\n>> Error!! Image %s does not exist \n" %args.image)
+        exit(0)
+
+    global isGenDfxmlFile
+    isGenDfxmlFile = False
+
+    # If dfxml file not provided, generate it now.
     if (args.dfxmlfile == None):
-        dfxmlfile = bcGenerateDfxmlFile(args.image)
+        # Get the directory where "image" exists
+        directory = os.path.dirname(args.image)
+        dfxmlfile = directory+'/dfxmlfile.xml'
+
+        if os.path.exists(dfxmlfile):
+            print("\n>> File %s exists. Remove it and run the command again.\n" %dfxmlfile)
+            exit(0)
+
+        bcGenerateDfxmlFile(args.image, dfxmlfile)
         if dfxmlfile == None:
             print(">> Error: Fiwalk generation failed")
             exit(0)
+
+        global isGenDfxmlFile
+        isGenDfxmlFile = True
+        
     else:
         dfxmlfile = args.dfxmlfile
+        if not os.path.exists(dfxmlfile):
+            # dfxmlfile provided in the args, but it doesn't exist
+            bcGenerateDfxmlFile(args.image, dfxmlfile)
+            if dfxmlfile == None:
+                print(">> Error: Fiwalk generation failed")
+                exit(0)
+
+            global isGenDfxmlFile
+            isGenDfxmlfile = True
 
     filestr = BcFileStructure()
 
@@ -587,9 +689,8 @@ if __name__=="__main__":
     if (args.listfiles == True):
         app = QtGui.QApplication(sys.argv)
         MainWindow = QtGui.QMainWindow()
-        ui = Ui_MainWindow()
+        ui = Ui_MainWindow(args.outdir)
         ui.setupUi(MainWindow)
-        filestr.bcExtractFileStr(args.image, dfxmlfile, args.outfile)
+        filestr.bcExtractFileStr(args.image, dfxmlfile, args.outdir)
         MainWindow.show()
         sys.exit(app.exec_())
-
