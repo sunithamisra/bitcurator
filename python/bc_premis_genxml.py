@@ -164,6 +164,8 @@ class BcPremisFile:
             of_premis = open(premis_file,"wb")
             line1 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
             of_premis.write(bytes(line1, 'UTF-8'))
+          else:
+            of_premis = "null"
         else:
             of_premis = "null"
 
@@ -183,7 +185,10 @@ class BcPremisFile:
 
         ## print("D:bcGenPremisXmlFiwalk: Generating Premis Event: ", root, dfxmlfile)
 
-        self.bcGenPremisEvent(root, eventIdType, eventIdVal,  "File System Analysis", eDateTime, eOutcome, eoDetail, of_premis, fw_tab)
+        if of_premis != "null":
+           self.bcGenPremisEvent(root, eventIdType, eventIdVal,  "File System Analysis", eDateTime, eOutcome, eoDetail, of_premis, fw_tab)
+
+        #self.bcGenPremisEvent(root, eventIdType, eventIdVal,  "File System Analysis", eDateTime, eOutcome, eoDetail, of_premis, fw_tab)
         return root
 
     def bcGenPremisXmlBulkExtractor(self, beReportFile, premis_file, isFirstEvent=False):
