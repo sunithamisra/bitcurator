@@ -1593,7 +1593,9 @@ class Ui_MainWindow(object):
         self.oldstdout = sys.stdout
         sys.stdout = StringIO()
         
-        scriptdir = self.cwd
+        #scriptdir = self.cwd
+        # Had to hardcode this to fix launch from desktop - FIXME
+        scriptdir = "/home/bcadmin/Tools/bitcurator/python"
         disk_access_script = scriptdir+'/bc_disk_access.py'
         cmd2 = ['python3', disk_access_script, '--image', self.accImageFileName, '--dfxmlfile', dfxmlfile, '--outdir', self.accOutdirName, '--listfiles']
 
