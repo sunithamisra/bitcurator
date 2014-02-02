@@ -190,6 +190,38 @@ echo "Skipping: ${seq}"
 echo ""
 fi
 
+seq="install matplotlib from the latest sources"
+echo -n " -- Would you like to ${seq}? -- (y/N) "
+read a
+if [[ $a == "Y" || $a == "y" ]]; then
+	git clone --recursive https://github.com/matplotlib/matplotlib /tmp/matplotlib
+	# UPDATE FOR FINAL INSTALL
+	cd /tmp/matplotlib
+	python3 setup.py build
+	sudo python3 setup.py install
+	sudo ldconfig
+	echo ""
+else
+echo "Skipping: ${seq}"
+echo ""
+fi
+
+seq="install py3fpdf"
+echo -n " -- Would you like to ${seq}? -- (y/N) "
+read a
+if [[ $a == "Y" || $a == "y" ]]; then
+	git clone --recursive https://github.com/kamwoods/py3fpdf /tmp/py3fpdf
+	# UPDATE FOR FINAL INSTALL
+	cd /tmp/py3fpdf
+	python3 setup.py build
+	sudo python3 setup.py install
+	sudo ldconfig
+	echo ""
+else
+echo "Skipping: ${seq}"
+echo ""
+fi
+
 # ----------------------
 # MORE ENVIRONMENT SETUP
 # ----------------------
