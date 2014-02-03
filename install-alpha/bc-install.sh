@@ -206,6 +206,24 @@ echo "Skipping: ${seq}"
 echo ""
 fi
 
+seq="install The Sleuth Kit from the latest sources"
+echo -n " -- Would you like to ${seq}? -- (y/N) "
+read a
+if [[ $a == "Y" || $a == "y" ]]; then
+	git clone --recursive https://github.com/sleuthkit/sleuthkit /tmp/sleuthkit
+	# UPDATE FOR FINAL INSTALL
+	cd /tmp/sleuthkit
+	./bootstrap
+        ./configure
+        make
+        sudo make install
+	sudo ldconfig
+	echo ""
+else
+echo "Skipping: ${seq}"
+echo ""
+fi
+
 seq="install py3fpdf"
 echo -n " -- Would you like to ${seq}? -- (y/N) "
 read a
