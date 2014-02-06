@@ -267,6 +267,12 @@ echo "Skipping: ${seq}"
 echo ""
 fi
 
+# ----------------------
+# DESKTOP
+# ----------------------
+
+# ADD BACKGROUND
+# ADD LAUNCHERS
 
 exit
 
