@@ -174,6 +174,23 @@ echo "Skipping: ${seq}"
 echo ""
 fi
 
+seq="install ZeroMQ"
+echo -n " -- Would you like to ${seq}? -- (y/N) "
+read a
+if [[ $a == "Y" || $a == "y" ]]; then
+	git clone --recursive https://github.com/zeromq/zeromq3-x.git /tmp/zeromq
+	# UPDATE FOR FINAL INSTALL
+	cd /tmp/zeromq
+	./autogen.sh
+	./configure
+	make
+	sudo make install
+	echo ""
+else
+echo "Skipping: ${seq}"
+echo ""
+fi
+
 seq="install bulk_extractor"
 echo -n " -- Would you like to ${seq}? -- (y/N) "
 read a
