@@ -1,6 +1,14 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 #
+# BitCurator
+# Copyright (C) 2012
+# All rights reserved.
+#
+# This code is distributed under the terms of the GNU General Public
+# License, Version 3. See the text file "COPYING" for further details
+# about the terms of this license.
+#
 # bc_disk_access --dfxmlfile <file> --filename <oufile>
 #
 # 1. Ex: Cat: 
@@ -412,7 +420,7 @@ class BcFileStructure:
 
         global g_image
         global g_dfxmlfile
-        g_image = image
+        g_image = re.escape(image)
         g_dfxmlfile = dfxmlfile
 
         # A dictionary item_of{} is maintained which contains each file/
