@@ -1576,7 +1576,7 @@ class Ui_MainWindow(object):
 
         if os.path.exists(dfxmlfile):
             print(">> Removing the existing file ", dfxmlfile)
-            os.system('rm '+ dfxmlfile)
+            os.system('rm '+ re.escape(dfxmlfile))
 
         # Thread uses it. so copy to the global value. We use the same
         # global var as the fw tab uses as we are piggybacking on it.
