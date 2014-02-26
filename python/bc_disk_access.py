@@ -420,7 +420,7 @@ class BcFileStructure:
 
         global g_image
         global g_dfxmlfile
-        g_image = image
+        g_image = re.escape(image)
         g_dfxmlfile = dfxmlfile
 
         # A dictionary item_of{} is maintained which contains each file/
