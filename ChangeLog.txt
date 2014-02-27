@@ -7,6 +7,26 @@ Real-World Collecting Institutions
 Copyright (C) 2011-2014
 All rights reserved.
 
+February 21, 2014
+BitCurator 0.7.6 released
+This is a maintenance release that addresses an issue in the File Access tab of the BitCurator reporting tool where disk images located under certain paths could not be accessed.
+
+February 18, 2014
+BitCurator 0.7.4 released
+- The mounting scripts have been fixed to mount disk images - without asking for authentication - from all locations.
+- The desktop now includes a folder named "Shared Folders and Media" that points to the /media directory. When users adds a host shared folder, it will automatically appear in this location with an "sf_"  prefix.
+- ClamTK is now linked in the Additional Tools folder.
+- The filint tool is also now linked in the Additional Tools folder as a convenience for keeping the VM clean.
+- The ficlam scripts, which run ClamAV scans during a fiwalk run, are now in the /Tools/ficlam directory, and there is a slide showing how to run them in the Quickstart guide.
+- A dd command-line launcher has been added to the Imaging Tools directory
+
+February 2, 2014
+BitCurator 0.7.0 released
+- File Export tab added to GUI. This new tab runs fiwalk and uses the output to generate a tree-style hierachy of the file system in a new window. This allows you to safely navigate through directory and file contents and export file items without having to mount the file system.
+- Removes bugs affecting the operation of the fiwalk and annotation tabs in the BitCurator GUI.
+- Updates The Sleuth Kit to 4.1.3.
+- Now includes ClamTK, a graphical front-end to the Clam virus scanner. ClamTK simplifies the process of scanning mounted file systems and regular directory contents.
+
 January 25, 2014
 BitCurator 0.6.4 released
 - Fixed a bug that prevented operation when using filenames with special characters
