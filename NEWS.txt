@@ -4,41 +4,8 @@ Tools for Digital Forensics Methods and Workflows in
 Real-World Collecting Institutions
 ----------------------------------------------------
 
-Copyright (C) 2012
+Copyright (C) 2011-2014
 All rights reserved.
 
 The latest project updates can be found on our wiki at http://wiki.bitcurator.net/
-
-Release schedule:
-
-    0.3.0 (July 30, 2013):
-        Front-end GUIs for forensic processing tools
-        Forensics tools for data indexing
-        Improved removable media support 
-    0.3.2 (Sept --, 2013):
-        [No public release this version] 
-    0.3.4 (Sept 9, 2013):
-        GUI updates
-        DFXML updates
-        Bulk extractor 1.4.0 and AFFLIB updates 
-    0.3.5 (Sept 10, 2013):
-        VirtualBox extensions updates
-        Imaging tool and launcher updates 
-    0.4.0 (Sept 30, 2013):
-        PPA packaging of forensics tools and BitCurator software via BitCurator LaunchPad site
-        Redaction scripting updates 
-    0.5.0 (December 6, 2013):
-        Initial PREMIS event metadata export for forensic analysis events
-        PREMIS in METS Toolbox included
-        File duplication tool included
-        Disk image mounting scripts added 
-    0.5.2 (December 18, 2013):
-        Updated PREMIS event reporting
-        Possible: Reporting on non-OCR'd and protected PDF documents 
-    0.6.0 (January 15, 2014):
-        Full PREMIS metadata update
-        Improved disk mounting scripts
-        EAD and METS exports 
-
-
 
