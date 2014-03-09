@@ -2,7 +2,7 @@
 # ---------------------------------------------------------------------------------------------------
 #
 # BitCurator
-# Copyright (C) 2012
+# Copyright (C) 2014
 # All rights reserved.
 #
 # This code is distributed under the terms of the GNU General Public
