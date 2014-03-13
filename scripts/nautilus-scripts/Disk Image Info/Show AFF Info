@@ -4,14 +4,15 @@
 #: Author		: "Porter Olsen" polsen@umd.edu
 #: Version		: 1.0
 #: Description	: Shows metadata saved with the AFF disk image
-# by Porter Olsen (c) 2013
+# by Porter Olsen and James Smith (c) 2013
 
 TITLE="AFF Disk Image Info"
 
-affinfo "$@" | \
-	zenity --text-info \
-		--title "AFF Disk Image Info" \
-		--width=1024 \
-		--height=768
+CONTENT=`( echo "<tt>"; affinfo "$@"; echo "</tt>")`
+zenity --info \
+	--title "AFF Disk Image Info" \
+	--width=1024 \
+	--height=768 \
+	--text="$CONTENT"
 
 exit 0
