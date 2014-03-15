@@ -18,7 +18,7 @@ from PyQt4.Qt import *
 from subprocess import Popen,PIPE
 import sys, time
 import threading
-from bc_premis_genxml import BcPremisFile
+from bc_genrep_premis import BcPremisFile
 
 from generate_report import *
 from bc_utils import *
