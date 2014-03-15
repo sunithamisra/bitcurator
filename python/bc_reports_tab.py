@@ -1824,7 +1824,7 @@ class Ui_MainWindow(object):
         self.label_rep_annDir.setText(QtGui.QApplication.translate("MainWindow", "Annotated Feature Files Directory", None, QtGui.QApplication.UnicodeUTF8))
         self.lineEdit_rep_annDir.setPlaceholderText(QtGui.QApplication.translate("MainWindow", "/Path/To/Directory", None, QtGui.QApplication.UnicodeUTF8))
         self.toolButton_rep_annDir.setText(QtGui.QApplication.translate("MainWindow", "...", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_rephdr.setText(QtGui.QApplication.translate("MainWindow", "Produces Office Open XML and PDF reports to assist in image analysis", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_rephdr.setText(QtGui.QApplication.translate("MainWindow", "Produces Office Open XML and PDF reports to assist in disk image analysis.", None, QtGui.QApplication.UnicodeUTF8))
 
         # Run All (allrep) tab
         
@@ -1890,10 +1890,10 @@ class Ui_MainWindow(object):
         self.toolButton_ann_bcpyDir.setText(QtGui.QApplication.translate("MainWindow", "...", None, QtGui.QApplication.UnicodeUTF8))
 
         self.label_anncmdlineoutput.setText(QtGui.QApplication.translate("MainWindow", "Command Line Output", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_annhdr.setText(QtGui.QApplication.translate("MainWindow", "Produces reports that identify which bulk extractor features are contained within files in a disk image.", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_annhdr.setText(QtGui.QApplication.translate("MainWindow", "Produces reports that link each bulk_extractor feature to a specific file in a disk image.", None, QtGui.QApplication.UnicodeUTF8))
 
         # file Access Tab
-        self.label_acc_hdr.setText(QtGui.QApplication.translate("MainWindow", "Displays the directory structure and allows user to dump file contents", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_acc_hdr.setText(QtGui.QApplication.translate("MainWindow", "Displays the directory structure of a disk image and allows export of individual files.", None, QtGui.QApplication.UnicodeUTF8))
         self.label_acc_image.setText(QtGui.QApplication.translate("MainWindow", "<html><head/><body><p><span style=\" font-size:10pt; font-weight:600;\">Image File</span></p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
         self.lineEdit_acc_image.setPlaceholderText(QtGui.QApplication.translate("MainWindow", "/Path/To/File", None, QtGui.QApplication.UnicodeUTF8))
         self.toolButton_acc_img.setText(QtGui.QApplication.translate("MainWindow", "...", None, QtGui.QApplication.UnicodeUTF8))
