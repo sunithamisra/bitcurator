@@ -33,7 +33,7 @@ from bc_genrep_dfxml import bc_process_xmlfile_using_sax
 from bc_genrep_dfxml import bc_get_volume_info_from_sax
 from bc_genrep_text import bc_process_textfile
 from bc_genrep_xls import bc_generate_xlsx
-from bc_gen_feature_rep_xls import bc_generate_feature_xlsx
+from bc_genrep_feature_xls import bc_generate_feature_xlsx
 import bc_genrep_gui
 from PyQt4 import QtCore, QtGui
 
