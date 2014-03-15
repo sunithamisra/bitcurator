@@ -33,16 +33,18 @@ Example:
 bulk_extractor ~/Research/TestData/M57-Scenario/usbflashdrives/jo-work-usb-2009-12-11.aff
 -o ~/Research/TestData/BEOutputs/jow-output
 
-2. Generate the Text and xml outputs from the fiwalk utility.
+2. Generate text (.txt) and xml (.xml) reports using fiwalk.
 Example 1: 
-fiwalk -f -X /home/sunitha/Research/TestData/BEOutputs/jo-work-usb-fi.xml -T /home/sunitha/Research/TestData/BEOutputs/jo-work-usb-fi_T jo-work-usb-2009-12-11.aff
-Example 2: fiwalk -f -X icharlie_F.xml -T icharlie_FT ~/Research/TestData/M57-Scenario/usbflashdrives/charlie-work-usb-2009-12-11.aff
+
+fiwalk -f -X /[PATH_TO_OUTPUT]/jo-work-usb-fi.xml -T /[PATH_TO_OUTPUT]/jo-work-usb-fi_T /[PATH_TO_DISK_IMAGE]/jo-work-usb-2009-12-11.aff
+Example 2: fiwalk -f -X icharlie_F.xml -T icharlie_FT /[PATH_TO_DISK_IMAGE]/charlie-work-usb-2009-12-11.aff
 
 3. Generate the annotated files from the identify_filenames utility
 Ex: python3 identify_filenames.py --all --imagefile
 ~/Research/TestData/M57-Scenario/usbflashdrives/jo-work-usb-2009-12-11.aff
 ~/Research/TestData/BEOutputs/jow-output
 ~/Research/TestData/BEOutputs/ident-jow-output
+
 4. Run the generate_reports script to generate the pdf reports.
 (this uses the annotated feature files created in step-3, fiwalk output
 created in Step-2, and bulk-extractor outputs created in step-1)
