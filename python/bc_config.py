@@ -14,7 +14,6 @@
 
 #from generate_report import PdfReport
 #from generate_report import FiwalkReport
-from bc_genrep_gui import *
 import bc_utils,re
 
 #
