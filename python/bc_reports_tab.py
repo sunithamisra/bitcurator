@@ -1,6 +1,8 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-
+#
+# BitCurator
+#
 # bc_reports_tab5.py
 #
 # Implementation of GUI interface in PyQT4 for generating various files and
