@@ -9,7 +9,7 @@
 #
 from __future__ import with_statement
 
-__version__ = "1.3.0"
+__version__ = "0.7.6"
 
 b'This module needs Python 2.7 or later.'
 import zipfile,os,os.path,glob,codecs
