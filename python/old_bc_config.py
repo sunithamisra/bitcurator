@@ -12,7 +12,6 @@
 
 #from generate_report import PdfReport
 #from generate_report import FiwalkReport
-from configobj import ConfigObj
 import bc_utils,re
 
 #
@@ -21,22 +20,22 @@ import bc_utils,re
 # they are regression test parameters.
 #
 def bc_get_regtest_parameters(FiwalkReport, config_file):
-#    ifd = open(config_file,"r")
-#    for line in ifd:
-#        line1 = re.split(":", line)
-#        if (line1[0] != 'G'):
-#            continue
-#
-#        if line1[1] == "REGRESS_ANNOTATED_DIR":
-#            FiwalkReport.regress_annotated_dir = line1[2].strip()
-#        elif line1[1] == "REGRESS_INPUT_XML_FILE":
-#            FiwalkReport.regress_input_xml_file = line1[2].strip()
-#        elif line1[1] == "REGRESS_OUTDIR":
-#            FiwalkReport.regress_outdir = line1[2].strip()
-#        elif line1[1] == "REGRESS_BEINFO_FILE":
-#            FiwalkReport.regress_beinfo_file = line1[2].strip()
-#            
-#    ifd.close()
+    ifd = open(config_file,"r")
+    for line in ifd:
+        line1 = re.split(":", line)
+        if (line1[0] != 'G'):
+            continue
+
+        if line1[1] == "REGRESS_ANNOTATED_DIR":
+            FiwalkReport.regress_annotated_dir = line1[2].strip()
+        elif line1[1] == "REGRESS_INPUT_XML_FILE":
+            FiwalkReport.regress_input_xml_file = line1[2].strip()
+        elif line1[1] == "REGRESS_OUTDIR":
+            FiwalkReport.regress_outdir = line1[2].strip()
+        elif line1[1] == "REGRESS_BEINFO_FILE":
+            FiwalkReport.regress_beinfo_file = line1[2].strip()
+            
+    ifd.close()
     return
 
 #
@@ -44,50 +43,6 @@ def bc_get_regtest_parameters(FiwalkReport, config_file):
 # configuration file.
 #
 def bc_parse_config_file(PdfReport, FiwalkReport, config_file):
-
-    # Open the configuration file as a ConfigObj
-    config = ConfigObj(config_file)
-    
-    # Clone static dictionary of file-formats to start with
-    # NOTE: The code is retained for future work on letting the user
-    # configure the format files. As of now, all format files are
-    # generated, but the user can limit the number of these files by setting
-    # S:MAX_FILE_FORMAT_FILES_TO_REPORT:20
-    PdfReport.bc_config_filefmt_files = FiwalkReport.dictFileFmtStatic.copy()
-    
-    # Initialize all the values to 0
-    for x, y in PdfReport.bc_config_filefmt_files.items():
-        PdfReport.bc_config_filefmt_files[x] = 0
-
-    # By default, report special files
-    PdfReport.bc_config_report_special_files = True
-    ## print("D:config_filefmt: ", PdfReport.bc_config_filefmt_files)
-
-    # Now, read out each of the sections NOTE: Add error checking 
-    # for report lines here
-
-    # Logo section: Set logo filename and properties
-    logo_sec = config['logo']
-    logo_filename = logo_sec['logo_filename']
-    
-    # Feature section: Set feature report output parameters
-    feature_sec = config['feature']
-    feature_1 = feature_sec['accts']
-    feature_2 = feature_sec['aes']
-
-    # Report section: Set properties for individual reports
-    report_sec = config['report']
-    report_stat1 = report_sec['report_stat1']
-    
-    # Miscellaneous flags: Control other features
-    report_sec = config['report']
-    report_stat1 = report_sec['report_stat1']
-
-
-#
-# Previous config parse func
-#
-def old_bc_parse_config_file(PdfReport, FiwalkReport, config_file):
 
     ifd = open(config_file,"r")
 
