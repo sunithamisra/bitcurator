@@ -7,51 +7,24 @@
 # License, Version 3. See the text file "COPYING" for further details 
 # about the terms of this license.
 #
-# This file has routines related to the configuration information
-# of generate_reports script
+# This module contains read and write routines related to the 
+# configuration information used by BitCurator - in particular the 
+# generate_reports script
 
-#from generate_report import PdfReport
-#from generate_report import FiwalkReport
-import bc_utils,re
+import os, sys
+from configobj import ConfigObj
+import re
+#import bc_utils,re
 
-#
-# This function is called when one invokes the regression test. 
-# The lines start with the letter "G" in the config file to indicate 
-# they are regression test parameters.
-#
-def bc_get_regtest_parameters(FiwalkReport, config_file):
-    ifd = open(config_file,"r")
-    for line in ifd:
-        line1 = re.split(":", line)
-        if (line1[0] != 'G'):
-            continue
-
-        if line1[1] == "REGRESS_ANNOTATED_DIR":
-            FiwalkReport.regress_annotated_dir = line1[2].strip()
-        elif line1[1] == "REGRESS_INPUT_XML_FILE":
-            FiwalkReport.regress_input_xml_file = line1[2].strip()
-        elif line1[1] == "REGRESS_OUTDIR":
-            FiwalkReport.regress_outdir = line1[2].strip()
-        elif line1[1] == "REGRESS_BEINFO_FILE":
-            FiwalkReport.regress_beinfo_file = line1[2].strip()
-            
-    ifd.close()
-    return
-
-#
-# Parse funciton to extract the configurable information out of the 
-# configuration file.
-#
 def bc_parse_config_file(PdfReport, FiwalkReport, config_file):
 
-    ifd = open(config_file,"r")
+    print(config_file)
 
-    # Clone the static dictionary of file-formats to start with
-    # NOTE: The code is retained for future work on letting the user
-    # configure the format files. As of now, all format files are
-    # generated, but the user can limit the number of these files by setting
-    # S:MAX_FILE_FORMAT_FILES_TO_REPORT:20
-
+    # Open the configuration file as a ConfigObj
+    config = ConfigObj(config_file)
+    
+    # Clone the static dictionary of file formats.
+    # The user can limit the number by setting S:MAX_FILE_FORMAT_FILES_TO_REPORT:20
     PdfReport.bc_config_filefmt_files = FiwalkReport.dictFileFmtStatic.copy()
 
     # Initialize all the values to 0
@@ -60,81 +33,162 @@ def bc_parse_config_file(PdfReport, FiwalkReport, config_file):
 
     # By default, report special files
     PdfReport.bc_config_report_special_files = True
+    # print("D:config_filefmt: ", PdfReport.bc_config_filefmt_files)
 
-    ## print("D:config_filefmt: ", PdfReport.bc_config_filefmt_files)
+    # Logo section: Set logo filename and properties (L)
+    logo_sec = config['logo_section']
+    for key in logo_sec:
+       if key == 'filepath':
+          logo_filepath = logo_sec['filepath']
+       else:
+          logo_filepath = 'empty'
+    # Overwrite the logo path:
+    if logo_filepath != 'empty':
+       PdfReport.logo = logo_filepath   
+ 
+    # Feature section: Set feature report output parameters (F)
+    feature_sec = config['feature_section']
+    for key in feature_sec:
+       #print(key, feature_sec[key])
+       if key in PdfReport.bc_config_feature:
+          #Enable the report and set number of lines to output for each feature (0 = all)
+          PdfReport.bc_config_feature[key] = 1
+          PdfReport.bc_config_feature_lines[key] = int(feature_sec[key])
 
-    for line in ifd:
-        if bc_utils.is_comment_line(line):
-            continue
+    # Report section: Set properties for individual reports (R)
+    report_sec = config['report_section']
+    for key in report_sec:
+       #print(key, report_sec[key])
+       if key in PdfReport.bc_config_report_files:
+          PdfReport.bc_config_report_files[key] = 1   
+          PdfReport.bc_config_report_lines[key] = int(report_sec[key])
+       else:
+          print("Info: Report file %s is not currently managed" % key)
+          print("Info: Fix the config file")
+ 
+    # Miscellaneous flags: Control other features (S)
+    misc_sec = config['misc_section']
+    for key in misc_sec:
+       #print(key, misc_sec[key])
+       if key == 'REPORT_SPECIAL_FILES':
+          if misc_sec[key] == 'YES':
+             PdfReport.bc_config_report_special_files = True
+          else:
+             # print("D: Not reporting Special files")
+             PdfReport.bc_config_report_special_files = False
+       elif key == 'MAX_LINES_TO_REPORT':
+          PdfReport.bc_max_lines_to_report = int(misc_sec[key])
+       elif key == 'MAX_FILE_FORMAT_FILES_TO_REPORT':
+          PdfReport.bc_max_fmtfiles_to_report = int(misc_sec[key])
+       elif key == 'MAX_FEATURE_FILES_TO_REPORT':
+          PdfReport.bc_max_featfiles_to_report = int(misc_sec[key])
+       elif key == 'MAX_FORMATS_FOR_BAR_GRAPH':
+          PdfReport.bc_max_formats_in_bar_graph = int(misc_sec[key])
+       elif key == 'FEATURE_OUTPUTS_IN_PDF':
+          PdfReport.bc_feature_output_in_pdf = int(misc_sec[key])
 
-        line1 = re.split(":", line)
+    # Regression flags: Control other features (S)
+    regress_sec = config['regress_section']
+    for key in regress_sec:
+       #print(key, regress_sec[key])
+       # Regression test parameters
+       if key == 'REGRESS_ANNOTATED_DIR':
+          PdfReport.bc_regr_annotated_dir = regress_sec[key]
+       elif key == 'REGRESS_INPUT_XML_FILE':
+          PdfReport.bc_regr_xml_file = regress_sec[key]
+       elif key == 'REGRESS_OUTDIR':
+          PdfReport.bc_regr_xml_file = regress_sec[key]
+
+    # For regression test we keep the max formats to be reported to 20
+    if FiwalkReport.regressionTest == True:
+       PdfReport.bc_max_fmtfiles_to_report = 20
+
+def bc_write_config_file(config_file):
+
+    # Set up the configuration object
+    config = ConfigObj()
+    # Set the filename
+    config.filename = config_file
+
+    # Build initial comment
+    config.initial_comment = [
+      '#',
+      '# Configuration file for BitCurator Reporting',
+      '# logo_section: Sets up the logo parameters',
+      '# feature_section: Sets number of lines reported for features',
+      '# report_section: Sets parameters for fiwalk/bulk_extractor reports',
+      '# misc_section: Special flags for other output',
+      '#'
+    ]
     
-        # Set the flag for the particular feature to 1 indicating
-        # the user wants to see the report for this feature.
-        if line1[0] == 'L':
-            ## Logo
-            print("Overwriting Logo with", line1[1])
-            PdfReport.logo = line1[1]
-        elif line1[0] == 'F':
-            ## Test if line1[1] is a legitimate feature>
-            if line1[1] in PdfReport.bc_config_feature:
-                PdfReport.bc_config_feature[line1[1]] = 1
+    # Set up the logo section
+    #config['logo_section'] = {}
+    logo_section = {
+    # Enter a filepath here if you wish to overwrite the default logo
+    #'filepath': '/home/bcadmin/logos/FinalBitCuratorLogo-NoText.png',
+    'empty' : 'empty'
+    }
+    config['logo_section'] = logo_section
 
-                # if the third field is 0, print all the lines in the
-                # feature file. Otherwise print what the number says.
-                if line1[2] == '\n':
-                    lines = 0
-                else:
-                    lines = line1[2]
-  
-                PdfReport.bc_config_feature_lines[line1[1]] = int(lines)
-            else:
-                print("Info: Feature %s does NOT exist" % line1[1])
-                          
+    # Set up the feature section
+    feature_section = {
+    'accts' : 0, 'aes' : 0, 'base16' : 0,
+    'base64' : 0, 'ccn' : 0, 'domain' : 0,
+    'elf' : 0, 'email' : 0, 'ether' : 0,
+    'exif' : 0, 'find' : 0, 'gps' : 0,
+    'gzip' : 0, 'hiber' : 0, 'ip' : 0,
+    'json' : 0, 'kml' : 0, 'net' : 0,
+    'pdf' : 0, 'rar' : 0, 'vcard' : 0,
+    'rfc822' : 0, 'tcp' : 0, 'telephone' : 0,
+    'aes_keys.txt' : 0, 'url' : 0, 'winpe' : 0,
+    'winpefetch' : 0, 'windirs' : 0, 'winprefetch' : 0,
+    'zip' : 0, 'bulk' : 0, 'wordlist' : 0,
+    'xor' : 0
+    }
+    config['feature_section'] = feature_section
 
-        elif line1[0] == 'R':
-            ## Test if line1[1] is a legitimate report file
-            if line1[1] in PdfReport.bc_config_report_files:
-                PdfReport.bc_config_report_files[line1[1]] = 1
-                PdfReport.bc_config_report_lines[line1[1]] = int(line1[2])
-                ## print("D: Reporting %d lines for file %s" \
-                      ## %(PdfReport.bc_config_report_lines[line1[1]], line1[1]))
-            else:
-                print("Info: Report file %s is not legitimate" % line1[1])
-                print("Info: Fix the config file")
-        elif line1[0] == 'M':
-            # Get the file format
-            file_format = line1[1].rstrip('\n')
-           
-            # Get all the files that have this format from the dict.
-            PdfReport.bc_config_filefmt_files[file_format] = 1
-        elif line1[0] == 'S':
-            # Find out if user wants special files to be reported
-            if line1[1].rstrip() == 'REPORT_SPECIAL_FILES':
-                if line1[2].rstrip() == 'YES':
-                    PdfReport.bc_config_report_special_files = True
-                else:
-                    # print("D: Not reporting Special files")
-                    PdfReport.bc_config_report_special_files = False
-            elif line1[1].rstrip() == 'MAX_LINES_TO_REPORT':
-                PdfReport.bc_max_lines_to_report = int(line1[2])
-            elif line1[1].rstrip() == 'MAX_FILE_FORMAT_FILES_TO_REPORT':
-                PdfReport.bc_max_fmtfiles_to_report = int(line1[2])
-            elif line1[1].rstrip() == 'MAX_FEATURE_FILES_TO_REPORT':
-                PdfReport.bc_max_featfiles_to_report = int(line1[2])
-            elif line1[1].rstrip() == 'MAX_FORMATS_FOR_BAR_GRAPH':
-                PdfReport.bc_max_formats_in_bar_graph = int(line1[2])
-            elif line1[1].rstrip() == 'FEATURE_OUTPUTS_IN_PDF':
-                PdfReport.bc_feature_output_in_pdf = int(line1[2])
-        elif line1[0] == 'G':
-            # Regression test parameters
-            if line1[1].rstrip() == 'REGRESS_ANNOTATED_DIR':
-                PdfReport.bc_regr_annotated_dir = line1[2]
-            elif line1[1].rstrip() == 'REGRESS_INPUT_XML_FILE':
-                PdfReport.bc_regr_xml_file = line1[2]
-            elif line1[1].rstrip() == 'REGRESS_OUTDIR':
-                PdfReport.bc_regr_xml_file = line1[2]
+    # Set up the report section
+    report_section = {
+    'bc_format_bargraph' : 0, 
+    'FiwalkReport' : -1,
+    'FiwalkDeletedFiles' : 0,
+    'BeReport' : 0
+    }
+    config['report_section'] = report_section
+    
+    # Set up other misc options
+    misc_section = {
+    'REPORT_SPECIAL_FILES' : 'YES',
+    'MAX_LINES_TO_REPORT' : 500,
+    'MAX_FILE_FORMAT_FILES_TO_REPORT' : 0,
+    'MAX_FEATURE_FILES_TO_REPORT' : 10,
+    'FEATURE_OUTPUTS_IN_PDF' : 0
+    }
+    config['misc_section'] = misc_section
 
-        # For regression test we keep the max formats to be reported to 20
-        if FiwalkReport.regressionTest == True:
-            PdfReport.bc_max_fmtfiles_to_report = 20
+    # Set up the regression section
+    regress_section = {
+    'REGRESS_ANNOTATED_DIR' : './bc_regress_dir/regress_annotated_charlie_output',
+    'REGRESS_INPUT_XML_FILE': './bc_regress_dir/regress_charlie_fi_F.xml',
+    'REGRESS_OUTDIR': './bc_regress_dir/regress_outdir',
+    'REGRESS_BEINFO_FILE' : './bc_regress_dir/regress_charlie_beinfo.txt'
+    }
+    config['regress_section'] = regress_section
+
+    # Write out the comment
+    config.comments = {'logo_section': ['', '#', '# Set up the logo section', '#'],
+    'feature_section': ['', '#', '# Set up the feature section', '#'],
+    'report_section': ['', '#', '# Set up the report section', '#'],
+    'misc_section': ['', '#', '# Set up the misc section', '#'],
+    'regress_section': ['', '#', '# Set up the regression section', '#']
+    }
+
+    # Write out the configuration file
+    config.write()
+
+# UNCOMMENT THIS ONLY FOR TESTING
+# Main application
+#if __name__ == "__main__":
+    #bc_write_config_file("/home/bcadmin/Desktop/bc_report_config.txt")
+    #bc_parse_config_file(0, 0, "/home/bcadmin/Desktop/bc_report_config.txt")
+
