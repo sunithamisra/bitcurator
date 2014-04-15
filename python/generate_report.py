@@ -692,12 +692,12 @@ class PdfReport:
     # The following is a set of all non-feature pdf report files. It is a
     # growing set. Add more as and when new reports are added.
     bc_config_report_files = {'bc_format_bargraph':0,'FiwalkReport':0, \
-                              'FiwalkDeletedFiles':0,'bulk_extractor_report':0}
+                              'fiwalk_deleted_files':0,'bulk_extractor_report':0}
 
     # The following is a corresponding set with the number of lines
     # to be reported in each file, being the value of each element.
     bc_config_report_lines = {'bc_format_bargraph':0,'FiwalkReport':0, \
-                              'FiwalkDeletedFiles':0,'bulk_extractor_report':0}
+                              'fiwalk_deleted_files':0,'bulk_extractor_report':0}
 
     def __init__(self, in_dir, out_dir, use_config_file, config_file, is_cmd_line = False):
  
@@ -761,8 +761,8 @@ class PdfReport:
                 self.bc_config_feature[filename] = 1
 
             self.bc_config_report_files['bc_format_bargraph'] = 1
-            self.bc_config_report_files['FiwalkReport'] = 1
-            self.bc_config_report_files['FiwalkDeletedFiles'] = 1
+            self.bc_config_report_files['fiwalk_report'] = 1
+            self.bc_config_report_files['fiwalk_deleted_files'] = 1
             self.bc_config_report_files['bulk_extractor_report'] = 1
                     
 
@@ -1123,19 +1123,19 @@ class FiwalkReport:
   
             '''
             # If configured as -1, the table of files is not generated.
-            if (PdfReport.bc_config_report_lines['FiwalkReport'] != -1):
+            if (PdfReport.bc_config_report_lines['fiwalk_report'] != -1):
                 pdf.set_font('Arial','',10)
                 pdf.add_page()
                 pdf.make_table(header_files)
             '''
-            pdf_file = fn.outdir + '/FiwalkReport.pdf'
+            pdf_file = fn.outdir + '/fiwalk_report.pdf'
             pdf.output(pdf_file,'F')
             bc_utils.bc_addToReportFileList(pdf_file, PdfReport)
           
         # Generate the Report of deleted files
   
         ## Report the Deleted Files only if the config file says so
-        if PdfReport.bc_config_report_files['FiwalkDeletedFiles'] == 1:
+        if PdfReport.bc_config_report_files['fiwalk_deleted_files'] == 1:
             ## print("D: Generating Deleted Files Report")
             pdf=PDF()
             pdf.compress = False
@@ -1144,7 +1144,7 @@ class FiwalkReport:
             y = pdf.get_y()
             pdf.set_y(y+10)
             pdf.make_table_delfiles(tab_header_delfiles)
-            pdf_file = fn.outdir + '/FiwalkDeletedFiles.pdf'
+            pdf_file = fn.outdir + '/fiwalk_deleted_files.pdf'
             print("Generating ", pdf_file)
             pdf.output(pdf_file, 'F')
             bc_utils.bc_addToReportFileList(pdf_file, PdfReport)
