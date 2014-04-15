@@ -692,12 +692,12 @@ class PdfReport:
     # The following is a set of all non-feature pdf report files. It is a
     # growing set. Add more as and when new reports are added.
     bc_config_report_files = {'bc_format_bargraph':0,'FiwalkReport':0, \
-                              'FiwalkDeletedFiles':0,'BeReport':0}
+                              'FiwalkDeletedFiles':0,'bulk_extractor_report':0}
 
     # The following is a corresponding set with the number of lines
     # to be reported in each file, being the value of each element.
     bc_config_report_lines = {'bc_format_bargraph':0,'FiwalkReport':0, \
-                              'FiwalkDeletedFiles':0,'BeReport':0}
+                              'FiwalkDeletedFiles':0,'bulk_extractor_report':0}
 
     def __init__(self, in_dir, out_dir, use_config_file, config_file, is_cmd_line = False):
  
@@ -763,7 +763,7 @@ class PdfReport:
             self.bc_config_report_files['bc_format_bargraph'] = 1
             self.bc_config_report_files['FiwalkReport'] = 1
             self.bc_config_report_files['FiwalkDeletedFiles'] = 1
-            self.bc_config_report_files['BeReport'] = 1
+            self.bc_config_report_files['bulk_extractor_report'] = 1
                     
 
         ## print("D: Reporting the following files: ")
@@ -1151,7 +1151,7 @@ class FiwalkReport:
   
         ## Now add the info from bulk-extractor output (be_ofn)
         ## Report the BE Report file only if the config file says so
-        if PdfReport.bc_config_report_files['BeReport'] == 1:
+        if PdfReport.bc_config_report_files['bulk_extractor_report'] == 1:
               pdf=PDF_BE()
               pdf.compress = False
   
@@ -1162,7 +1162,7 @@ class FiwalkReport:
               pdf.set_text_color(128)
               pdf.make_table_be(header_be, ofn_be)
   
-              pdf_file = fn.outdir + '/BeReport.pdf'
+              pdf_file = fn.outdir + '/bulk_extractor_report.pdf'
               pdf.output(pdf_file,'F')
               bc_utils.bc_addToReportFileList(pdf_file, PdfReport)
 

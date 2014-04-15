@@ -152,7 +152,7 @@ def bc_write_config_file(config_file):
     'bc_format_bargraph' : 0, 
     'FiwalkReport' : -1,
     'FiwalkDeletedFiles' : 0,
-    'BeReport' : 0
+    'bulk_extractor_report' : 0
     }
     config['report_section'] = report_section
     
