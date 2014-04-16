@@ -577,10 +577,10 @@ class PDF(FPDF):
 
         # Warn the user if the length of a feature file is > max lines
         if PdfReport.bc_max_lines_to_report and \
-             FiwalkReport.array_ind > PdfReport.bc_config_report_lines['FiwalkReport']:
+             FiwalkReport.array_ind > PdfReport.bc_config_report_lines['fiwalk_report']:
             print("### WARNING ### Feature Report file has exceeded "\
                     "%d lines limit###" \
-                    %(PdfReport.bc_config_report_lines['FiwalkReport']))
+                    %(PdfReport.bc_config_report_lines['fiwalk_report']))
 
         self.set_font('Times','',8)
         linenum = 0
@@ -596,10 +596,10 @@ class PDF(FPDF):
  
             # Config file sets the maxlines to 0 to report all the lines
             # or a specific number to limit the reporting lines.
-            if (PdfReport.bc_config_report_lines['FiwalkReport'] != 0):
-                if (linenum >= PdfReport.bc_config_report_lines['FiwalkReport']):
+            if (PdfReport.bc_config_report_lines['fiwalk_report'] != 0):
+                if (linenum >= PdfReport.bc_config_report_lines['fiwalk_report']):
                     # Lines reached max: Breaking
-                    print("FiwalkReport: Exceeded Maxlines: ", linenum)
+                    print("fiwalk_report: Exceeded Maxlines: ", linenum)
                     break
                     
             linenum += 1
@@ -691,12 +691,12 @@ class PdfReport:
 
     # The following is a set of all non-feature pdf report files. It is a
     # growing set. Add more as and when new reports are added.
-    bc_config_report_files = {'bc_format_bargraph':0,'FiwalkReport':0, \
+    bc_config_report_files = {'bc_format_bargraph':0,'fiwalk_report':0, \
                               'fiwalk_deleted_files':0,'bulk_extractor_report':0}
 
     # The following is a corresponding set with the number of lines
     # to be reported in each file, being the value of each element.
-    bc_config_report_lines = {'bc_format_bargraph':0,'FiwalkReport':0, \
+    bc_config_report_lines = {'bc_format_bargraph':0,'fiwalk_report':0, \
                               'fiwalk_deleted_files':0,'bulk_extractor_report':0}
 
     def __init__(self, in_dir, out_dir, use_config_file, config_file, is_cmd_line = False):
@@ -1110,7 +1110,7 @@ class FiwalkReport:
   
   
         ## Report the Fiwalk Report file only if the config file says so
-        if PdfReport.bc_config_report_files['FiwalkReport'] == 1:
+        if PdfReport.bc_config_report_files['fiwalk_report'] == 1:
             pdf=PDF()
             pdf.compress = False
             pdf.set_title("Bitcurator Report")
