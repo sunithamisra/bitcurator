@@ -132,29 +132,33 @@ def bc_write_config_file(config_file):
 
     # Set up the feature section
     feature_section = {
-    'bulk' : 0, 
-    'wordlist' : 0, 
-    'xor' : 0,
-    'accts' : 0, 
-    'aes' : 0, 
-    'base16' : 0,
-    'base64' : 0, 
-    'elf' : 0, 
-    'email' : 0, 
-    'exif' : 0, 
-    'find' : 0, 
+    'aes_keys' : 0,
+    'alerts' : 0,
+    'ccn_track2' : 0,
+    'ccn' : 0,
+    'domain' : 0,
+    'elf' : 0,
+    'email' : 0,
+    'ether' : 0,
+    'exif' : 0,
+    'find' : 0,
     'gps' : 0,
-    'gzip' : 0, 
-    'hiber' : 0, 
-    'json' : 0, 
-    'kml' : 0, 
-    'net' : 0,
-    'pdf' : 0, 
-    'rar' : 0, 
-    'vcard' : 0, 
-    'windirs' : 0, 
-    'winpe' : 0, 
-    'winprefetch' : 0, 
+    'hex' : 0,
+    'ip' : 0,
+    'jpeg_carved' : 0,
+    'json' : 0,
+    'kml' : 0,
+    'pii' : 0,
+    'rar' : 0,
+    'rfc822' : 0,
+    'telephone' : 0,
+    'unrar_carved' : 0,
+    'unzip_carved' : 0,
+    'url' : 0,
+    'vcard' : 0,
+    'windirs' : 0,
+    'winpe' : 0,
+    'winprefetch' : 0,
     'zip' : 0
     }
     config['feature_section'] = feature_section
@@ -171,9 +175,9 @@ def bc_write_config_file(config_file):
     # Set up other misc options
     misc_section = {
     'REPORT_SPECIAL_FILES' : 'YES',
-    'MAX_LINES_TO_REPORT' : 500,
+    'MAX_LINES_TO_REPORT' : 1000,
     'MAX_FILE_FORMAT_FILES_TO_REPORT' : 0,
-    'MAX_FEATURE_FILES_TO_REPORT' : 10,
+    'MAX_FEATURE_FILES_TO_REPORT' : 50,
     'FEATURE_OUTPUTS_IN_PDF' : 0
     }
     config['misc_section'] = misc_section
@@ -201,6 +205,6 @@ def bc_write_config_file(config_file):
 # UNCOMMENT THIS ONLY FOR TESTING
 # Main application
 #if __name__ == "__main__":
-    #bc_write_config_file("/home/bcadmin/Desktop/bc_report_config.txt")
-    #bc_parse_config_file(0, 0, "/home/bcadmin/Desktop/bc_report_config.txt")
+#    bc_write_config_file("/home/bcadmin/Desktop/bc_report_config.txt")
+#    #bc_parse_config_file(0, 0, "/home/bcadmin/Desktop/bc_report_config.txt")
 
