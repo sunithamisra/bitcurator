@@ -36,15 +36,15 @@ def bc_parse_config_file(PdfReport, FiwalkReport, config_file):
     # print("D:config_filefmt: ", PdfReport.bc_config_filefmt_files)
 
     # Logo section: Set logo filename and properties (L)
-    logo_sec = config['logo_section']
-    for key in logo_sec:
-       if key == 'filepath':
-          logo_filepath = logo_sec['filepath']
-       else:
-          logo_filepath = 'empty'
+    #logo_sec = config['logo_section']
+    #for key in logo_sec:
+    #   if key == 'filepath':
+    #      logo_filepath = logo_sec['filepath']
+    #   else:
+    #      logo_filepath = 'empty'
     # Overwrite the logo path:
-    if logo_filepath != 'empty':
-       PdfReport.logo = logo_filepath   
+    #if logo_filepath != 'empty':
+    #   PdfReport.logo = logo_filepath   
  
     # Feature section: Set feature report output parameters (F)
     feature_sec = config['feature_section']
@@ -132,18 +132,30 @@ def bc_write_config_file(config_file):
 
     # Set up the feature section
     feature_section = {
-    'accts' : 0, 'aes' : 0, 'base16' : 0,
-    'base64' : 0, 'ccn' : 0, 'domain' : 0,
-    'elf' : 0, 'email' : 0, 'ether' : 0,
-    'exif' : 0, 'find' : 0, 'gps' : 0,
-    'gzip' : 0, 'hiber' : 0, 'ip' : 0,
-    'json' : 0, 'kml' : 0, 'net' : 0,
-    'pdf' : 0, 'rar' : 0, 'vcard' : 0,
-    'rfc822' : 0, 'tcp' : 0, 'telephone' : 0,
-    'aes_keys.txt' : 0, 'url' : 0, 'winpe' : 0,
-    'winpefetch' : 0, 'windirs' : 0, 'winprefetch' : 0,
-    'zip' : 0, 'bulk' : 0, 'wordlist' : 0,
-    'xor' : 0
+    'bulk' : 0, 
+    'wordlist' : 0, 
+    'xor' : 0,
+    'accts' : 0, 
+    'aes' : 0, 
+    'base16' : 0,
+    'base64' : 0, 
+    'elf' : 0, 
+    'email' : 0, 
+    'exif' : 0, 
+    'find' : 0, 
+    'gps' : 0,
+    'gzip' : 0, 
+    'hiber' : 0, 
+    'json' : 0, 
+    'kml' : 0, 
+    'net' : 0,
+    'pdf' : 0, 
+    'rar' : 0, 
+    'vcard' : 0, 
+    'windirs' : 0, 
+    'winpe' : 0, 
+    'winprefetch' : 0, 
+    'zip' : 0
     }
     config['feature_section'] = feature_section
 

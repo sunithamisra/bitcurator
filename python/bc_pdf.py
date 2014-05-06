@@ -23,14 +23,15 @@ def bc_table_end_page(pdf, FiwalkReport, linenum, header, w):
         pdf.ln()
     FiwalkReport.page = pdf.page
 
-def make_header(this, logo, header_text):
+#def make_header(this, logo, header_text):
+def make_header(this, header_text):
     this.set_font('Arial','B',14)
     this.underline = 1
     header_text = 'Report: ' + header_text
     this.cell(0,0,header_text,0,0,'L')
 
     # Logo
-    this.image(logo,150,5,33)
+    #this.image(logo,150,5,33)
 
     # Line break
     this.ln(10)
