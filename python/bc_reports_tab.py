@@ -2072,7 +2072,8 @@ class bcThread_allrep_all(threading.Thread):
                                  self.allrepXmlFileName, \
                                  self.allrepAnnDir, \
                                  self.genrepOutDir, \
-                                 self.allrepConfile)
+                                 self.allrepConfile,
+                                 self.allrepBeFeatDir)
                 # Set the progresbar active flag so the other thread can
                 # get out of the while loop.
                 ProgressBar._active = False
