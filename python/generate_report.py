@@ -9,23 +9,14 @@
 #
 from __future__ import with_statement
 
-__version__ = "0.7.6"
+__version__ = "0.9.4"
 
 b'This module needs Python 2.7 or later.'
-import zipfile,os,os.path,glob,codecs
+import re, os, sys, zipfile, glob, codecs
+import fnmatch, string, datetime
+import bc_utils, bc_config, bc_pdf, bc_graph, bc_regress
 from fpdf import *
-import re
-import os
-import fnmatch
 from collections import namedtuple
-import string
-import datetime
-import sys
-import bc_utils
-import bc_config
-import bc_pdf
-import bc_graph
-import bc_regress
 from bc_utils import filename_from_path
 from bc_genrep_dfxml import bc_process_xmlfile_using_sax
 from bc_genrep_dfxml import bc_get_volume_info_from_sax
@@ -67,7 +58,7 @@ glb_image_info = []
 #
 class PDF_BE(FPDF):
     def header(this):
-        bc_pdf.make_header(this,PdfReport.logo, 'Bulk Extractor Overview')
+        bc_pdf.make_header(this, 'Bulk Extractor Overview')
 
     # Page footer
     def footer(this):
@@ -95,9 +86,9 @@ class PDF_BE(FPDF):
 
         if be_version != None:
             ver = be_version.text
-        if tb != None:
+        if total_bytes != None:
             tb = total_bytes.text
-        if es != None:
+        if elapsed_seconds != None:
             es=elapsed_seconds.text
         if max_depth_seen != None:
             mds=max_depth_seen.text
@@ -114,7 +105,11 @@ class PDF_BE(FPDF):
 
         # Add some metadata information from reports.xml
         ver, tb, es, mds = self.bc_extract_info_from_bexml(be_feat_dir+'/report.xml')
-        tmb = str(int(tb) / 1000000) + ' MB'
+        if tb != None:
+            tmb = str(int(tb) / 1000000) + ' MB'
+        else:
+            tmb = tb
+
         print("BE version: {}, total_bytes:{}, MB:{}, elapsed_time:{}, max_depth:{}".format(ver, tb, tmb, es, mds))
         #be_version = 2345
 
@@ -249,7 +244,7 @@ class PDF_BE(FPDF):
         # Get the data from the input file
         data = self.bc_get_data_from_feature_file(feature_file)
 
-        # Now generte the xlsx file for feature file
+        # Now generate the xlsx file for feature file
         bc_generate_feature_xlsx(PdfReport, data, feature_file)
 
     #
@@ -342,7 +337,8 @@ class PDF_BE(FPDF):
 class PDF(FPDF):
     # Page footer
     def header(this):
-        bc_pdf.make_header(this,PdfReport.logo, 'File System Statistics and Files')
+        #bc_pdf.make_header(this,PdfReport.logo, 'File System Statistics and Files')
+        bc_pdf.make_header(this, 'File System Statistics and Files')
 
     # Page footer
     def footer(this):
@@ -744,7 +740,7 @@ def be_create_xlsx_report_file(input_file, annotated_file):
 #
 class PdfReport:
     reportFiles = 0
-    logo = "/usr/share/pixmaps/bitcurator/FinalBitCuratorLogo-NoText.png" # Default
+    #logo = "/usr/share/pixmaps/bitcurator/FinalBitCuratorLogo-NoText.png" # Default
  
     default_config = False
     bc_config_feature = {}
