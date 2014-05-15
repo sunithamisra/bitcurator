@@ -151,13 +151,13 @@ def get_file_info(line, FiwalkReport):
 # option of running the reports is intact.
 
 from collections import namedtuple
-def bc_get_reports(PdfReport, FiwalkReport, fiwalk_xmlfile, annotated_dir, outdir, config_file):
+def bc_get_reports(PdfReport, FiwalkReport, fiwalk_xmlfile, annotated_dir, outdir, config_file, be_feat_dir):
 
         fiwalk_txtfile = "null"
         fiwalk_xlsx = True  # By default, xlsx files are generated
 
-        argStruct = namedtuple("argStruct", "outdir fiwalk_xmlfile annotated_dir")
-        args = argStruct(outdir=outdir, fiwalk_xmlfile=fiwalk_xmlfile, annotated_dir=annotated_dir)
+        argStruct = namedtuple("argStruct", "outdir fiwalk_xmlfile annotated_dir be_feat_dir")
+        args = argStruct(outdir=outdir, fiwalk_xmlfile=fiwalk_xmlfile, annotated_dir=annotated_dir,be_feat_dir=be_feat_dir)
 
         use_config_file = True
         fiwalk_txtfile = None
@@ -167,7 +167,7 @@ def bc_get_reports(PdfReport, FiwalkReport, fiwalk_xmlfile, annotated_dir, outdi
         print(" o annotated Directory: ", args.annotated_dir)
         print(" o Output Directory: ", args.outdir)
 
-        report = PdfReport(args.annotated_dir, args.outdir, use_config_file, config_file)
+        report = PdfReport(args.annotated_dir, args.outdir, use_config_file, config_file, be_feat_dir, is_cmd_line=False)
         report.be_process_generate_report(args, use_config_file)
 
         if fiwalk_txtfile:
