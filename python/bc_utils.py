@@ -226,7 +226,6 @@ def bcGetAffInfo(image_name):
     os.system('rm /tmp/tmpaffinfofile')
     return aff_info
 
-##import os
 def bcGetE01Info(image_name):
     mod_image_name = re.escape(image_name)
     os.system('ewfinfo ' + mod_image_name + '>/tmp/tmpe01infofile')
