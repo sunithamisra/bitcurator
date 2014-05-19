@@ -104,53 +104,54 @@ class PDF_BE(FPDF):
         self.set_font('Times','I',10)
 
         # Add some metadata information from reports.xml
-        ver, tb, es, mds = self.bc_extract_info_from_bexml(be_feat_dir+'/report.xml')
-        if tb != None:
-            tmb = str(int(tb) / 1000000) + ' MB'
-        else:
-            tmb = tb
+        if be_feat_dir != None:
+            ver, tb, es, mds = self.bc_extract_info_from_bexml(be_feat_dir+'/report.xml')
+            if tb != None:
+                tmb = str(int(tb) / 1000000) + ' MB'
+            else:
+                tmb = tb
 
-        print("BE version: {}, total_bytes:{}, MB:{}, elapsed_time:{}, max_depth:{}".format(ver, tb, tmb, es, mds))
-        #be_version = 2345
+            print("BE version: {}, total_bytes:{}, MB:{}, elapsed_time:{}, max_depth:{}".format(ver, tb, tmb, es, mds))
+            #be_version = 2345
 
-        imgname =  str(image_info['image_filename'])
-        self.set_x(10)
-        self.set_y(15)
-        self.set_text_color(2)
-        self.set_font('Times','I', 10)
-        self.cell(0, 5, 'Image Name: ' +imgname, border=0, ln=1)
-
-        self.set_y(self.get_y() + 2)
-        self.set_font('Times','', 14)
-
-        # bold font
-        self.set_fill_color(135,0,0)
-        self.set_text_color(0)
-        self.set_draw_color(128,0,0)
-        self.set_line_width(.3)
-
-        self.underline = 1
-        self.cell(0, 5, 'Run Metadata', border=0, ln=1)
-        self.underline = 0
-
-        self.set_text_color(20)
-        self.set_font('Times','I',10)
-
-        self.set_y(self.get_y() + 2)
-
-        self.cell(0, 5, 'Bulk Extractor Version :' +ver, border=0, ln=1)
-        if tmb != None:
+            imgname =  str(image_info['image_filename'])
             self.set_x(10)
-            self.cell(0, 5, 'Total Bytes :' +tmb, border=0, ln=1)
+            self.set_y(15)
+            self.set_text_color(2)
+            self.set_font('Times','I', 10)
+            self.cell(0, 5, 'Image Name: ' +imgname, border=0, ln=1)
 
-        if es != None:
-            self.set_x(10)
-            tempstr = 'This image was processed in '+ es + ' seconds'
-            self.cell(0, 5, tempstr, border=0, ln=1)
+            self.set_y(self.get_y() + 2)
+            self.set_font('Times','', 14)
 
-        if mds != None:
-            self.set_x(10)
-            self.cell(0, 5, 'Maximum Depth (maximum level of compressed files) :' +mds, border=0, ln=1)
+            # bold font
+            self.set_fill_color(135,0,0)
+            self.set_text_color(0)
+            self.set_draw_color(128,0,0)
+            self.set_line_width(.3)
+
+            self.underline = 1
+            self.cell(0, 5, 'Run Metadata', border=0, ln=1)
+            self.underline = 0
+
+            self.set_text_color(20)
+            self.set_font('Times','I',10)
+    
+            self.set_y(self.get_y() + 2)
+
+            self.cell(0, 5, 'Bulk Extractor Version :' +ver, border=0, ln=1)
+            if tmb != None:
+                self.set_x(10)
+                self.cell(0, 5, 'Total Bytes :' +tmb, border=0, ln=1)
+
+            if es != None:
+                self.set_x(10)
+                tempstr = 'This image was processed in '+ es + ' seconds'
+                self.cell(0, 5, tempstr, border=0, ln=1)
+    
+            if mds != None:
+                self.set_x(10)
+                self.cell(0, 5, 'Maximum Depth (maximum level of compressed files) :' +mds, border=0, ln=1)
 
         self.set_text_color(3)
         self.set_font('Times','', 14)
