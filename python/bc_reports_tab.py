@@ -1733,6 +1733,7 @@ class Ui_MainWindow(object):
         # FIXME-BEFORE COMMIT: For testing, I have set it to my path. Replace this
         # line with the line above before committing.
         # self.allrepBcpyDir = "/home/sunitha/Research/Tools/bulk_extractor/python"
+        # self.allrepBcpyDir = "/home/sunitha/Tools/bulk_extractor-1.4.4/python"
         return (0)
 
     def bc_allrep_check_parameters_old(self):
@@ -2345,7 +2346,7 @@ class bcThread_rep(threading.Thread):
         bc_get_reports(PdfReport, FiwalkReport, self.repFwXmlFileName, \
                                  self.repAnnDir, \
                                  self.repOutDir, \
-                                 self.repConfile)
+                                 self.repConfile, None)
 
         # Set the progresbar active flag so the other thread can
         # get out of the while loop.
