@@ -226,6 +226,7 @@ def bcGetAffInfo(image_name):
     os.system('rm /tmp/tmpaffinfofile')
     return aff_info
 
+##import os
 def bcGetE01Info(image_name):
     mod_image_name = re.escape(image_name)
     os.system('ewfinfo ' + mod_image_name + '>/tmp/tmpe01infofile')
@@ -238,8 +239,9 @@ def bcGetE01Info(image_name):
         elif "Acquisition date" in line:
             tmplist = line.split(':')
             e01_info['acq_date'] = tmplist[1]
-    e01_info['imagesize'] = os.system('sizeof('+image_name+')')
-    ## print("D: E01 Info", e01_info)
+    e01_info['imagesize'] = os.path.getsize(image_name)
+
+    ##print("D: E01 Info", e01_info)
     return e01_info
     close(tmpfile)
     os.system('rm /tmp/tmpe01infofile')
