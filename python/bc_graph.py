@@ -11,13 +11,18 @@
 # generate_reports script
 
 import matplotlib
-import pylab as p
+#import pylab as p
+
+from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+from matplotlib.figure import Figure
+
 from bc_utils import filename_from_path, bc_addToReportFileList 
 #import bc_utils
 from matplotlib.backends.backend_pdf import PdfPages
 
 def bc_generate_bar_graph(PdfReport, image_info, outfile, item_dict):
-    fig = p.figure()
+    fig = Figure()
+    canvas = FigureCanvas(fig)
     ax = fig.add_subplot(1,1,1)
 
     y = []
@@ -67,10 +72,14 @@ def bc_generate_bar_graph(PdfReport, image_info, outfile, item_dict):
     ax.set_xticklabels(group_labels)
     fig.autofmt_xdate()
  
-    pp = PdfPages(outfile)
+    #pp = PdfPages(outfile)
+    canvas.print_figure(outfile)
+
     bc_addToReportFileList(outfile, PdfReport)
-    pp.savefig(fig)
-    pp.close()
+
+    #pp.savefig(fig)
+    #pp.close()
+
     #os.system("evince ./bc_format_bargraph.pdf")
 
 def bc_draw_histogram_fileformat(PdfReport, image_info, outfile, item_dict):
