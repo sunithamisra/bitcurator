@@ -62,6 +62,10 @@ global g_dfxmlfile
 global isGenDfxmlFile
 
 class Ui_MainWindow(object):
+    ## The following lines are added for debugging
+    oldstdout = sys.stdout
+    sys.stdout = StringIO()
+
     def __init__(self, outdir=None):
         self.outdir = outdir
 
@@ -406,15 +410,24 @@ class BcFileStructure:
     # This routine extracts the file structure given a disk image and the
     # corresponding dfxml file.
     def bcExtractFileStr(self, image, dfxmlfile, outdir):
+        x = Ui_MainWindow
+
+        ### Following 4 lines added for debug
+        global g_textEdit
+        g_textEdit.append( sys.stdout.getvalue() )
+        x.oldstdout = sys.stdout
+        sys.stdout = StringIO()
+        
         # Extract the information from dfxml file to create the 
         # dictionary only if it is not done before.
         if len(self.fiDictList) == 0:
             self.bcProcessDfxmlFileUsingSax(dfxmlfile)
             ## print("D: Length of dictionary fiDictList: ", len(self.fiDictList))
 
-        parent0 = QtGui.QStandardItem('Disk Image: {}'.format(image))
+        parent0 = image
+        parent0_item = QtGui.QStandardItem('Disk Image: {}'.format(image))
         current_fileordir = image
-        parent_dir_item = parent0
+        parent_dir_item = parent0_item
 
         global g_image
         global g_dfxmlfile
@@ -424,10 +437,14 @@ class BcFileStructure:
         # A dictionary item_of{} is maintained which contains each file/
         # directory and its corresponding " tree item" as its value.
         item_of = dict()
-        item_of[image] = parent0
+        item_of[image] = parent0_item
+
+        global g_model
+        g_model.appendRow(parent0_item)
 
         for i in range(0, len(self.fiDictList) - 1):
             path = self.fiDictList[i]['filename']
+            ## print("D: Path: ", path)
             if self.fiDictList[i]['name_type'] == 'd':
                 isdir = True
             else:
@@ -435,50 +452,70 @@ class BcFileStructure:
             pathlist = path.split('/')
             pathlen = len(pathlist)
             ## print("D: Path LiSt: ", pathlist, len(pathlist))
-            ## print("D: =================")
             last_elem = pathlist[pathlen-1]
             if last_elem == "." or last_elem == "..":
                 # Ignore . and ..
                 continue 
 
             if isdir == True:
+                ## print("D: It is  a Directory:  Pathlen: ", pathlen)
                 if (pathlen < 2):
                     # If pathlen is < 2 it is a file/dir directly off the root.
-                    parent = parent0
+                    parent_dir_item = parent0_item
                 else:
-                    parent = item_of[pathlist[pathlen-2]]
+                    parent_dir_item = item_of[pathlist[pathlen-2]]
+
+                '''
+                font = parent_dir_item.font(self.COLS.icon)
+                font.setBold(True)
+                parent_dir_item.setFont(self.COLS.icon, font)
+                '''
 
                 current_dir = pathlist[pathlen-1]
-                ## print("D: Set Current_dir to: ", current_dir)
-                current_dir_item = QtGui.QStandardItem(current_dir)
-                parent_dir_item.appendRow(current_dir_item)
+                current_item = QtGui.QStandardItem(current_dir)
+
+                # Add the directory item to the tree.
+                parent_dir_item.appendRow(current_item)
+
+                # DEBUG: Following 2 lines are added for debugging 
+                g_textEdit.append(sys.stdout.getvalue() )
+                sys.stdout = StringIO()
 
                 # Save the item of this directory
-                item_of[current_dir] = current_dir_item
+                item_of[current_dir] = current_item
+                
             else:
                 # File: The file could be in any level - top level is the
-                # child of parent0 (disk img). The level is sensed by the
+                # child of parent0_item (disk img). The level is sensed by the
                 # pathlen 
                 current_fileordir = pathlist[pathlen-1]
                 current_item = QtGui.QStandardItem(current_fileordir)
+                ## print("D: It is a file:  ", current_fileordir, current_item)
+                ## print("D: pathlen: ", pathlen)
+
+                # DEEBUG: The following 2 lines are added for debugging
+                g_textEdit.append( sys.stdout.getvalue() )
+                sys.stdout = StringIO()
+
                 current_item.setCheckable(True)
                 current_item.setCheckState(0)
 
                 # save the "item" of each file
                 self.file_item_of[current_fileordir] = current_item
 
-                ## print("D: Adding child to parent: ", pathlist[pathlen-2], parent0)
-
                 if pathlen > 1:
                     parent_dir_item = item_of[pathlist[pathlen-2]]
                 else:
-                    parent_dir_item = parent0
+                    parent_dir_item = parent0_item
             
+                # Add the directory item to the tree.
                 parent_dir_item.appendRow(current_item)
 
             parent = parent_dir_item
-            global g_model
-            g_model.appendRow(parent)
+
+            # DEEBUG: The following 2 lines are added for debugging
+            g_textEdit.append( sys.stdout.getvalue() )
+            sys.stdout = StringIO()
             
     def bcCatFile(self, filename, image, dfxmlfile, redirect_file, outfile):
         # Traverse the XML file, get the file_name, extract the inode number
@@ -648,7 +685,7 @@ if __name__=="__main__":
             print(">> Error: Fiwalk generation failed")
             exit(0)
 
-        global isGenDfxmlFile
+        ###global isGenDfxmlFile
         isGenDfxmlFile = True
         
     else:
@@ -660,7 +697,7 @@ if __name__=="__main__":
                 print(">> Error: Fiwalk generation failed")
                 exit(0)
 
-            global isGenDfxmlFile
+            ###global isGenDfxmlFile
             isGenDfxmlfile = True
 
     filestr = BcFileStructure()
@@ -681,7 +718,7 @@ if __name__=="__main__":
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # expand third container
-    ## parent0 = BcFileStructure.bcExtractFileStr.parent0
+    ## parent0_item = BcFileStructure.bcExtractFileStr.parent0
     ## index = model.indexFromItem(parent0)
     ## view.expand(index)
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -697,6 +734,7 @@ if __name__=="__main__":
         MainWindow = QtGui.QMainWindow()
         ui = Ui_MainWindow(args.outdir)
         ui.setupUi(MainWindow)
+
         filestr.bcExtractFileStr(args.image, dfxmlfile, args.outdir)
         MainWindow.show()
         sys.exit(app.exec_())
