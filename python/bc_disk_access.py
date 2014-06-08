@@ -293,7 +293,7 @@ class Ui_MainWindow(object):
 
 class BcFileStructure:
 
-    acc_dict_array = ["filename", "partition", "inode", "name_type", "filesize"]
+    acc_dict_array = ["filename", "partition", "inode", "name_type", "filesize", "alloc"]
     fiDictList = []
     parentlist = []
     file_item_of = dict()
@@ -348,6 +348,7 @@ class BcFileStructure:
                         ## print(">> D: File %s is Checked" %current_fileordir)
                         if not os.path.exists(exportDir):
                             os.mkdir(exportDir)
+
                         pathlist = path.split('/')
                         oldDir = newDir = exportDir
                         
@@ -412,7 +413,7 @@ class BcFileStructure:
     def bcExtractFileStr(self, image, dfxmlfile, outdir):
         x = Ui_MainWindow
 
-        ### Following 4 lines added for debug
+        ### Following 4 lines added for debugging
         global g_textEdit
         g_textEdit.append( sys.stdout.getvalue() )
         x.oldstdout = sys.stdout
@@ -428,6 +429,8 @@ class BcFileStructure:
         parent0_item = QtGui.QStandardItem('Disk Image: {}'.format(image))
         current_fileordir = image
         parent_dir_item = parent0_item
+        font = QtGui.QFont("Times",12,QtGui.QFont.Bold)
+        parent_dir_item.setFont(font)
 
         global g_image
         global g_dfxmlfile
@@ -445,10 +448,14 @@ class BcFileStructure:
         for i in range(0, len(self.fiDictList) - 1):
             path = self.fiDictList[i]['filename']
             ## print("D: Path: ", path)
+            isdir = False
             if self.fiDictList[i]['name_type'] == 'd':
                 isdir = True
-            else:
-                isdir = False
+
+            deleted = False
+            if self.fiDictList[i]['alloc'] == '0':
+                deleted = True
+
             pathlist = path.split('/')
             pathlen = len(pathlist)
             ## print("D: Path LiSt: ", pathlist, len(pathlist))
@@ -465,14 +472,10 @@ class BcFileStructure:
                 else:
                     parent_dir_item = item_of[pathlist[pathlen-2]]
 
-                '''
-                font = parent_dir_item.font(self.COLS.icon)
-                font.setBold(True)
-                parent_dir_item.setFont(self.COLS.icon, font)
-                '''
-
                 current_dir = pathlist[pathlen-1]
                 current_item = QtGui.QStandardItem(current_dir)
+                font = QtGui.QFont("Times",12,QtGui.QFont.Bold)
+                current_item.setFont(font)
 
                 # Add the directory item to the tree.
                 parent_dir_item.appendRow(current_item)
@@ -499,6 +502,9 @@ class BcFileStructure:
 
                 current_item.setCheckable(True)
                 current_item.setCheckState(0)
+
+                if deleted == True:
+                    current_item.setForeground(QtGui.QColor('red'))
 
                 # save the "item" of each file
                 self.file_item_of[current_fileordir] = current_item
@@ -608,7 +614,8 @@ class BcFileStructure:
                            self.acc_dict_array[1]:fi.partition(), \
                            self.acc_dict_array[2]:fi.inode(), \
                            self.acc_dict_array[3]:fi.name_type(), \
-                           self.acc_dict_array[4]:fi.filesize() })
+                           self.acc_dict_array[4]:fi.filesize(),\
+                           self.acc_dict_array[5]:fi.allocated() })
 
         
     # The fiwalk utility fiwalk_using_sax is invoked with a callback
@@ -685,7 +692,6 @@ if __name__=="__main__":
             print(">> Error: Fiwalk generation failed")
             exit(0)
 
-        ###global isGenDfxmlFile
         isGenDfxmlFile = True
         
     else:
