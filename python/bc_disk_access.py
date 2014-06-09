@@ -151,7 +151,7 @@ class Ui_MainWindow(object):
         global g_model 
         g_model = self.model
 
-        g_model.setHorizontalHeaderLabels(['File Structure: \n  Entries in Bold  are directories \n  Entries in Red font are unallocated deleted files '])
+        g_model.setHorizontalHeaderLabels(['File System: \n  Entries in Bold  are directories \n  Entries in Red font are unallocated/deleted files '])
 
         self.pushButton_export = QtGui.QPushButton(self.centralwidget)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Maximum)
