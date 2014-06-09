@@ -151,7 +151,7 @@ class Ui_MainWindow(object):
         global g_model 
         g_model = self.model
 
-        g_model.setHorizontalHeaderLabels(['File Structure'])
+        g_model.setHorizontalHeaderLabels(['File Structure: \n  Entries in Bold  are directories \n  Entries in Red font are unallocated deleted files '])
 
         self.pushButton_export = QtGui.QPushButton(self.centralwidget)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Maximum)
@@ -453,7 +453,7 @@ class BcFileStructure:
                 isdir = True
 
             deleted = False
-            if self.fiDictList[i]['alloc'] == '0':
+            if self.fiDictList[i]['alloc'] == False:
                 deleted = True
 
             pathlist = path.split('/')
