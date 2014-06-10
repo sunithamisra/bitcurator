@@ -1585,7 +1585,7 @@ class Ui_MainWindow(object):
         global g_accXmlFileName
         g_accXmlFileName = dfxmlfile
             
-        cmd1 = ['fiwalk', '-g', '-z', '-X', dfxmlfile, self.accImageFileName]
+        cmd1 = ['fiwalk', '-f', '-X', dfxmlfile, self.accImageFileName]
         print(">> Generating XML File ", dfxmlfile)
         print(">> Invoking command for Fiwalk = ", cmd1)
         
