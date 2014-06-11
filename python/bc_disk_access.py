@@ -329,7 +329,8 @@ class BcFileStructure:
 
                 # Now using the dict of files, file_item_of, get the item 
                 # for this file
-                current_item = self.file_item_of[current_fileordir]
+                # current_item = self.file_item_of[current_fileordir]
+                current_item = self.file_item_of[path]
                 if check == 1:
                     ## print("D: Setting File to Checked_state ", current_fileordir) 
                     current_item.setCheckState(2)
@@ -507,7 +508,8 @@ class BcFileStructure:
                     current_item.setForeground(QtGui.QColor('red'))
 
                 # save the "item" of each file
-                self.file_item_of[current_fileordir] = current_item
+                # self.file_item_of[current_fileordir] = current_item
+                self.file_item_of[path] = current_item
 
                 if pathlen > 1:
                     parent_dir_item = item_of[pathlist[pathlen-2]]
