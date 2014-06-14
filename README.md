@@ -15,9 +15,9 @@ The default username and password for the virtual machine are as follows:
 * Username: `bcadmin`
 * Password: `bcadmin`
 
-# Installing BitCurator from scratch
+# Installation and Dependencies
 
-The core BitCurator tools have been tested in Ubuntu 12.04LTS. To clone the master BitCurator repository, run:
+The core BitCurator tools have been tested in Ubuntu 12.04LTS and Ubuntu 14.04LTS. To clone the master BitCurator repository, run:
 
 * git clone https://github.com/kamwoods/bitcurator
 
