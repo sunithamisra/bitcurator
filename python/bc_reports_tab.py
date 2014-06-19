@@ -26,6 +26,7 @@ from generate_report import *
 from bc_utils import *
 from bc_disk_access import *
 #from PyQt4.Qsci import *
+from os.path import expanduser
 
 try:
     from io import StringIO
@@ -1571,9 +1572,12 @@ class Ui_MainWindow(object):
         if ui.lineEdit_acc_outdir.text() != self.accOutdirName:
             self.accOutdirName = ui.lineEdit_acc_outdir.text()
 
-        # Generte the dfxml file using Fiwalk, in the same directory
-        # as where the image resides.
-        dfxmlpath = os.path.dirname(self.accImageFileName)
+        # Generte the dfxml file using Fiwalk, in a hidden directory
+        # .bcfa, in the user's home directory
+        dfxmlpath = expanduser("~") + '/.bcfa'
+        if not os.path.exists(dfxmlpath):
+            os.mkdir(dfxmlpath)
+
         dfxmlfile = dfxmlpath + '/dfxml.xml'
 
         if os.path.exists(dfxmlfile):
