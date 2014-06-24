@@ -232,10 +232,20 @@ class Ui_MainWindow(object):
         QtCore.QCoreApplication.instance().quit()
 
     def selectAllMenu(self):
+        self.oldstdout = sys.stdout
+        sys.stdout = StringIO()
         BcFileStructure.bcOperateOnFiles(BcFileStructure, 1, None)
+        global g_textEdit
+        g_textEdit.setText( sys.stdout.getvalue() )
+        sys.stdout = self.oldstdout
         
     def deSelectAllMenu(self):
+        self.oldstdout = sys.stdout
+        sys.stdout = StringIO()
         BcFileStructure.bcOperateOnFiles(BcFileStructure, 0, None)
+        global g_textEdit
+        g_textEdit.setText( sys.stdout.getvalue() )
+        sys.stdout = self.oldstdout
 
     def buttonClickedClose(self):
         # if dfxml file was internally generated, remove it.
@@ -310,6 +320,7 @@ class BcFileStructure:
         ## print(">>D: LENGTH of fiDictList: ", len(self.fiDictList))
         for i in range(0, len(self.fiDictList) - 1):
             path = self.fiDictList[i]['filename']
+            inode = self.fiDictList[i]['inode']
             if self.fiDictList[i]['name_type'] == 'd':
                 isdir = True
             else:
@@ -329,11 +340,12 @@ class BcFileStructure:
 
                 # Now using the dict of files, file_item_of, get the item 
                 # for this file
-                # current_item = self.file_item_of[current_fileordir]
-                current_item = self.file_item_of[path]
+                unique_path = path + '-' + str(inode)
+                current_item = self.file_item_of[unique_path]
                 if check == 1:
-                    ## print("D: Setting File to Checked_state ", current_fileordir) 
-                    current_item.setCheckState(2)
+                    if (current_item.checkState() == 0):
+                        ## print("D: Setting File to Checked_state ", current_fileordir) 
+                        current_item.setCheckState(2)
                 elif check == 0:
                     current_item.setCheckState(0)
                 elif check == 2:
@@ -363,7 +375,7 @@ class BcFileStructure:
                         outfile = newDir + '/'+current_fileordir
                         ## print(">> D: Writing to Outfile: ", outfile, path)
                         
-                        filestr.bcCatFile(path, g_image, g_dfxmlfile, True, outfile)
+                        filestr.bcCatFile(path, inode, g_image, g_dfxmlfile, True, outfile)
                     elif current_item.checkState() == 1:
                         print("Partially checked state: ",current_item.checkState()) 
                         print("File %s is NOT Checked" %current_fileordir)
@@ -378,7 +390,8 @@ class BcFileStructure:
                         sys.stdout = StringIO()
                         
                         ## print("D: >> Dumping the contents of the file ", path)
-                        filestr.bcCatFile(path, g_image, g_dfxmlfile, False, None)
+                        ## FIXME: Not tested with inode yet.
+                        filestr.bcCatFile(path, inode, g_image, g_dfxmlfile, False, None)
                          
                         g_textEdit.setText( sys.stdout.getvalue() )
                         sys.stdout = self.oldstdout
@@ -448,7 +461,8 @@ class BcFileStructure:
 
         for i in range(0, len(self.fiDictList) - 1):
             path = self.fiDictList[i]['filename']
-            ## print("D: Path: ", path)
+            inode = self.fiDictList[i]['inode']
+            ## print("D: path, inode: ", path, inode)
             isdir = False
             if self.fiDictList[i]['name_type'] == 'd':
                 isdir = True
@@ -493,11 +507,14 @@ class BcFileStructure:
                 # child of parent0_item (disk img). The level is sensed by the
                 # pathlen 
                 current_fileordir = pathlist[pathlen-1]
-                current_item = QtGui.QStandardItem(current_fileordir)
+                unique_current_file = current_fileordir + '-' + str(inode)
+                current_item = QtGui.QStandardItem(unique_current_file)
                 ## print("D: It is a file:  ", current_fileordir, current_item)
                 ## print("D: pathlen: ", pathlen)
 
-                # DEEBUG: The following 2 lines are added for debugging
+                # We want just the filename in the GUI - without the inode
+                current_item.setText(current_fileordir)
+
                 g_textEdit.append( sys.stdout.getvalue() )
                 sys.stdout = StringIO()
 
@@ -508,8 +525,8 @@ class BcFileStructure:
                     current_item.setForeground(QtGui.QColor('red'))
 
                 # save the "item" of each file
-                # self.file_item_of[current_fileordir] = current_item
-                self.file_item_of[path] = current_item
+                unique_path = path + '-' + str(inode)
+                self.file_item_of[unique_path] = current_item
 
                 if pathlen > 1:
                     parent_dir_item = item_of[pathlist[pathlen-2]]
@@ -525,7 +542,7 @@ class BcFileStructure:
             g_textEdit.append( sys.stdout.getvalue() )
             sys.stdout = StringIO()
             
-    def bcCatFile(self, filename, image, dfxmlfile, redirect_file, outfile):
+    def bcCatFile(self, filename, inode, image, dfxmlfile, redirect_file, outfile):
         # Traverse the XML file, get the file_name, extract the inode number
         # of the file and run icat to extract the data.
         ## print(">>D: bcCatFile: Filename: ", filename)
@@ -543,7 +560,7 @@ class BcFileStructure:
         # Dictionary is formed. Now traverse through the array and 
         # in each dictionary, get the inode and call iCat command.
         for i in range(0, len(self.fiDictList)-1):
-            if (self.fiDictList[i]['filename'] == filename):
+            if (self.fiDictList[i]['filename'] == filename and self.fiDictList[i]['inode'] == inode):
                 ## print("D: Extracting the contents of the file:inode ", \ 
                 ##                  filename, self.fiDictList[i]['inode']) 
                 # First get the offset of the 2nd partition using mmls cmd
@@ -722,7 +739,8 @@ if __name__=="__main__":
             print(">> File %s doesnot exist " %dfxmlfile) 
             exit(0)
 
-        filestr.bcCatFile(args.filename, args.image, dfxmlfile, False, None)
+        # FIXME: Inode is set to 0 temporarily.
+        filestr.bcCatFile(args.filename, 0, args.image, dfxmlfile, False, None)
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # expand third container
