@@ -571,6 +571,10 @@ class BcFileStructure:
                     imgtype = 'ewf'
                 elif image.endswith(".aff") or image.endswith(".AFF"):
                     imgtype = 'aff'
+                elif image.endswith(".iso") or image.endswith(".ISO"):
+                    imgtype = 'iso'
+                else:
+                    imgtype = 'raw'
 
                 # Extract the file-system type from dfxml file volume
                 ftype = self.bc_get_ftype_from_sax(dfxmlfile) 
@@ -578,7 +582,7 @@ class BcFileStructure:
                 # For fat12 file-system there is no partiton information.
                 # So skip the step for extracting partition offset.
                 part2_start = 0
-                if self.ftype != 'fat12':
+                if self.ftype != 'fat12' and imgtype != 'iso':
                     mmls_cmd = "mmls -i " + imgtype +" "+image +" | grep \"02:\""
 
                     ## print("D: Executing mmls command: ", mmls_cmd) 
