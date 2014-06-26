@@ -35,6 +35,7 @@ import os, fiwalk, sys
 from PyQt4 import QtCore, QtGui
 import subprocess
 from subprocess import Popen,PIPE
+#from bc_genrep_dfxml import bc_get_ftype_from_sax
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -570,14 +571,23 @@ class BcFileStructure:
                     imgtype = 'ewf'
                 elif image.endswith(".aff") or image.endswith(".AFF"):
                     imgtype = 'aff'
-                mmls_cmd = "mmls -i " + imgtype +" "+image +" | grep \"02:\""
 
-                ## print("D: Executing mmls command: ", mmls_cmd) 
-                part2 = subprocess.check_output(mmls_cmd, shell=True)
-                ## print("D: Extracting partition-2: ", part2)
+                # Extract the file-system type from dfxml file volume
+                ftype = self.bc_get_ftype_from_sax(dfxmlfile) 
+                
+                # For fat12 file-system there is no partiton information.
+                # So skip the step for extracting partition offset.
+                part2_start = 0
+                if self.ftype != 'fat12':
+                    mmls_cmd = "mmls -i " + imgtype +" "+image +" | grep \"02:\""
 
-                part2_list = part2.split()
-                part2_start = int(part2_list[2])
+                    ## print("D: Executing mmls command: ", mmls_cmd) 
+                    part2 = subprocess.check_output(mmls_cmd, shell=True)
+                    ## print("D: Extracting partition-2: ", part2)
+
+                    part2_list = part2.split()
+                    part2_start = int(part2_list[2])
+                
 
                 ## print("D: Start offset of Partition-2: ", part2_start)
                 ## icat_cmd ex: icat -o 1 ~/aaa/charlie-work-usb-2009-12-11.aff 130 
@@ -641,6 +651,12 @@ class BcFileStructure:
     # to process the dfxml file contents.
     def bcProcessDfxmlFileUsingSax(self, dfxmlfile):
         fiwalk.fiwalk_using_sax(xmlfile=open(dfxmlfile, 'rb'),callback=self.cb)
+
+    def cbv_ftype(self, fv):
+        self.ftype = fv.ftype_str()
+
+    def bc_get_ftype_from_sax(self, dfxmlfile):
+        fiwalk.fiwalk_vobj_using_sax(xmlfile=open(dfxmlfile, 'rb'),callback=self.cbv_ftype)
        
 # Generate the XML file using the Fiwalk cmd
 # It generates a temporary file <image_path>/dfxmlfile.xml
