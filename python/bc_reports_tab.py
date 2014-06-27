@@ -1147,7 +1147,16 @@ class Ui_MainWindow(object):
     def getAccOutdir(self):
         # Since This directory should not exist, use getSaveFileName
         # to let the user create a new directory.
-        acc_outdir = QtGui.QFileDialog.getSaveFileName(caption="Create a directory for the File Access")
+        access_dialog = QtGui.QFileDialog(caption="Find or create an output directory")
+        access_dialog.setFileMode(QtGui.QFileDialog.Directory)
+        access_dialog.setOption(QtGui.QFileDialog.ShowDirsOnly)
+        result = access_dialog.exec_()
+        if result:
+            acc_outdir = access_dialog.selectedFiles()[0]
+        else:
+            acc_outdir = "No directory selected"
+
+        #acc_outdir = QtGui.QFileDialog.getSaveFileName(caption="Create a directory for the File Access")
 
 
         print(">> Output Directory Selected for File Access ", acc_outdir)
