@@ -608,7 +608,7 @@ class BcFileStructure:
                     
                     ## Fixed - subprocess works fine
                     f2 = subprocess.check_output(icat_cmd, shell=True)
-                    print(">> Writing to file ", outfile)
+                    #print(">> Writing to file ", outfile)
  
                 else:
                     # Only printable files are dumped on the textEdit wondow.
