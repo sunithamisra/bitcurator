@@ -604,13 +604,12 @@ class BcFileStructure:
                                 image + " " + \
                                 self.fiDictList[i]['inode'] + ' > ' + outfile
                     ## print(">> D: Executing iCAT command: ", icat_cmd)
-                    f2 = os.popen(icat_cmd)
+                    ## f2 = os.popen(icat_cmd)
+                    
+                    ## Fixed - subprocess works fine
+                    f2 = subprocess.check_output(icat_cmd, shell=True)
+                    print(">> Writing to file ", outfile)
  
-                    # FIXME: Using subprocess.check_output is making icat_cmd
-                    # fail for some instances. Revisit this. Till then the
-                    # older call os.popen is used, which seems to work fine.
-                    # subprocess.check_output(icat_cmd, shell=True)
-                    ## print(">> Writing to file ", outfile)
                 else:
                     # Only printable files are dumped on the textEdit wondow.
                     # The rest are redirected to a file in /tmp
