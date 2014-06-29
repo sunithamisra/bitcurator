@@ -35,6 +35,8 @@ import os, fiwalk, sys
 from PyQt4 import QtCore, QtGui
 import subprocess
 from subprocess import Popen,PIPE
+import threading
+import time
 #from bc_genrep_dfxml import bc_get_ftype_from_sax
 
 try:
@@ -63,6 +65,7 @@ global g_dfxmlfile
 global isGenDfxmlFile
 
 class Ui_MainWindow(object):
+    progressBar = "null"
     ## The following lines are added for debugging
     oldstdout = sys.stdout
     sys.stdout = StringIO()
@@ -180,6 +183,18 @@ class Ui_MainWindow(object):
         self.pushButton_sall.setSizePolicy(sizePolicy)
         self.pushButton_sall.setObjectName(_fromUtf8("pushButton_sall"))
         self.gridLayout.addWidget(self.pushButton_sall, 5, 4, 1, 2)
+
+        #self.progressBar = QtGui.QProgressBar(self.centralwidget)
+        self.progressBar = ProgressBar()
+        global global_pb_da
+        global_pb_da = self.progressBar
+        
+        self.progressBar.setEnabled(True)
+        self.progressBar.setProperty("value", 0)
+        self.progressBar.setObjectName(_fromUtf8("progressBar"))
+        self.gridLayout.addWidget(self.progressBar, 5, 6, 1, 1)
+
+        MainWindow.setCentralWidget(self.centralwidget)
         
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MainWindow)
@@ -241,8 +256,6 @@ class Ui_MainWindow(object):
         sys.stdout = self.oldstdout
         
     def deSelectAllMenu(self):
-        self.oldstdout = sys.stdout
-        sys.stdout = StringIO()
         BcFileStructure.bcOperateOnFiles(BcFileStructure, 0, None)
         global g_textEdit
         g_textEdit.setText( sys.stdout.getvalue() )
@@ -268,16 +281,22 @@ class Ui_MainWindow(object):
 
         ## print(">> D: Output Directory Selected: ", exportDir)
         
-        self.oldstdout = sys.stdout
+        # FIXME: Check if the following is necessary
+        oldstdout = sys.stdout
         sys.stdout = StringIO()
+        x = Ui_MainWindow
 
-        # Now loop through the checked files and dump them in this directory
-        BcFileStructure.bcOperateOnFiles(BcFileStructure, 2, exportDir)
+        # Invoke bcOperateOnfiles routine with check=2
+        thread1 = daThread(2, exportDir)
 
-        print(">> Copied Checked files to the directory: ", exportDir)
-        global g_textEdit
-        g_textEdit.setText( sys.stdout.getvalue() )
-        sys.stdout = self.oldstdout
+        # Save the thread handle for later use in cancel task.
+        global g_thread1_da
+        g_thread1_da = thread1
+        
+        thread2 = guiThread()
+
+        thread1.start()
+        thread2.start()
 
     '''
     def buttonClickedDump(self):
@@ -309,6 +328,8 @@ class BcFileStructure:
     parentlist = []
     file_item_of = dict()
     path_of = dict()
+
+    x = Ui_MainWindow
     
     # bcOperateOnFiles()
     # Iterate through the leaves of the file structure and check/uncheck
@@ -380,8 +401,9 @@ class BcFileStructure:
                     elif current_item.checkState() == 1:
                         print("Partially checked state: ",current_item.checkState()) 
                         print("File %s is NOT Checked" %current_fileordir)
+                        # FIXME: Test the above debug print stmts
                         g_textEdit.setText( sys.stdout.getvalue() )
-                        sys.stdout = self.oldstdout
+                        sys.stdout = x.oldstdout
                 elif check == 3:
                     # Dump the first checked File in textEdit window
                     if current_item.checkState() == 2:
@@ -498,7 +520,7 @@ class BcFileStructure:
 
                 # DEBUG: Following 2 lines are added for debugging 
                 g_textEdit.append(sys.stdout.getvalue() )
-                sys.stdout = StringIO()
+                sys.stdout = x.oldstdout
 
                 # Save the item of this directory
                 item_of[current_dir] = current_item
@@ -517,7 +539,7 @@ class BcFileStructure:
                 current_item.setText(current_fileordir)
 
                 g_textEdit.append( sys.stdout.getvalue() )
-                sys.stdout = StringIO()
+                sys.stdout = x.oldstdout
 
                 current_item.setCheckable(True)
                 current_item.setCheckState(0)
@@ -541,7 +563,7 @@ class BcFileStructure:
 
             # DEEBUG: The following 2 lines are added for debugging
             g_textEdit.append( sys.stdout.getvalue() )
-            sys.stdout = StringIO()
+            sys.stdout = x.oldstdout
             
     def bcCatFile(self, filename, inode, image, dfxmlfile, redirect_file, outfile):
         # Traverse the XML file, get the file_name, extract the inode number
@@ -550,6 +572,9 @@ class BcFileStructure:
         ## print(">>D: bcCatFile: image: ", image)
         ## print(">>D: bcCatFile: dfxmlfile: ", dfxmlfile)
         ## print(">>D: bcCatFile: outfile: ", outfile)
+        x = Ui_MainWindow
+        #x.oldstdout = sys.stdout
+        #sys.stdout = StringIO()
 
         # First traverse through dfxmlfile to get the block containing 
         # "filename" to extract the inode. Do this just once.
@@ -603,13 +628,14 @@ class BcFileStructure:
                     icat_cmd = "icat -o "+str(part2_start)+ " "+ \
                                 image + " " + \
                                 self.fiDictList[i]['inode'] + ' > ' + outfile
-                    ## print(">> D: Executing iCAT command: ", icat_cmd)
-                    ## f2 = os.popen(icat_cmd)
-                    
-                    ## Fixed - subprocess works fine
-                    f2 = subprocess.check_output(icat_cmd, shell=True)
-                    #print(">> Writing to file ", outfile)
- 
+                    f2 = Popen(icat_cmd, shell = True, stdout=PIPE, stderr=PIPE)
+                    (data, err) = f2.communicate()
+
+                    # FIXME: Using subprocess.check_output is making icat_cmd
+                    # fail for some instances. Revisit this. Till then the
+                    # older call os.popen is used, which seems to work fine.
+                    # subprocess.check_output(icat_cmd, shell=True)
+                    ## print(">> Writing to file ", outfile)
                 else:
                     # Only printable files are dumped on the textEdit wondow.
                     # The rest are redirected to a file in /tmp
@@ -686,6 +712,96 @@ def bcGenerateDfxmlFile(image, dfxmlfile):
         print(">>> Generated the file %s " %dfxmlfile)
         return dfxmlfile
 
+# Thread which exports all the checked files 
+class daThread(threading.Thread):
+    def __init__(self, check, export_dir):
+        self.check = check
+        self.export_dir = export_dir
+        super(daThread, self).__init__()
+        self.stoprequest = threading.Event()
+
+    def stopped(self):
+        return self.stoprequest.isSet()
+
+    def join(self, timeout=None):
+        self.stoprequest.set()
+        super(daThread, self).join(timeout)
+
+    def run(self):
+        x = Ui_MainWindow
+        print(">> File export operation in progress...")
+        global g_textEdit
+        g_textEdit.append( sys.stdout.getvalue() )
+        sys.stdout = x.oldstdout
+
+        BcFileStructure.bcOperateOnFiles(BcFileStructure, self.check, self.export_dir)
+
+        ProgressBar._active = False
+
+        # Set the progressbar maximum to > minimum so the spinning will stop
+        global global_pb_da
+        global_pb_da.progressbar.setRange(0,1)
+
+        oldstdout = sys.stdout
+        sys.stdout = StringIO()
+        print(">> Copied hecked files to the directory: ", self.export_dir)
+        g_textEdit.append( sys.stdout.getvalue() )
+        sys.stdout = oldstdout
+
+    def stop(self):
+        print(">> Terminating the Thread for \"Run All\"")
+        ### FIXME: When cancel button is installed
+           
+
+# This is the thread which spins in a loop till the other thread which
+# does the work sets the flag once the task is completed.
+class guiThread(threading.Thread):
+    def __init__(self):
+        threading.Thread.__init__(self)
+
+    def run(self):
+        progressbar = global_pb_da
+
+        progressbar.startLoop()
+
+class ProgressBar( QtGui.QWidget):
+    _active = False
+    def __init__(self, parent=None):
+        super(ProgressBar, self).__init__(parent)
+        self.progressbar = QtGui.QProgressBar()
+        main_layout = QtGui.QGridLayout()
+        main_layout.addWidget(self.progressbar, 0, 1)
+        self.setLayout(main_layout)
+        self.setWindowTitle('Progress')
+
+    def closeEvent(self):
+        self._active = False
+
+    def startLoop(self):
+        self._active = True
+        ProgressBar._active = True
+        cntr = 0
+
+        global global_pb_da
+        global_pb_da.progressbar.setRange(0,0)
+
+        while True:
+            time.sleep(1.05)
+            cntr = cntr + 1
+
+            QtGui.qApp.processEvents()
+            #print("D: ProgressBar._active = ", ProgressBar._active)
+            if not ProgressBar._active:
+                #print ("D: startLoop thread detected flag = ", ProgressBar._active)
+                global g_thread1_da
+                if g_thread1_da.stopped():
+                    ## print("D: startLoop_bc: Thread Stopped ")
+                    g_thread1_da.stop()
+                break
+
+        ProgressBar._active = False
+                    
+            
 if __name__=="__main__":
     import sys, time, re
 
