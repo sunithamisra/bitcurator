@@ -63,6 +63,7 @@ global g_model
 global g_image
 global g_dfxmlfile
 global isGenDfxmlFile
+global g_breakout
 
 class Ui_MainWindow(object):
     progressBar = "null"
@@ -268,10 +269,11 @@ class Ui_MainWindow(object):
         global isGenDfxmlFile
         if isGenDfxmlFile == True:
             os.system('rm '+g_dfxmlfile)
-        print(">> D: Disk Access operation is aborted ")
+        print(">> Disk Access operation is aborted ")
 
-        # Uncheck all the files so the loop will stop.
-        BcFileStructure.bcOperateOnFiles(BcFileStructure, 0, None)
+        # Set the breakout flag to True to stop the export operation.
+        global g_breakout
+        g_breakout = True
 
         # Set the active flag to False
         ProgressBar._active = False
@@ -364,7 +366,9 @@ class BcFileStructure:
     # directory. It is again used with check=3 to dump the contents of a
     # file to the textEdit window. 
     def bcOperateOnFiles(self, check, exportDir):
-        ## print(">>D: LENGTH of fiDictList: ", len(self.fiDictList))
+        ## print(">>D: Length of fiDictList: ", len(self.fiDictList))
+        global g_breakout
+        g_breakout = False
         for i in range(0, len(self.fiDictList) - 1):
             path = self.fiDictList[i]['filename']
             inode = self.fiDictList[i]['inode']
@@ -396,6 +400,8 @@ class BcFileStructure:
                 elif check == 0:
                     current_item.setCheckState(0)
                 elif check == 2:
+                    if g_breakout == True:
+                        break
                     # If "check" is 2, we use this routine to dump the 
                     # contents of the specified file to the specified output
                     # file. 
@@ -780,8 +786,6 @@ class daThread(threading.Thread):
         ## print(">> D: Terminating the Thread for \"Export Files\"")
         ## g_textEdit.append( sys.stdout.getvalue() )
         ## sys.stdout = oldstdout
-        # Uncheck all the files so the loop will stop.
-        # BcFileStructure.bcOperateOnFiles(BcFileStructure, 0, None)
 
            
 
