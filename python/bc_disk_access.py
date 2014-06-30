@@ -82,31 +82,94 @@ class Ui_MainWindow(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(MainWindow.sizePolicy().hasHeightForWidth())
         MainWindow.setSizePolicy(sizePolicy)
-        
-
         self.centralwidget = QtGui.QWidget(MainWindow)
         self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
-
         self.gridLayout = QtGui.QGridLayout(self.centralwidget)
         self.gridLayout.setObjectName(_fromUtf8("gridLayout"))
-
-        self.pushButton_close = QtGui.QPushButton(self.centralwidget)
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.pushButton_close.sizePolicy().hasHeightForWidth())
-        self.pushButton_close.setSizePolicy(sizePolicy)
-        self.pushButton_close.setObjectName(_fromUtf8("pushButton_close"))
-        self.gridLayout.addWidget(self.pushButton_close, 5, 0, 1, 1)
-
         self.label = QtGui.QLabel(self.centralwidget)
         font = QtGui.QFont()
         font.setBold(True)
         font.setWeight(75)
         self.label.setFont(font)
         self.label.setObjectName(_fromUtf8("label"))
-        self.gridLayout.addWidget(self.label, 0, 6, 1, 1)
-        
+        self.gridLayout.addWidget(self.label, 0, 7, 1, 1)
+
+        self.DirectoryTree = QtGui.QTreeView(self.centralwidget)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Ignored)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.DirectoryTree.sizePolicy().hasHeightForWidth())
+        # Note:
+        # The following line was added in an attempt to get the horizontal
+        # scroll bar automatically when there is text longer than the window size.
+        # But with or without this line, it still needs one to drag the top bar
+        # to the right to make the scroll bar start working. Could be a bug with 
+        # pyQT4 implementation.
+        self.DirectoryTree.header().setResizeMode(0, QtGui.QHeaderView.ResizeToContents)
+
+        self.DirectoryTree.setSizePolicy(sizePolicy)
+        self.DirectoryTree.setSizeIncrement(QtCore.QSize(0, 0))
+        self.DirectoryTree.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOn)
+        self.DirectoryTree.setObjectName(_fromUtf8("DirectoryTree"))
+
+        #.#
+        self.DirectoryTree.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
+
+        self.gridLayout.addWidget(self.DirectoryTree, 1, 0, 1, 6)
+
+        #.#
+        self.model = QtGui.QStandardItemModel()
+        self.DirectoryTree.setModel(self.model)
+        self.DirectoryTree.setUniformRowHeights(True)
+        global g_model 
+        g_model = self.model
+
+        g_model.setHorizontalHeaderLabels(['File System: \n  Entries in bold are directories \n  Entries in red are unallocated/deleted files '])
+
+
+        self.pushButton_cancel = QtGui.QPushButton(self.centralwidget)
+        self.pushButton_cancel.setObjectName(_fromUtf8("pushButton_cancel"))
+        self.gridLayout.addWidget(self.pushButton_cancel, 8, 1, 1, 1)
+
+        self.pushButton_sall = QtGui.QPushButton(self.centralwidget)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.pushButton_sall.sizePolicy().hasHeightForWidth())
+        self.pushButton_sall.setSizePolicy(sizePolicy)
+        self.pushButton_sall.setObjectName(_fromUtf8("pushButton_sall"))
+        self.gridLayout.addWidget(self.pushButton_sall, 8, 5, 1, 1)
+        self.pushButton_close = QtGui.QPushButton(self.centralwidget)
+        self.pushButton_close.setObjectName(_fromUtf8("pushButton_close"))
+        self.gridLayout.addWidget(self.pushButton_close, 8, 0, 1, 1)
+
+        #.#
+        #self.progressBar = QtGui.QProgressBar(self.centralwidget)
+        self.progressBar = ProgressBar()
+
+        #.#
+        global global_pb_da
+        global_pb_da = self.progressBar
+
+        self.progressBar.setProperty("value", 0)
+        self.progressBar.setObjectName(_fromUtf8("progressBar"))
+        self.gridLayout.addWidget(self.progressBar, 8, 7, 1, 1)
+        self.pushButton_export = QtGui.QPushButton(self.centralwidget)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Maximum)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.pushButton_export.sizePolicy().hasHeightForWidth())
+        self.pushButton_export.setSizePolicy(sizePolicy)
+        self.pushButton_export.setObjectName(_fromUtf8("pushButton_export"))
+        self.gridLayout.addWidget(self.pushButton_export, 8, 3, 1, 1)
+        self.pushButton_dsall = QtGui.QPushButton(self.centralwidget)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.pushButton_dsall.sizePolicy().hasHeightForWidth())
+        self.pushButton_dsall.setSizePolicy(sizePolicy)
+        self.pushButton_dsall.setObjectName(_fromUtf8("pushButton_dsall"))
+        self.gridLayout.addWidget(self.pushButton_dsall, 8, 6, 1, 1)
         self.textEdit = QtGui.QTextEdit(self.centralwidget)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Ignored, QtGui.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(20)
@@ -118,85 +181,14 @@ class Ui_MainWindow(object):
 "border-color: rgb(170, 0, 0);"))
         self.textEdit.setTextInteractionFlags(QtCore.Qt.TextSelectableByKeyboard|QtCore.Qt.TextSelectableByMouse)
         self.textEdit.setObjectName(_fromUtf8("textEdit"))
-        self.gridLayout.addWidget(self.textEdit, 1, 6, 1, 1)
+        self.gridLayout.addWidget(self.textEdit, 1, 6, 1, 2)
 
+        #.#
         global g_textEdit
         g_textEdit = self.textEdit
 
-        self.DirectoryTree = QtGui.QTreeView(self.centralwidget)
-
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Ignored)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.DirectoryTree.sizePolicy().hasHeightForWidth())
-
-        # Note:
-        # The following line was added in an attempt to get the horizontal
-        # scroll bar automatically when there is text longer than the window size.
-        # But with or without this line, it still needs one to drag the top bar
-        # to the right to make the scroll bar start working. Could be a bug with 
-        # pyQT4 implementation.
-        self.DirectoryTree.header().setResizeMode(0, QtGui.QHeaderView.ResizeToContents)
-
-        self.DirectoryTree.setSizePolicy(sizePolicy)
-        self.DirectoryTree.setSizeIncrement(QtCore.QSize(0, 0))
-        self.DirectoryTree.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
-        self.DirectoryTree.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
-
-
-        self.DirectoryTree.setObjectName(_fromUtf8("DirectoryTree"))
-
-        self.DirectoryTree.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
-        self.gridLayout.addWidget(self.DirectoryTree, 1, 0, 1, 6)
-
-        self.model = QtGui.QStandardItemModel()
-        self.DirectoryTree.setModel(self.model)
-        self.DirectoryTree.setUniformRowHeights(True)
-        global g_model 
-        g_model = self.model
-
-        g_model.setHorizontalHeaderLabels(['File System: \n  Entries in bold are directories \n  Entries in red are unallocated/deleted files '])
-
-        self.pushButton_export = QtGui.QPushButton(self.centralwidget)
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Maximum)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.pushButton_export.sizePolicy().hasHeightForWidth())
-        self.pushButton_export.setSizePolicy(sizePolicy)
-        self.pushButton_export.setObjectName(_fromUtf8("pushButton_export"))
-        self.gridLayout.addWidget(self.pushButton_export, 5, 1, 1, 2)
-
-        self.pushButton_dsall = QtGui.QPushButton(self.centralwidget)
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.pushButton_dsall.sizePolicy().hasHeightForWidth())
-        self.pushButton_dsall.setSizePolicy(sizePolicy)
-        self.pushButton_dsall.setObjectName(_fromUtf8("pushButton_dsall"))
-        self.gridLayout.addWidget(self.pushButton_dsall, 5, 3, 1, 1)
-
-        self.pushButton_sall = QtGui.QPushButton(self.centralwidget)
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.pushButton_sall.sizePolicy().hasHeightForWidth())
-        self.pushButton_sall.setSizePolicy(sizePolicy)
-        self.pushButton_sall.setObjectName(_fromUtf8("pushButton_sall"))
-        self.gridLayout.addWidget(self.pushButton_sall, 5, 4, 1, 2)
-
-        #self.progressBar = QtGui.QProgressBar(self.centralwidget)
-        self.progressBar = ProgressBar()
-        global global_pb_da
-        global_pb_da = self.progressBar
-        
-        self.progressBar.setEnabled(True)
-        self.progressBar.setProperty("value", 0)
-        self.progressBar.setObjectName(_fromUtf8("progressBar"))
-        self.gridLayout.addWidget(self.progressBar, 5, 6, 1, 1)
-
         MainWindow.setCentralWidget(self.centralwidget)
         
-        MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 835, 25))
         self.menubar.setObjectName(_fromUtf8("menubar"))
@@ -236,6 +228,9 @@ class Ui_MainWindow(object):
         # Handle the DeSelect button
         QtCore.QObject.connect(self.pushButton_dsall, QtCore.SIGNAL(_fromUtf8("clicked()")), self.buttonClickedDeSelectAll)
 
+        # Handle the Cancel button
+        QtCore.QObject.connect(self.pushButton_cancel, QtCore.SIGNAL(_fromUtf8("clicked()")), self.buttonClickedCancel)
+
         '''
         # Handle the Dump button
         QtCore.QObject.connect(self.pushButton_dump, QtCore.SIGNAL(_fromUtf8("clicked()")), self.buttonClickedDump)
@@ -268,6 +263,35 @@ class Ui_MainWindow(object):
             os.system('rm '+g_dfxmlfile)
         QtCore.QCoreApplication.instance().quit()
 
+    def buttonClickedCancel(self):
+        # if dfxml file was internally generated, remove it.
+        global isGenDfxmlFile
+        if isGenDfxmlFile == True:
+            os.system('rm '+g_dfxmlfile)
+        print(">> D: Disk Access operation is aborted ")
+
+        # Uncheck all the files so the loop will stop.
+        BcFileStructure.bcOperateOnFiles(BcFileStructure, 0, None)
+
+        # Set the active flag to False
+        ProgressBar._active = False
+
+        # Set the progressbar maximum to > minimum so the spinning will stop
+        global global_pb_da
+        global_pb_da.progressbar.setRange(0,1)
+
+        x = Ui_MainWindow
+        global g_textEdit
+        g_textEdit.setText( sys.stdout.getvalue() )
+        sys.stdout = x.oldstdout
+
+        x.oldstdout = sys.stdout
+        sys.stdout = StringIO()
+
+        # Set the flag in the thread to signal thread termination
+        global g_thread1_da
+        g_thread1_da.join()
+
     def buttonClickedExport(self):
         # If invoked thorugh reports_tab gui, the outdir provided is the 
         # exportDir and so there is no need to choose again. If invoked 
@@ -282,9 +306,9 @@ class Ui_MainWindow(object):
         ## print(">> D: Output Directory Selected: ", exportDir)
         
         # FIXME: Check if the following is necessary
-        oldstdout = sys.stdout
-        sys.stdout = StringIO()
-        x = Ui_MainWindow
+        ##oldstdout = sys.stdout
+        ##sys.stdout = StringIO()
+        ##x = Ui_MainWindow
 
         # Invoke bcOperateOnfiles routine with check=2
         thread1 = daThread(2, exportDir)
@@ -312,6 +336,7 @@ class Ui_MainWindow(object):
         MainWindow.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Disk Image Access Interface", None, QtGui.QApplication.UnicodeUTF8))
         self.pushButton_export.setText(QtGui.QApplication.translate("MainWindow", "Export", None, QtGui.QApplication.UnicodeUTF8))
         self.pushButton_close.setText(QtGui.QApplication.translate("MainWindow", "Close", None, QtGui.QApplication.UnicodeUTF8))
+        self.pushButton_cancel.setText(QtGui.QApplication.translate("MainWindow", "Cancel", None, QtGui.QApplication.UnicodeUTF8))
         self.pushButton_sall.setText(QtGui.QApplication.translate("MainWindow", "Select All", None, QtGui.QApplication.UnicodeUTF8))
         self.pushButton_dsall.setText(QtGui.QApplication.translate("MainWindow", "DeSelect All", None, QtGui.QApplication.UnicodeUTF8))
         self.label.setText(QtGui.QApplication.translate("MainWindow", "Command Line Output", None, QtGui.QApplication.UnicodeUTF8))
@@ -744,13 +769,20 @@ class daThread(threading.Thread):
 
         oldstdout = sys.stdout
         sys.stdout = StringIO()
-        print(">> Copied hecked files to the directory: ", self.export_dir)
+        print(">> Copied checked files to the directory: ", self.export_dir)
         g_textEdit.append( sys.stdout.getvalue() )
         sys.stdout = oldstdout
 
+    # A placeholder for any clean-up operation to be done upon pressing
+    # the cancel button.
     def stop(self):
-        print(">> Terminating the Thread for \"Run All\"")
-        ### FIXME: When cancel button is installed
+        pass
+        ## print(">> D: Terminating the Thread for \"Export Files\"")
+        ## g_textEdit.append( sys.stdout.getvalue() )
+        ## sys.stdout = oldstdout
+        # Uncheck all the files so the loop will stop.
+        # BcFileStructure.bcOperateOnFiles(BcFileStructure, 0, None)
+
            
 
 # This is the thread which spins in a loop till the other thread which
