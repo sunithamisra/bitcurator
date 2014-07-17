@@ -342,6 +342,13 @@ class Ui_MainWindow(object):
         g_oldstdout = sys.stdout
         sys.stdout = StringIO()
         
+        # First delete any existing QTreeView model. Also clear the 
+        # dictionary created for any previous image.
+        global g_model
+        if (g_model):
+            g_model.clear()
+            BcFileStructure.fiDictList = []
+
         image_file = QtGui.QFileDialog.getOpenFileName(caption="Select an image file")
         self.current_image = image_file
         print(">> Image File Selected: ", image_file)
@@ -349,6 +356,8 @@ class Ui_MainWindow(object):
         # Check if the image exists. 
         if not os.path.exists(image_file):
             print(">> Error! Image {} does not exist: ".format(image_file))
+            g_textEdit_msg.append( sys.stdout.getvalue() )
+            sys.stdout = g_oldstdout
             return
         
         g_textEdit_msg.append( sys.stdout.getvalue() )
@@ -358,25 +367,27 @@ class Ui_MainWindow(object):
         sys.stdout = StringIO()
 
         # If aff or ewf images, run the info commands
+        mod_image_name = re.escape(image_file)
         if image_file.endswith(".E01") or image_file.endswith(".e01"):
-            cmdlist = ['ewfinfo', image_file]
-            p = subprocess.Popen(cmdlist, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
-            ewfinfo, err = p.communicate()
-        
-            ## FIXME: The escape characters are getting printed. Fix it
-            #re.sub(r'[\x00-\x08\x0b\x0c\x0e-\x1f\x7f-\xff]', '', ewfinfo)
-            ewfinfo.decode("utf-8")
-            print(ewfinfo)
+            os.system('echo Image Name: ' + image_file + '>/tmp/tmpe01infofile')
+            os.system('ewfinfo ' + mod_image_name + '>>/tmp/tmpe01infofile')
+            with open("/tmp/tmpe01infofile", 'r') as tmpfile:
+                print(tmpfile.read())
+
+            tmpfile.close()
+            os.system('rm /tmp/tmpe01infofile')
 
         elif image_file.endswith(".aff") or image_file.endswith(".AFF"):
-            cmd = 'affinfo ' + image_file
-            affinfo = subprocess.check_output(cmd, shell=True)
-            affinfo.decode("utf-8")
-            print(affinfo)
+            #os.system('echo Image Name: ' + image_file + '>/tmp/tmpe01infofile')
+            os.system('affinfo ' + mod_image_name + '>/tmp/tmpe01infofile')
+            with open("/tmp/tmpe01infofile", 'r') as tmpfile:
+                print(tmpfile.read())
+
+            tmpfile.close()
+            os.system('rm /tmp/tmpe01infofile')
         else:
             print(">>> No image information found")
 
-        #g_textEdit_imginfo.append( sys.stdout.getvalue() )
         self.textEdit_imginfo.append( sys.stdout.getvalue() )
         sys.stdout = g_img_oldstdout
 
@@ -640,14 +651,12 @@ class BcFileStructure:
         return filename
     
     # Routine to be invoked when a disk image is 'closed'
-    # FIXME: under construction
+    # It clears the QTreeView model and the dictionary created from 
+    # dfxml file of the image.
     def bcDeleteModel(self, image):
-        global g_parent0_item
-        #parent0_item = bcExtractFileStr.item_of[image]
-
         global g_model
-        g_model.removeRows(0,1, g_parent0_item)
-        #g_model.reset()
+        g_model.clear()
+        self.fiDictList = []
  
     # bcExtractFileStr()
     # This routine extracts the file structure given a disk image and the
@@ -686,6 +695,7 @@ class BcFileStructure:
         item_of[image] = parent0_item
 
         global g_model
+        g_model.setHorizontalHeaderLabels(['File System: \n  Entries in bold are directories \n  Entries in red are unallocated/deleted files '])
         g_model.appendRow(parent0_item)
 
         for i in range(0, len(self.fiDictList) - 1):
