@@ -418,7 +418,7 @@ class Ui_MainWindow(object):
         if os.path.exists(dfxmlfile):
             os.system("rm " + dfxmlfile)
 
-        cmd = ['fiwalk', '-f', '-X', dfxmlfile, image_file]
+        cmd = ['fiwalk', '-z', '-g', '-X', dfxmlfile, image_file]
         ## print(" >>D: Generating XML File ", dfxmlfile)
         ## print(">>D: Invoking command for Fiwalk = ", cmd)
         self.textEdit_msg.append( sys.stdout.getvalue() )
