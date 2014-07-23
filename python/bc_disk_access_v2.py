@@ -118,9 +118,78 @@ class Ui_MainWindow(object):
         self.DirectoryTree.setUniformRowHeights(True)
         global g_model
         g_model = self.model
-
         g_model.setHorizontalHeaderLabels(['File System: \n  Entries in bold are directories \n  Entries in red are unallocated/deleted files '])
         
+        
+
+        self.dockWidget_imginfo = QtGui.QDockWidget(self.centralwidget)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(2)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.dockWidget_imginfo.sizePolicy().hasHeightForWidth())
+        self.dockWidget_imginfo.setSizePolicy(sizePolicy)
+        self.dockWidget_imginfo.setObjectName(_fromUtf8("dockWidget_imginfo"))
+        self.dockWidgetContents_imginfo = QtGui.QWidget()
+        self.dockWidgetContents_imginfo.setObjectName(_fromUtf8("dockWidgetContents_imginfo"))
+        self.verticalLayout_3 = QtGui.QVBoxLayout(self.dockWidgetContents_imginfo)
+        self.verticalLayout_3.setObjectName(_fromUtf8("verticalLayout_3"))
+        self.textEdit_imginfo = QtGui.QTextEdit(self.dockWidgetContents_imginfo)
+        self.textEdit_imginfo.setObjectName(_fromUtf8("textEdit_imginfo"))
+        self.verticalLayout_3.addWidget(self.textEdit_imginfo)
+        self.dockWidget_imginfo.setWidget(self.dockWidgetContents_imginfo)
+        self.gridLayout.addWidget(self.dockWidget_imginfo, 0, 1, 1, 1)
+        self.dockWidget_msg = QtGui.QDockWidget(self.centralwidget)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(2)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.dockWidget_msg.sizePolicy().hasHeightForWidth())
+        self.dockWidget_msg.setSizePolicy(sizePolicy)
+        self.dockWidget_msg.setMinimumSize(QtCore.QSize(380, 146))
+        self.dockWidget_msg.setObjectName(_fromUtf8("dockWidget_msg"))
+        self.dockWidgetContents_msg = QtGui.QWidget()
+        self.dockWidgetContents_msg.setObjectName(_fromUtf8("dockWidgetContents_msg"))
+        self.verticalLayout_4 = QtGui.QVBoxLayout(self.dockWidgetContents_msg)
+        self.verticalLayout_4.setObjectName(_fromUtf8("verticalLayout_4"))
+        self.textEdit_msg = QtGui.QTextEdit(self.dockWidgetContents_msg)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Expanding)
+        sizePolicy.setHorizontalStretch(2)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.textEdit_msg.sizePolicy().hasHeightForWidth())
+        self.textEdit_msg.setSizePolicy(sizePolicy)
+        self.textEdit_msg.setAutoFillBackground(True)
+        self.textEdit_msg.setStyleSheet(_fromUtf8("background-color: rgb(200, 206, 200);\n"
+"border-color: rgb(170, 0, 0);"))
+        self.textEdit_msg.setTextInteractionFlags(QtCore.Qt.TextSelectableByKeyboard|QtCore.Qt.TextSelectableByMouse)
+        self.textEdit_msg.setObjectName(_fromUtf8("textEdit_msg"))
+        self.verticalLayout_4.addWidget(self.textEdit_msg)
+
+        #.#
+        global g_textEdit_msg
+        g_textEdit_msg = self.textEdit_msg
+
+        #.#
+        #self.progressBar = QtGui.QProgressBar(self.dockWidgetContents_msg)
+        self.progressBar = ProgressBar()
+
+        #.#
+        global global_fw
+        global_fw =  self.progressBar
+
+        #.#
+        global global_pb_da
+        global_pb_da = self.progressBar
+        
+
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.progressBar.sizePolicy().hasHeightForWidth())
+        self.progressBar.setSizePolicy(sizePolicy)
+        self.progressBar.setProperty("value", 0)
+        self.progressBar.setObjectName(_fromUtf8("progressBar"))
+        self.verticalLayout_4.addWidget(self.progressBar)
+        self.dockWidget_msg.setWidget(self.dockWidgetContents_msg)
+        self.gridLayout.addWidget(self.dockWidget_msg, 1, 1, 1, 1)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 880, 25))
@@ -142,72 +211,6 @@ class Ui_MainWindow(object):
         self.toolBar = QtGui.QToolBar(MainWindow)
         self.toolBar.setObjectName(_fromUtf8("toolBar"))
         MainWindow.addToolBar(QtCore.Qt.TopToolBarArea, self.toolBar)
-        self.dockWidget_msg = QtGui.QDockWidget(MainWindow)
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Preferred)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.dockWidget_msg.sizePolicy().hasHeightForWidth())
-        self.dockWidget_msg.setSizePolicy(sizePolicy)
-        self.dockWidget_msg.setMinimumSize(QtCore.QSize(380, 146))
-        self.dockWidget_msg.setObjectName(_fromUtf8("dockWidget_msg"))
-        self.dockWidgetContents_msg = QtGui.QWidget()
-        self.dockWidgetContents_msg.setObjectName(_fromUtf8("dockWidgetContents_msg"))
-        self.verticalLayout = QtGui.QVBoxLayout(self.dockWidgetContents_msg)
-        self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
-        self.textEdit_msg = QtGui.QTextEdit(self.dockWidgetContents_msg)
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Expanding)
-        sizePolicy.setHorizontalStretch(2)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.textEdit_msg.sizePolicy().hasHeightForWidth())
-        self.textEdit_msg.setSizePolicy(sizePolicy)
-        self.textEdit_msg.setAutoFillBackground(True)
-        self.textEdit_msg.setStyleSheet(_fromUtf8("background-color: rgb(200, 206, 200);\n"
-"border-color: rgb(170, 0, 0);"))
-        self.textEdit_msg.setTextInteractionFlags(QtCore.Qt.TextSelectableByKeyboard|QtCore.Qt.TextSelectableByMouse)
-        self.textEdit_msg.setObjectName(_fromUtf8("textEdit_msg"))
-        self.verticalLayout.addWidget(self.textEdit_msg)
-
-        global g_textEdit_msg
-        g_textEdit_msg = self.textEdit_msg
-
-        #.#
-        ##self.progressBar = QtGui.QProgressBar(self.dockWidgetContents_msg)
-        self.progressBar = ProgressBar()
-
-        #.#
-        global global_fw
-        global_fw =  self.progressBar
-
-        #.#
-        global global_pb_da
-        global_pb_da = self.progressBar
-
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Preferred)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.progressBar.sizePolicy().hasHeightForWidth())
-        self.progressBar.setSizePolicy(sizePolicy)
-        self.progressBar.setProperty("value", 0)
-        self.progressBar.setObjectName(_fromUtf8("progressBar"))
-        self.verticalLayout.addWidget(self.progressBar)
-        self.dockWidget_msg.setWidget(self.dockWidgetContents_msg)
-        MainWindow.addDockWidget(QtCore.Qt.DockWidgetArea(2), self.dockWidget_msg)
-        self.dockWidget_imginfo = QtGui.QDockWidget(MainWindow)
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Preferred)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.dockWidget_imginfo.sizePolicy().hasHeightForWidth())
-        self.dockWidget_imginfo.setSizePolicy(sizePolicy)
-        self.dockWidget_imginfo.setObjectName(_fromUtf8("dockWidget_imginfo"))
-        self.dockWidgetContents_imginfo = QtGui.QWidget()
-        self.dockWidgetContents_imginfo.setObjectName(_fromUtf8("dockWidgetContents_imginfo"))
-        self.verticalLayout_2 = QtGui.QVBoxLayout(self.dockWidgetContents_imginfo)
-        self.verticalLayout_2.setObjectName(_fromUtf8("verticalLayout_2"))
-        self.textEdit_imginfo = QtGui.QTextEdit(self.dockWidgetContents_imginfo)
-        self.textEdit_imginfo.setObjectName(_fromUtf8("textEdit_imginfo"))
-        self.verticalLayout_2.addWidget(self.textEdit_imginfo)
-        self.dockWidget_imginfo.setWidget(self.dockWidgetContents_imginfo)
-        MainWindow.addDockWidget(QtCore.Qt.DockWidgetArea(2), self.dockWidget_imginfo)
         self.actionExit = QtGui.QAction(MainWindow)
         self.actionExit.setObjectName(_fromUtf8("actionExit"))
         self.actionSelect_All = QtGui.QAction(MainWindow)
@@ -266,6 +269,8 @@ class Ui_MainWindow(object):
         self.toolBar.addSeparator()
         self.toolBar.addAction(self.actionExport_selected_files)
         self.toolBar.addAction(self.actionCancel_export)
+        self.toolBar.addAction(self.actionShow_Messages)
+        self.toolBar.addAction(self.actionShow_Image_Info)
 
         # menubar triggers
         self.actionExit.triggered.connect(self.exitMenu)
@@ -276,6 +281,8 @@ class Ui_MainWindow(object):
         self.actionClose_disk_image.triggered.connect(self.closeDiskImageMenu)
         self.actionExport_selected_files.triggered.connect(self.exportFilesMenu)
         self.actionCancel_export.triggered.connect(self.cancelExportMenu)
+        self.actionShow_Messages.triggered.connect(self.showMsgsWindowMenu)
+        self.actionShow_Image_Info.triggered.connect(self.showImginfoWindowMenu)
 
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
@@ -314,7 +321,7 @@ class Ui_MainWindow(object):
         if result:
             export_outdir = export_dialog.selectedFiles()[0]
 
-            print(">> Output Directory Selected for File Export ", export_outdir)
+            print(">> Output directory selected for file export ", export_outdir)
             global g_oldstdout
             g_textEdit_msg.append( sys.stdout.getvalue() )
             sys.stdout = g_oldstdout
@@ -351,7 +358,7 @@ class Ui_MainWindow(object):
 
         image_file = QtGui.QFileDialog.getOpenFileName(caption="Select an image file")
         self.current_image = image_file
-        print(">> Image File Selected: ", image_file)
+        print(">> Image file selected: ", image_file)
 
         # Check if the image exists. 
         if not os.path.exists(image_file):
@@ -363,7 +370,8 @@ class Ui_MainWindow(object):
         g_textEdit_msg.append( sys.stdout.getvalue() )
         sys.stdout = g_oldstdout
 
-        g_oldstdout = sys.stdout
+        #g_oldstdout = sys.stdout
+        imginfo_oldstdout = sys.stdout
         sys.stdout = StringIO()
 
         # If aff or ewf images, run the info commands
@@ -403,7 +411,7 @@ class Ui_MainWindow(object):
         image_name = os.path.basename(image_file)
         dfxmlfile = dfxmlpath + '/' + image_name + '_dfxml.xml'
 
-        print(">> Generating DFXML File  ", dfxmlfile)
+        print(">> Generating DFXML file  ", dfxmlfile)
         self.textEdit_msg.append( sys.stdout.getvalue() )
         sys.stdout = g_oldstdout
 
@@ -442,25 +450,21 @@ class Ui_MainWindow(object):
 
         BcFileStructure.bcDeleteModel(self, self.current_image)
         self.current_image = "null"
+        #global g_textEdit_msg
+        # FIXME: The following causes crash sometimes.
+        '''
+        self.textEdit_msg.setText( sys.stdout.getvalue() )
+        sys.stdout = g_oldstdout
+        '''
+        self.textEdit_imginfo.setText( sys.stdout.getvalue() )
+        sys.stdout = g_oldstdout
         return
 
     def selectAllMenu(self):
-        global g_oldstdout
-        g_oldstdout = sys.stdout
-        sys.stdout = StringIO()
         BcFileStructure.bcOperateOnFiles(BcFileStructure, 1, None)
-        global g_textEdit_msg
-        g_textEdit_msg.setText( sys.stdout.getvalue() )
-        sys.stdout = g_oldstdout
         
     def deSelectAllMenu(self):
-        global g_oldstdout
-        g_oldstdout = sys.stdout
-        sys.stdout = StringIO()
         BcFileStructure.bcOperateOnFiles(BcFileStructure, 0, None)
-        global g_textEdit_msg
-        g_textEdit_msg.setText( sys.stdout.getvalue() )
-        sys.stdout = g_oldstdout
 
     def cancelExportMenu(self):
         # if dfxml file was internally generated, remove it.
@@ -515,6 +519,15 @@ class Ui_MainWindow(object):
     def buttonClickedDump(self):
         BcFileStructure.bcOperateOnFiles(BcFileStructure, 3, None)
     '''
+    def showMsgsWindowMenu(self):
+        ret = MainWindow.restoreDockWidget(self, self.dockWidget_mag)
+        print("ret: ", ret)
+        return
+
+    def showImginfoWindowMenu(self):
+        ret = MainWindow.restoreDockWidget(self, self.dockWidget_imginfo)
+        print("ret: ", ret)
+        return
 
 class BcFileStructure:
 
@@ -953,7 +966,7 @@ class bcfaThread_fw(threading.Thread):
             sys.stdout = StringIO()
 
             # Generate the Directory Tree
-            print(">> Generating Directory Tree ...")
+            print(">> Generating directory tree ...")
             g_textEdit_msg.append( sys.stdout.getvalue() )
             sys.stdout = g_oldstdout
             g_oldstdout = sys.stdout
