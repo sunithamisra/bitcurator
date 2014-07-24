@@ -139,6 +139,11 @@ class Ui_MainWindow(object):
         self.verticalLayout_3.addWidget(self.textEdit_imginfo)
         self.dockWidget_imginfo.setWidget(self.dockWidgetContents_imginfo)
         self.gridLayout.addWidget(self.dockWidget_imginfo, 0, 1, 1, 1)
+
+ 
+        # Save the state 
+        self.byte_array_msg_window = MainWindow.saveState()
+
         self.dockWidget_msg = QtGui.QDockWidget(self.centralwidget)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(2)
@@ -517,13 +522,17 @@ class Ui_MainWindow(object):
         BcFileStructure.bcOperateOnFiles(BcFileStructure, 3, None)
     '''
     def showMsgsWindowMenu(self):
-        ret = MainWindow.restoreDockWidget(self, self.dockWidget_mag)
-        print("ret: ", ret)
+        # FIXME: Under construction
+        MainWindow.restoreState(self.byte_array_msg_window)
+        ret = MainWindow.restoreDockWidget(self.dockWidget_msg)
+        ## print("D: showMsgsWidnowMenu: ret: ", ret)
         return
 
     def showImginfoWindowMenu(self):
+        # FIXME: Under construction
+        MainWindow.restoreState(self.byte_array_msg_window)
         ret = MainWindow.restoreDockWidget(self, self.dockWidget_imginfo)
-        print("ret: ", ret)
+        ## print("D: showMsgsWidnowMenu: ret: ", ret)
         return
 
 class BcFileStructure:
@@ -1079,7 +1088,6 @@ if __name__=="__main__":
     import sys, time, re
 
     parser = ArgumentParser(prog='bc_disk_access.py', description='File Access')
-    parser.add_argument('--listfiles',action='store_true',help='list file structure ')
     args = parser.parse_args()
 
     global isGenDfxmlFile
@@ -1118,10 +1126,9 @@ if __name__=="__main__":
     ## selmod.select(index2, QtGui.QItemSelectionModel.Select|QtGui.QItemSelectionModel.Rows)
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    if (args.listfiles == True):
-        app = QtGui.QApplication(sys.argv)
-        MainWindow = QtGui.QMainWindow()
-        ui = Ui_MainWindow()
-        ui.setupUi(MainWindow)
-        MainWindow.show()
-        sys.exit(app.exec_())
+    app = QtGui.QApplication(sys.argv)
+    MainWindow = QtGui.QMainWindow()
+    ui = Ui_MainWindow()
+    ui.setupUi(MainWindow)
+    MainWindow.show()
+    sys.exit(app.exec_())
