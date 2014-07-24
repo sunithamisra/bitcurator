@@ -275,8 +275,8 @@ class Ui_MainWindow(object):
         self.toolBar.addSeparator()
         self.toolBar.addAction(self.actionExport_selected_files)
         self.toolBar.addAction(self.actionCancel_export)
-        self.toolBar.addAction(self.actionShow_Messages)
-        self.toolBar.addAction(self.actionShow_Image_Info)
+        #self.toolBar.addAction(self.actionShow_Messages)
+        #self.toolBar.addAction(self.actionShow_Image_Info)
 
         # menubar triggers
         self.actionExit.triggered.connect(self.exitMenu)
@@ -314,8 +314,8 @@ class Ui_MainWindow(object):
         self.actionAbout_BitCurator_Disk_Access.setText(_translate("MainWindow", "About BitCurator Disk Access", None))
         self.actionExport_selected_files.setText(_translate("MainWindow", "Export selected files", None))
         self.actionCancel_export.setText(_translate("MainWindow", "Cancel export", None))
-        #self.actionShow_Messages.setText(_translate("MainWindow", "Show Messages", None))
-        #self.actionShow_Image_Info.setText(_translate("MainWindow", "Show Image Info", None))
+        self.actionShow_Messages.setText(_translate("MainWindow", "Show Messages", None))
+        self.actionShow_Image_Info.setText(_translate("MainWindow", "Show Image Info", None))
 
     def getExportOutdir(self):
         # Since This directory should not exist, use getSaveFileName
