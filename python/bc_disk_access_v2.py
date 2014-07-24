@@ -135,6 +135,7 @@ class Ui_MainWindow(object):
         self.verticalLayout_3.setObjectName(_fromUtf8("verticalLayout_3"))
         self.textEdit_imginfo = QtGui.QTextEdit(self.dockWidgetContents_imginfo)
         self.textEdit_imginfo.setObjectName(_fromUtf8("textEdit_imginfo"))
+        self.textEdit_imginfo.setTextInteractionFlags(QtCore.Qt.TextSelectableByKeyboard|QtCore.Qt.TextSelectableByMouse)
         self.verticalLayout_3.addWidget(self.textEdit_imginfo)
         self.dockWidget_imginfo.setWidget(self.dockWidgetContents_imginfo)
         self.gridLayout.addWidget(self.dockWidget_imginfo, 0, 1, 1, 1)
@@ -308,8 +309,8 @@ class Ui_MainWindow(object):
         self.actionAbout_BitCurator_Disk_Access.setText(_translate("MainWindow", "About BitCurator Disk Access", None))
         self.actionExport_selected_files.setText(_translate("MainWindow", "Export selected files", None))
         self.actionCancel_export.setText(_translate("MainWindow", "Cancel export", None))
-        self.actionShow_Messages.setText(_translate("MainWindow", "Show Messages", None))
-        self.actionShow_Image_Info.setText(_translate("MainWindow", "Show Image Info", None))
+        #self.actionShow_Messages.setText(_translate("MainWindow", "Show Messages", None))
+        #self.actionShow_Image_Info.setText(_translate("MainWindow", "Show Image Info", None))
 
     def getExportOutdir(self):
         # Since This directory should not exist, use getSaveFileName
