@@ -370,8 +370,7 @@ class Ui_MainWindow(object):
         g_textEdit_msg.append( sys.stdout.getvalue() )
         sys.stdout = g_oldstdout
 
-        #g_oldstdout = sys.stdout
-        imginfo_oldstdout = sys.stdout
+        self.imginfo_oldstdout = sys.stdout
         sys.stdout = StringIO()
 
         # If aff or ewf images, run the info commands
@@ -397,9 +396,9 @@ class Ui_MainWindow(object):
             print(">>> No image information found")
 
         self.textEdit_imginfo.append( sys.stdout.getvalue() )
-        sys.stdout = g_img_oldstdout
+        sys.stdout = self.imginfo_oldstdout
 
-        g_oldstdout = sys.stdout
+        self.imginfo_oldstdout = sys.stdout
         sys.stdout = StringIO()
 
         # Image is selected. First Generte the dfxml file using Fiwalk, 
@@ -450,14 +449,11 @@ class Ui_MainWindow(object):
 
         BcFileStructure.bcDeleteModel(self, self.current_image)
         self.current_image = "null"
-        #global g_textEdit_msg
-        # FIXME: The following causes crash sometimes.
-        '''
+
         self.textEdit_msg.setText( sys.stdout.getvalue() )
         sys.stdout = g_oldstdout
-        '''
-        self.textEdit_imginfo.setText( sys.stdout.getvalue() )
-        sys.stdout = g_oldstdout
+
+        self.textEdit_imginfo.clear()
         return
 
     def selectAllMenu(self):
@@ -960,17 +956,9 @@ class bcfaThread_fw(threading.Thread):
             # Set the progressbar maximum to > minimum so the spinning will stop
             global_fw.progressbar.setRange(0,1)
 
-            g_textEdit_msg.append( sys.stdout.getvalue() )
-            sys.stdout = g_oldstdout
-            g_oldstdout = sys.stdout
-            sys.stdout = StringIO()
-
             # Generate the Directory Tree
             print(">> Generating directory tree ...")
-            g_textEdit_msg.append( sys.stdout.getvalue() )
-            sys.stdout = g_oldstdout
-            g_oldstdout = sys.stdout
-            sys.stdout = StringIO()
+
             filestr = BcFileStructure()
             filestr.bcExtractFileStr(self.image_file, self.dfxmlfile, outdir=None)
 
