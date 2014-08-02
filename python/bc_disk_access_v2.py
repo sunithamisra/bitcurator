@@ -839,7 +839,7 @@ class BcFileStructure:
                 # For fat12 file-system there is no partiton information.
                 # So skip the step for extracting partition offset.
                 part2_start = 0
-                if self.ftype != 'fat12' and imgtype != 'iso':
+                if self.ftype != 'fat12' and self.ftype != 'iso9660' and imgtype != 'iso':
                     mmls_cmd = "mmls -i " + imgtype +" "+image +" | grep \"02:\""
 
                     ## print("D: Executing mmls command: ", mmls_cmd) 
