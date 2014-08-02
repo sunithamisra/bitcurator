@@ -250,12 +250,23 @@ class Ui_MainWindow(object):
         self.actionShow_Messages.setObjectName(_fromUtf8("actionShow_Messages"))
         self.actionShow_Image_Info = QtGui.QAction(MainWindow)
         self.actionShow_Image_Info.setObjectName(_fromUtf8("actionShow_Image_Info"))
+
+        self.actionSelect_Deleted_Files = QtGui.QAction(MainWindow)
+        self.actionSelect_Deleted_Files.setObjectName(_fromUtf8("actionSelect_Deleted_Files"))
+        self.actionDeSelect_Deleted_Files = QtGui.QAction(MainWindow)
+        self.actionDeSelect_Deleted_Files.setObjectName(_fromUtf8("actionDeSelect_Deleted_Files"))
+        
         self.menuFile.addAction(self.actionOpen_disk_image)
         self.menuFile.addAction(self.actionClose_disk_image)
         self.menuFile.addSeparator()
         self.menuFile.addAction(self.actionExit)
         self.menuEdit.addAction(self.actionSelect_All)
         self.menuEdit.addAction(self.actionDeSelect_All)
+
+        self.menuEdit.addAction(self.actionSelect_Deleted_Files)
+        self.menuEdit.addAction(self.actionDeSelect_Deleted_Files)
+        
+
         self.menuHelp.addAction(self.actionAbout_BitCurator_Disk_Access)
         self.menuRun.addAction(self.actionExport_selected_files)
         self.menuRun.addAction(self.actionCancel_export)
@@ -282,6 +293,8 @@ class Ui_MainWindow(object):
         self.actionExit.triggered.connect(self.exitMenu)
         self.actionSelect_All.triggered.connect(self.selectAllMenu)
         self.actionDeSelect_All.triggered.connect(self.deSelectAllMenu)
+        self.actionSelect_Deleted_Files.triggered.connect(self.selectDeletedFilesMenu)
+        self.actionDeSelect_Deleted_Files.triggered.connect(self.deSelectDeletedFilesMenu)
 
         self.actionOpen_disk_image.triggered.connect(self.openDiskImageMenu)
         self.actionClose_disk_image.triggered.connect(self.closeDiskImageMenu)
@@ -316,6 +329,9 @@ class Ui_MainWindow(object):
         self.actionCancel_export.setText(_translate("MainWindow", "Cancel export", None))
         #self.actionShow_Messages.setText(_translate("MainWindow", "Show Messages", None))
         #self.actionShow_Image_Info.setText(_translate("MainWindow", "Show Image Info", None))
+        self.actionSelect_Deleted_Files.setText(_translate("MainWindow", "Select Deleted Files", None))
+        self.actionDeSelect_Deleted_Files.setText(_translate("MainWindow", "DeSelect Deleted Files", None))
+        
 
     def getExportOutdir(self):
         # Since This directory should not exist, use getSaveFileName
@@ -468,6 +484,15 @@ class Ui_MainWindow(object):
     def deSelectAllMenu(self):
         BcFileStructure.bcOperateOnFiles(BcFileStructure, 0, None)
 
+    def selectDeletedFilesMenu(self):
+        self.textEdit_msg.setText( sys.stdout.getvalue() )
+        sys.stdout = g_oldstdout
+
+        BcFileStructure.bcOperateOnFiles(BcFileStructure, 4, None)
+        
+    def deSelectDeletedFilesMenu(self):
+        BcFileStructure.bcOperateOnFiles(BcFileStructure, 5, None)
+
     def cancelExportMenu(self):
         # if dfxml file was internally generated, remove it.
         global isGenDfxmlFile
@@ -548,10 +573,11 @@ class BcFileStructure:
     # bcOperateOnFiles()
     # Iterate through the leaves of the file structure and check/uncheck
     # all the files based on whether "check" is True or False.
-    # This same routine is reused with the parameter "cehck" set to 2, 
+    # This same routine is reused with the parameter "check" set to 2, 
     # to dump the contents of the "checked" files to the specified output 
     # directory. It is again used with check=3 to dump the contents of a
-    # file to the textEdit window. 
+    # file to the textEdit window. Further it is extended to use check=4 and 5 
+    # for selecting and deselecting respectively the deleted files. 
     def bcOperateOnFiles(self, check, exportDir):
         ## print(">>D: Length of fiDictList: ", len(self.fiDictList))
         global g_breakout
@@ -571,6 +597,10 @@ class BcFileStructure:
             if last_elem == "." or last_elem == "..":
                 # Ignore . and ..
                 continue 
+
+            deleted = False
+            if self.fiDictList[i]['alloc'] == False:
+                deleted = True
 
             if isdir == False:
                 # First get the name of the current file
@@ -651,6 +681,16 @@ class BcFileStructure:
                         g_textEdit_msg.setText( sys.stdout.getvalue() )
                         #sys.stdout = self.oldstdout
                         sys.stdout = g_oldstdout
+                elif check == 4:
+                    # If current_item is a deleted file, select it
+                    if deleted == True:
+                        if (current_item.checkState() == 0):
+                            ## print("D: Setting File to Checked_state ", current_fileordir) 
+                            current_item.setCheckState(2)
+                elif check == 5:
+                    # If current_item is a deleted file, DeSelect it
+                    if deleted == True:
+                        current_item.setCheckState(0)
 
     def bcHandleSpecialChars(self, filename):
         #filename = filename.replace("$", "\$")
