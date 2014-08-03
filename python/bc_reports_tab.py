@@ -789,12 +789,12 @@ class Ui_MainWindow(object):
         QtCore.QObject.connect(self.pb_rep_cancel, QtCore.SIGNAL(_fromUtf8("clicked()")), self.buttonClickedCancel_rep)
 
         # File navigation for File Access Tab
-        QtCore.QObject.connect(self.toolButton_acc_img, QtCore.SIGNAL(_fromUtf8("clicked()")), self.getAccImgFileName)
-        QtCore.QObject.connect(self.toolButton_acc_outdir, QtCore.SIGNAL(_fromUtf8("clicked()")), self.getAccOutdir)
+        #QtCore.QObject.connect(self.toolButton_acc_img, QtCore.SIGNAL(_fromUtf8("clicked()")), self.getAccImgFileName)
+        #QtCore.QObject.connect(self.toolButton_acc_outdir, QtCore.SIGNAL(_fromUtf8("clicked()")), self.getAccOutdir)
 
-        QtCore.QObject.connect(self.pb_acc_run, QtCore.SIGNAL(_fromUtf8("clicked()")), self.buttonClickedOkAcc)
-        QtCore.QObject.connect(self.pb_acc_close, QtCore.SIGNAL(_fromUtf8("clicked()")), self.buttonClickedClose)
-        QtCore.QObject.connect(self.pb_acc_cancel, QtCore.SIGNAL(_fromUtf8("clicked()")), self.buttonClickedCancel_acc)
+        #QtCore.QObject.connect(self.pb_acc_run, QtCore.SIGNAL(_fromUtf8("clicked()")), self.buttonClickedOkAcc)
+        #QtCore.QObject.connect(self.pb_acc_close, QtCore.SIGNAL(_fromUtf8("clicked()")), self.buttonClickedClose)
+        #QtCore.QObject.connect(self.pb_acc_cancel, QtCore.SIGNAL(_fromUtf8("clicked()")), self.buttonClickedCancel_acc)
 
         self.actionExit.triggered.connect(self.exitMenu)
         self.actionCopy.triggered.connect(self.copyMenu)
