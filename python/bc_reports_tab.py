@@ -1922,7 +1922,7 @@ class Ui_MainWindow(object):
         self.pb_acc_close.setText(QtGui.QApplication.translate("MainWindow", "Close", None, QtGui.QApplication.UnicodeUTF8))
         self.pb_acc_cancel.setText(QtGui.QApplication.translate("MainWindow", "Cancel", None, QtGui.QApplication.UnicodeUTF8))
         self.pb_acc_run.setText(QtGui.QApplication.translate("MainWindow", "Run", None, QtGui.QApplication.UnicodeUTF8))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_acc), QtGui.QApplication.translate("MainWindow", "File Access", None, QtGui.QApplication.UnicodeUTF8))
+        #self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_acc), QtGui.QApplication.translate("MainWindow", "File Access", None, QtGui.QApplication.UnicodeUTF8))
         
 
         self.menuFile.setTitle(QtGui.QApplication.translate("MainWindow", "File", None, QtGui.QApplication.UnicodeUTF8))
