@@ -24,7 +24,7 @@ from bc_genrep_premis import BcPremisFile
 
 from generate_report import *
 from bc_utils import *
-from bc_disk_access import *
+#from bc_disk_access import *
 #from PyQt4.Qsci import *
 from os.path import expanduser
 
@@ -44,16 +44,16 @@ except AttributeError:
 # GUI attributes are initialized only once by the main routine.
 global_allrep = "null"
 global_fw = "null"
-global_acc = "null"
+#global_acc = "null"
 g_textEdit_allrepcmdlineoutput = "null"
 g_textEdit_fwcmdlineoutput = "null"
-g_textEdit_acc = "null"
+#g_textEdit_acc = "null"
 g_xmlFwFilename = "null"
 global_ann = "null"
 g_textEdit_anncmdlineoutput = "null"
-g_acc_outdir = "null"
-g_acc_dfxmlfile = "null"
-g_acc_image = "null"
+#g_acc_outdir = "null"
+#g_acc_dfxmlfile = "null"
+#g_acc_image = "null"
 
 class Ui_MainWindow(object):
     #def __init__(self, parent=None):
@@ -64,7 +64,7 @@ class Ui_MainWindow(object):
     fwImageFileName = "null"
     beImageFileName = "null"
     annImageFileName = "null"
-    accImageFileName = "null"
+    #accImageFileName = "null"
     xmlFileName = "null"
     fwXmlFileName = "null"
     allrepXmlFileName = "null"
@@ -81,7 +81,7 @@ class Ui_MainWindow(object):
     configFileName = "null"
     reportsDir = "null"
     annOutputDirName = "null"
-    accOutdirName = "null"
+    #accOutdirName = "null"
     annBeFeatDir = "null"
     repFwXmlFileName = "null"
     repOutDir = "null"
@@ -89,7 +89,7 @@ class Ui_MainWindow(object):
     allrepConfile = "null"
     repAnnDir = "null"
     progressBar_fw = "null"
-    progressBar_acc = "null"
+    #progressBar_acc = "null"
     progressBar_allrep = "null"
 
     # The standard output from this point is placed by an in-memory
@@ -706,8 +706,8 @@ class Ui_MainWindow(object):
         #self.tabWidget.addTab(self.tab_acc, _fromUtf8(""))
 
         # Save some class-specific vars in global vars for later use in threads
-        global g_textEdit_acc
-        g_textEdit_acc = self.textEdit_acc
+        #global g_textEdit_acc
+        #g_textEdit_acc = self.textEdit_acc
         # End Tab File-access
           
         self.gridLayout.addWidget(self.tabWidget, 0, 0, 1, 1)
@@ -952,26 +952,26 @@ class Ui_MainWindow(object):
         global g_thread1_ann
         g_thread1_ann.join()
 
-    def buttonClickedCancel_acc(self):
-        print(">> File Access Task Cancelled ")
-        # Set the progressbar maximum to > minimum so the spinning will stop
-        global global_acc
-        global_acc.progressbar.setRange(0,1)
+    #def buttonClickedCancel_acc(self):
+    #    print(">> File Access Task Cancelled ")
+    #    # Set the progressbar maximum to > minimum so the spinning will stop
+    #    global global_acc
+    #    global_acc.progressbar.setRange(0,1)
 
-        # Set the active flag to False
-        ProgressBar._active = False
+    #    # Set the active flag to False
+    #    ProgressBar._active = False
 
-        x = Ui_MainWindow
-        global g_textEdit_acc
-        g_textEdit_acc.append( sys.stdout.getvalue() )
-        sys.stdout = x.oldstdout
+    #    x = Ui_MainWindow
+    #    global g_textEdit_acc
+    #    g_textEdit_acc.append( sys.stdout.getvalue() )
+    #    sys.stdout = x.oldstdout
 
-        x.oldstdout = sys.stdout
-        sys.stdout = StringIO()
+    #    x.oldstdout = sys.stdout
+    #    sys.stdout = StringIO()
 
-        # Set the flag in the thread to signal thread termination
-        global g_thread1_acc
-        g_thread1_acc.join()
+    #    # Set the flag in the thread to signal thread termination
+    #    global g_thread1_acc
+    #    g_thread1_acc.join()
 
     #
     # buttonClickCancel_rep: Handle Cancel button for Reports tab 
@@ -1041,18 +1041,18 @@ class Ui_MainWindow(object):
         
         self.annImageFileName = image_file
 
-    def getAccImgFileName(self):
-        # Navigation
-        image_file = QtGui.QFileDialog.getOpenFileName(caption="Select an image file")
-        print(">> Image File Selected: ", image_file)
+    #def getAccImgFileName(self):
+    #    # Navigation
+    #    image_file = QtGui.QFileDialog.getOpenFileName(caption="Select an image file")
+    #    print(">> Image File Selected: ", image_file)
 
-        self.lineEdit_acc_image.setText(image_file)
+    #    self.lineEdit_acc_image.setText(image_file)
         
-        self.accImageFileName = image_file
+    #    self.accImageFileName = image_file
  
-        # Save it globally for use by the thread
-        global g_acc_image
-        g_acc_image = self.accImageFileName
+    #    # Save it globally for use by the thread
+    #    global g_acc_image
+    #    g_acc_image = self.accImageFileName
 
     def getbcpyDir(self):
         # Navigation
@@ -1144,32 +1144,32 @@ class Ui_MainWindow(object):
 
         os.mkdir(self.annOutputDirName)
 
-    def getAccOutdir(self):
-        # Since This directory should not exist, use getSaveFileName
-        # to let the user create a new directory.
-        access_dialog = QtGui.QFileDialog(caption="Find or create an output directory")
-        access_dialog.setFileMode(QtGui.QFileDialog.Directory)
-        access_dialog.setOption(QtGui.QFileDialog.ShowDirsOnly)
-        result = access_dialog.exec_()
-        if result:
-            acc_outdir = access_dialog.selectedFiles()[0]
+    #def getAccOutdir(self):
+    #    # Since This directory should not exist, use getSaveFileName
+    #    # to let the user create a new directory.
+    #    access_dialog = QtGui.QFileDialog(caption="Find or create an output directory")
+    #    access_dialog.setFileMode(QtGui.QFileDialog.Directory)
+    #    access_dialog.setOption(QtGui.QFileDialog.ShowDirsOnly)
+    #    result = access_dialog.exec_()
+    #    if result:
+    #        acc_outdir = access_dialog.selectedFiles()[0]
 
-        #acc_outdir = QtGui.QFileDialog.getSaveFileName(caption="Create a directory for the File Access")
+    #    #acc_outdir = QtGui.QFileDialog.getSaveFileName(caption="Create a directory for the File Access")
 
 
-            print(">> Output Directory Selected for File Access ", acc_outdir)
-            self.lineEdit_acc_outdir.setText(acc_outdir)
-            self.accOutdirName = acc_outdir
+    #        print(">> Output Directory Selected for File Access ", acc_outdir)
+    #        self.lineEdit_acc_outdir.setText(acc_outdir)
+    #        self.accOutdirName = acc_outdir
 
-            # Save it in global var for use by the thread
-            global g_acc_outdir
-            g_acc_outdir = self.accOutdirName
+    #        # Save it in global var for use by the thread
+    #        global g_acc_outdir
+    #        g_acc_outdir = self.accOutdirName
 
-            if not os.path.exists(self.accOutdirName):
-                os.mkdir(self.accOutdirName)
+    #        if not os.path.exists(self.accOutdirName):
+    #            os.mkdir(self.accOutdirName)
 
-        else:
-            print(">> Warning! No output directory selected! ")
+    #    else:
+    #        print(">> Warning! No output directory selected! ")
 
 
     def getAnnBcpyDir(self):
@@ -1569,66 +1569,66 @@ class Ui_MainWindow(object):
 
     # buttonClickedOkAcc: Routine invoked when File Access Tab's Run 
     # button is clicked.
-    def buttonClickedOkAcc(self):
-        self.oldstdout = sys.stdout
-        sys.stdout = StringIO()
+    #def buttonClickedOkAcc(self):
+    #    self.oldstdout = sys.stdout
+    #    sys.stdout = StringIO()
 
-        # If Image file is not selected through menu, see if it is
-        # typed in the text box:
-        if ui.lineEdit_acc_image.text() != self.accImageFileName:
-            self.accImageFileName = ui.lineEdit_acc_image.text()
+    #    # If Image file is not selected through menu, see if it is
+    #    # typed in the text box:
+    #    if ui.lineEdit_acc_image.text() != self.accImageFileName:
+    #        self.accImageFileName = ui.lineEdit_acc_image.text()
 
-        # If output Outdir is not selected through menu, see if it is
-        # typed in the text box:
-        if ui.lineEdit_acc_outdir.text() != self.accOutdirName:
-            self.accOutdirName = ui.lineEdit_acc_outdir.text()
+    #    # If output Outdir is not selected through menu, see if it is
+    #    # typed in the text box:
+    #    if ui.lineEdit_acc_outdir.text() != self.accOutdirName:
+    #        self.accOutdirName = ui.lineEdit_acc_outdir.text()
 
-        # Generte the dfxml file using Fiwalk, in a hidden directory
-        # .bcfa, in the user's home directory
-        dfxmlpath = expanduser("~") + '/.bcfa'
-        if not os.path.exists(dfxmlpath):
-            os.mkdir(dfxmlpath)
+    #    # Generte the dfxml file using Fiwalk, in a hidden directory
+    #    # .bcfa, in the user's home directory
+    #    dfxmlpath = expanduser("~") + '/.bcfa'
+    #    if not os.path.exists(dfxmlpath):
+    #        os.mkdir(dfxmlpath)
 
-        dfxmlfile = dfxmlpath + '/dfxml.xml'
+    #    dfxmlfile = dfxmlpath + '/dfxml.xml'
 
-        if os.path.exists(dfxmlfile):
-            print(">> Removing the existing file ", dfxmlfile)
-            os.system('rm '+ re.escape(dfxmlfile))
+    #    if os.path.exists(dfxmlfile):
+    #        print(">> Removing the existing file ", dfxmlfile)
+    #        os.system('rm '+ re.escape(dfxmlfile))
 
-        # Thread uses it. so copy to the global value. We use the same
-        # global var as the fw tab uses as we are piggybacking on it.
-        global g_accXmlFileName
-        g_accXmlFileName = dfxmlfile
+    #    # Thread uses it. so copy to the global value. We use the same
+    #    # global var as the fw tab uses as we are piggybacking on it.
+    #    global g_accXmlFileName
+    #    g_accXmlFileName = dfxmlfile
             
-        cmd1 = ['fiwalk', '-z', '-g', '-X', dfxmlfile, self.accImageFileName]
-        print(">> Generating XML File ", dfxmlfile)
-        print(">> Invoking command for Fiwalk = ", cmd1)
+    #    cmd1 = ['fiwalk', '-z', '-g', '-X', dfxmlfile, self.accImageFileName]
+    #    print(">> Generating XML File ", dfxmlfile)
+    #    print(">> Invoking command for Fiwalk = ", cmd1)
         
-        self.textEdit_acc.setText( sys.stdout.getvalue() )
-        sys.stdout = self.oldstdout
+    #    self.textEdit_acc.setText( sys.stdout.getvalue() )
+    #    sys.stdout = self.oldstdout
 
-        self.oldstdout = sys.stdout
-        sys.stdout = StringIO()
+    #    self.oldstdout = sys.stdout
+    #    sys.stdout = StringIO()
         
-        #scriptdir = self.cwd
-        # Had to hardcode this to fix launch from desktop - FIXME
-        scriptdir = "/home/bcadmin/Tools/bitcurator/python"
-        disk_access_script = scriptdir+'/bc_disk_access.py'
-        cmd2 = ['python3', disk_access_script, '--image', self.accImageFileName, '--dfxmlfile', dfxmlfile, '--outdir', self.accOutdirName, '--listfiles']
+    #    #scriptdir = self.cwd
+    #    # Had to hardcode this to fix launch from desktop - FIXME
+    #    scriptdir = "/home/bcadmin/Tools/bitcurator/python"
+    #    disk_access_script = scriptdir+'/bc_disk_access.py'
+    #    cmd2 = ['python3', disk_access_script, '--image', self.accImageFileName, '--dfxmlfile', dfxmlfile, '--outdir', self.accOutdirName, '--listfiles']
 
-        # Start two threads - one for executing the above command and
-        # a second one to start a progress bar on the gui which keeps
-        # spinning till the first thread finishes the command execution
-        # and signals the second one by setting a flag. 
-        thread1 = bcThread_acc(cmd1, cmd2)
+    #    # Start two threads - one for executing the above command and
+    #    # a second one to start a progress bar on the gui which keeps
+    #    # spinning till the first thread finishes the command execution
+    #    # and signals the second one by setting a flag. 
+    #    thread1 = bcThread_acc(cmd1, cmd2)
 
-        # Save the thread handle for later use in cancel task.
-        global g_thread1_acc
-        g_thread1_acc = thread1
+    #    # Save the thread handle for later use in cancel task.
+    #    global g_thread1_acc
+    #    g_thread1_acc = thread1
 
-        thread2 = guiThread("acc")
-        thread1.start()
-        thread2.start()
+    #    thread2 = guiThread("acc")
+    #    thread1.start()
+    #    thread2.start()
 
     def bcRunCmd(self, cmd, err):
         (data, err) = Popen(cmd, stdout=PIPE, stderr=PIPE).communicate()
@@ -1911,17 +1911,17 @@ class Ui_MainWindow(object):
         self.label_annhdr.setText(QtGui.QApplication.translate("MainWindow", "Produces reports that link each bulk_extractor feature to a specific file in a disk image.", None, QtGui.QApplication.UnicodeUTF8))
 
         # file Access Tab
-        self.label_acc_hdr.setText(QtGui.QApplication.translate("MainWindow", "Displays the directory structure of a disk image and allows export of individual files.", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_acc_image.setText(QtGui.QApplication.translate("MainWindow", "<html><head/><body><p><span style=\" font-size:10pt; font-weight:600;\">Image File</span></p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
-        self.lineEdit_acc_image.setPlaceholderText(QtGui.QApplication.translate("MainWindow", "/Path/To/File", None, QtGui.QApplication.UnicodeUTF8))
-        self.toolButton_acc_img.setText(QtGui.QApplication.translate("MainWindow", "...", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_acc_outfile.setText(QtGui.QApplication.translate("MainWindow", "Output Directory", None, QtGui.QApplication.UnicodeUTF8))
-        self.lineEdit_acc_outdir.setPlaceholderText(QtGui.QApplication.translate("MainWindow", "/Path/To/File", None, QtGui.QApplication.UnicodeUTF8))
-        self.toolButton_acc_outdir.setText(QtGui.QApplication.translate("MainWindow", "...", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_acc_cmdlineoutput.setText(QtGui.QApplication.translate("MainWindow", "Command Line Output", None, QtGui.QApplication.UnicodeUTF8))
-        self.pb_acc_close.setText(QtGui.QApplication.translate("MainWindow", "Close", None, QtGui.QApplication.UnicodeUTF8))
-        self.pb_acc_cancel.setText(QtGui.QApplication.translate("MainWindow", "Cancel", None, QtGui.QApplication.UnicodeUTF8))
-        self.pb_acc_run.setText(QtGui.QApplication.translate("MainWindow", "Run", None, QtGui.QApplication.UnicodeUTF8))
+        #self.label_acc_hdr.setText(QtGui.QApplication.translate("MainWindow", "Displays the directory structure of a disk image and allows export of individual files.", None, QtGui.QApplication.UnicodeUTF8))
+        #self.label_acc_image.setText(QtGui.QApplication.translate("MainWindow", "<html><head/><body><p><span style=\" font-size:10pt; font-weight:600;\">Image File</span></p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
+        #self.lineEdit_acc_image.setPlaceholderText(QtGui.QApplication.translate("MainWindow", "/Path/To/File", None, QtGui.QApplication.UnicodeUTF8))
+        #self.toolButton_acc_img.setText(QtGui.QApplication.translate("MainWindow", "...", None, QtGui.QApplication.UnicodeUTF8))
+        #self.label_acc_outfile.setText(QtGui.QApplication.translate("MainWindow", "Output Directory", None, QtGui.QApplication.UnicodeUTF8))
+        #self.lineEdit_acc_outdir.setPlaceholderText(QtGui.QApplication.translate("MainWindow", "/Path/To/File", None, QtGui.QApplication.UnicodeUTF8))
+        #self.toolButton_acc_outdir.setText(QtGui.QApplication.translate("MainWindow", "...", None, QtGui.QApplication.UnicodeUTF8))
+        #self.label_acc_cmdlineoutput.setText(QtGui.QApplication.translate("MainWindow", "Command Line Output", None, QtGui.QApplication.UnicodeUTF8))
+        #self.pb_acc_close.setText(QtGui.QApplication.translate("MainWindow", "Close", None, QtGui.QApplication.UnicodeUTF8))
+        #self.pb_acc_cancel.setText(QtGui.QApplication.translate("MainWindow", "Cancel", None, QtGui.QApplication.UnicodeUTF8))
+        #self.pb_acc_run.setText(QtGui.QApplication.translate("MainWindow", "Run", None, QtGui.QApplication.UnicodeUTF8))
         #self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_acc), QtGui.QApplication.translate("MainWindow", "File Access", None, QtGui.QApplication.UnicodeUTF8))
         
 
@@ -2206,82 +2206,82 @@ class bcThread_fw(threading.Thread):
             sys.stdout = StringIO()
                 
 # Thread for running the fiwalk command for file-access
-class bcThread_acc(threading.Thread):
-    def __init__(self, cmd1, cmd2):
-        threading.Thread.__init__(self)
-        self.cmd1 = cmd1
-        self.cmd2 = cmd2
-        super(bcThread_acc, self).__init__()
-        self.stoprequest = threading.Event()
-        self.process = None
-
-    def stopped(self):
-        return self.stoprequest.isSet()
-
-    def join(self, timeout=None):
-        self.stoprequest.set()
-        super(bcThread_acc, self).join(timeout)
-
-    def run(self):
-        p = self.process = Popen(self.cmd1, stdout=PIPE, stderr=PIPE)
-        (data, err) = p.communicate()
-        if p.returncode:
-           ProgressBar._active = False
-           
-           x = Ui_MainWindow
-           print(">> ERROR!!! Fiwalk terminated with error: \n", err)
-
-           global g_textEdit_acc
-           g_textEdit_acc.append( sys.stdout.getvalue() )
-           sys.stdout = x.oldstdout
-
-           # Set the progressbar maximum to > minimum so the spinning will stop
-           global global_acc
-           global_acc.progressbar.setRange(0,1)
-
-           x.oldstdout = sys.stdout
-           sys.stdout = StringIO()
-        else:
-            # Set the progresbar active flag so the other thread can
-            # get out of the while loop.
-            ProgressBar._active = False
-            #print("D: bcThread_acc: Progressbar Active Flag Set to: ", ProgressBar._active)
-
-            print("\n>> Success!!! Fiwalk created the following file(s): \n")
-
-
-            # Set the progressbar maximum to > minimum so the spinning will stop
-            global_acc.progressbar.setRange(0,1)
-
-            global g_accXmlFileName
-            print(" o ", g_accXmlFileName) 
-
-            x = Ui_MainWindow
-            # Note: setText for some reason, wouldn't work when used with
-            # global value. append seems to work
-            # g_textEdit_fwcmdlineoutput.setText( sys.stdout.getvalue() )
-            g_textEdit_acc.append( sys.stdout.getvalue() )
-            sys.stdout = x.oldstdout
-
-            x.oldstdout = sys.stdout
-            sys.stdout = StringIO()
-            
-            # Now invoke File access GUI.
-            print(">> Launching File Access Interface")
-            g_textEdit_acc.append( sys.stdout.getvalue() )
-            sys.stdout = x.oldstdout
-     
-            (data, err) = Popen(self.cmd2, stdout=PIPE, stderr=PIPE).communicate()
-            if len(err) > 0:
-                raise ValueError("Launch error (" + str(err).strip() + "): "+" ".join(self.cmd2))
-                
-                
-    def stop(self):
-        if self.process is not None:
-            print(">> Terminating the Thread for \"Fiwalk\"")
-            self.process.terminate()
-        else:
-            Popen.terminate(self.process)
+#class bcThread_acc(threading.Thread):
+#    def __init__(self, cmd1, cmd2):
+#        threading.Thread.__init__(self)
+#        self.cmd1 = cmd1
+#        self.cmd2 = cmd2
+#        super(bcThread_acc, self).__init__()
+#        self.stoprequest = threading.Event()
+#        self.process = None
+#
+#    def stopped(self):
+#        return self.stoprequest.isSet()
+#
+#    def join(self, timeout=None):
+#        self.stoprequest.set()
+#        super(bcThread_acc, self).join(timeout)
+#
+#    def run(self):
+#        p = self.process = Popen(self.cmd1, stdout=PIPE, stderr=PIPE)
+#        (data, err) = p.communicate()
+#        if p.returncode:
+#           ProgressBar._active = False
+#           
+#           x = Ui_MainWindow
+#           print(">> ERROR!!! Fiwalk terminated with error: \n", err)
+#
+#           global g_textEdit_acc
+#           g_textEdit_acc.append( sys.stdout.getvalue() )
+#           sys.stdout = x.oldstdout
+#
+#           # Set the progressbar maximum to > minimum so the spinning will stop
+#           global global_acc
+#           global_acc.progressbar.setRange(0,1)
+#
+#           x.oldstdout = sys.stdout
+#           sys.stdout = StringIO()
+#        else:
+#            # Set the progresbar active flag so the other thread can
+#            # get out of the while loop.
+#            ProgressBar._active = False
+#            #print("D: bcThread_acc: Progressbar Active Flag Set to: ", ProgressBar._active)
+#
+#            print("\n>> Success!!! Fiwalk created the following file(s): \n")
+#
+#
+#            # Set the progressbar maximum to > minimum so the spinning will stop
+#            global_acc.progressbar.setRange(0,1)
+#
+#            global g_accXmlFileName
+#            print(" o ", g_accXmlFileName) 
+#
+#            x = Ui_MainWindow
+#            # Note: setText for some reason, wouldn't work when used with
+#            # global value. append seems to work
+#            # g_textEdit_fwcmdlineoutput.setText( sys.stdout.getvalue() )
+#            g_textEdit_acc.append( sys.stdout.getvalue() )
+#            sys.stdout = x.oldstdout
+#
+#            x.oldstdout = sys.stdout
+#            sys.stdout = StringIO()
+#            
+#            # Now invoke File access GUI.
+#            print(">> Launching File Access Interface")
+#            g_textEdit_acc.append( sys.stdout.getvalue() )
+#            sys.stdout = x.oldstdout
+#     
+#            (data, err) = Popen(self.cmd2, stdout=PIPE, stderr=PIPE).communicate()
+#            if len(err) > 0:
+#                raise ValueError("Launch error (" + str(err).strip() + "): "+" ".join(self.cmd2))
+#                
+#                
+#    def stop(self):
+#        if self.process is not None:
+#            print(">> Terminating the Thread for \"Fiwalk\"")
+#            self.process.terminate()
+#        else:
+#            Popen.terminate(self.process)
 
 # Thread for running the identify_filenames command
 class bcThread_ann(threading.Thread):
@@ -2407,9 +2407,9 @@ class guiThread(threading.Thread):
         elif self.cmd_type == "allrep":
             global global_allrep
             progressbar = global_allrep
-        elif self.cmd_type == "acc":
-            global global_acc
-            progressbar = global_acc
+        #elif self.cmd_type == "acc":
+        #    global global_acc
+        #    progressbar = global_acc
 
         progressbar.startLoop_bc(self.cmd_type)
 
@@ -2443,9 +2443,9 @@ class ProgressBar(QtGui.QWidget):
         elif cmd_type == "allrep":
             global global_allrep
             global_allrep.progressbar.setRange(0,0)
-        elif cmd_type == "acc":
-            global global_acc
-            global_acc.progressbar.setRange(0,0)
+        #elif cmd_type == "acc":
+        #    global global_acc
+        #    global_acc.progressbar.setRange(0,0)
 
         while True:
             time.sleep(1.05)
@@ -2480,11 +2480,11 @@ class ProgressBar(QtGui.QWidget):
                     if g_thread1_ann.stopped():
                         ## print("D: startLoop_bc: Ann Thread Stopped ")
                         g_thread1_ann.stop()
-                if cmd_type == "acc":
-                    global g_thread1_acc
-                    if g_thread1_acc.stopped():
-                        ## print("D: startLoop_bc: Access Thread Stopped ")
-                        g_thread1_acc.stop()
+                #if cmd_type == "acc":
+                #    global g_thread1_acc
+                #    if g_thread1_acc.stopped():
+                #        ## print("D: startLoop_bc: Access Thread Stopped ")
+                #        g_thread1_acc.stop()
                 break
         ProgressBar._active = False
 
