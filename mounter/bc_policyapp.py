@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 # BitCurator Mounter and Read/Write Application Indicator
 # Unity Application Indicator

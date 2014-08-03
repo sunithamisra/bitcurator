@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from gi.repository import Gtk as gtk
 import subprocess
 import os, sys
