@@ -128,6 +128,13 @@ class Ui_MainWindow(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.dockWidget_imginfo.sizePolicy().hasHeightForWidth())
         self.dockWidget_imginfo.setSizePolicy(sizePolicy)
+        self.dockWidget_imginfo.setMinimumSize(QtCore.QSize(380, 146))
+
+        #.# Remove the "close widget" (x) feature from the widget. Deleting
+        # the following line sets all three features by default: 
+        # DockWidgetClosable, DockWidgetFloatable and DockWidgetMovable
+        self.dockWidget_imginfo.setFeatures(QtGui.QDockWidget.DockWidgetFloatable|QtGui.QDockWidget.DockWidgetMovable)
+        
         self.dockWidget_imginfo.setObjectName(_fromUtf8("dockWidget_imginfo"))
         self.dockWidgetContents_imginfo = QtGui.QWidget()
         self.dockWidgetContents_imginfo.setObjectName(_fromUtf8("dockWidgetContents_imginfo"))
@@ -136,6 +143,10 @@ class Ui_MainWindow(object):
         self.textEdit_imginfo = QtGui.QTextEdit(self.dockWidgetContents_imginfo)
         self.textEdit_imginfo.setObjectName(_fromUtf8("textEdit_imginfo"))
         self.textEdit_imginfo.setTextInteractionFlags(QtCore.Qt.TextSelectableByKeyboard|QtCore.Qt.TextSelectableByMouse)
+    
+        #.#
+        self.textEdit_imginfo.moveCursor(QtGui.QTextCursor.End)
+
         self.verticalLayout_3.addWidget(self.textEdit_imginfo)
         self.dockWidget_imginfo.setWidget(self.dockWidgetContents_imginfo)
         self.gridLayout.addWidget(self.dockWidget_imginfo, 0, 1, 1, 1)
@@ -151,6 +162,11 @@ class Ui_MainWindow(object):
         sizePolicy.setHeightForWidth(self.dockWidget_msg.sizePolicy().hasHeightForWidth())
         self.dockWidget_msg.setSizePolicy(sizePolicy)
         self.dockWidget_msg.setMinimumSize(QtCore.QSize(380, 146))
+
+        #.# Remove the "close widget" (x) feature from the widget. Deleting
+        # the following line sets all three features by default: 
+        # DockWidgetClosable, DockWidgetFloatable and DockWidgetMovable
+        self.dockWidget_msg.setFeatures(QtGui.QDockWidget.DockWidgetFloatable|QtGui.QDockWidget.DockWidgetMovable)
         self.dockWidget_msg.setObjectName(_fromUtf8("dockWidget_msg"))
         self.dockWidgetContents_msg = QtGui.QWidget()
         self.dockWidgetContents_msg.setObjectName(_fromUtf8("dockWidgetContents_msg"))
@@ -158,6 +174,10 @@ class Ui_MainWindow(object):
         self.verticalLayout_4.setObjectName(_fromUtf8("verticalLayout_4"))
         self.textEdit_msg = QtGui.QTextEdit(self.dockWidgetContents_msg)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Expanding)
+
+        #.#
+        self.textEdit_msg.moveCursor(QtGui.QTextCursor.End)
+
         sizePolicy.setHorizontalStretch(2)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.textEdit_msg.sizePolicy().hasHeightForWidth())
@@ -485,15 +505,23 @@ class Ui_MainWindow(object):
         BcFileStructure.bcOperateOnFiles(BcFileStructure, 0, None)
 
     def selectDeletedFilesMenu(self):
-        self.textEdit_msg.setText( sys.stdout.getvalue() )
-        sys.stdout = g_oldstdout
-
         BcFileStructure.bcOperateOnFiles(BcFileStructure, 4, None)
         
     def deSelectDeletedFilesMenu(self):
         BcFileStructure.bcOperateOnFiles(BcFileStructure, 5, None)
 
     def cancelExportMenu(self):
+        # If the tree is not generated yet, just return.
+        global g_textEdit_msg
+        global g_oldstdout
+        if not BcFileStructure.fiDictList:
+            print(">> No directory tree exists. Nothing to cancel ")
+            g_textEdit_msg.setText( sys.stdout.getvalue() )
+            sys.stdout = g_oldstdout
+            g_oldstdout = sys.stdout
+            sys.stdout = StringIO()
+            return
+
         # if dfxml file was internally generated, remove it.
         global isGenDfxmlFile
         if isGenDfxmlFile == True:
@@ -511,9 +539,6 @@ class Ui_MainWindow(object):
         global global_pb_da
         global_pb_da.progressbar.setRange(0,1)
 
-        x = Ui_MainWindow
-        global g_textEdit_msg
-        global g_oldstdout
         g_textEdit_msg.setText( sys.stdout.getvalue() )
         sys.stdout = g_oldstdout
 
@@ -525,6 +550,17 @@ class Ui_MainWindow(object):
         g_thread1_da.join()
 
     def exportFilesMenu(self):
+        # If the tree is not generated yet, just return.
+        if not BcFileStructure.fiDictList:
+            print(">> No directory tree exists. Aborting export")
+            global g_textEdit_msg
+            global g_oldstdout
+            g_textEdit_msg.setText( sys.stdout.getvalue() )
+            sys.stdout = g_oldstdout
+            g_oldstdout = sys.stdout
+            sys.stdout = StringIO()
+            return
+
         os.chdir(os.environ["HOME"])
         outdir = self.getExportOutdir()
 
@@ -1012,6 +1048,7 @@ class bcfaThread_fw(threading.Thread):
             filestr = BcFileStructure()
             filestr.bcExtractFileStr(self.image_file, self.dfxmlfile, outdir=None)
 
+            g_textEdit_msg.moveCursor(QtGui.QTextCursor.End)
 
 # Thread which exports all the checked files 
 class daThread(threading.Thread):
@@ -1048,6 +1085,8 @@ class daThread(threading.Thread):
         print(">> Copied checked files to the directory: ", self.export_dir)
         g_textEdit_msg.append( sys.stdout.getvalue() )
         sys.stdout = g_oldstdout
+
+        g_textEdit_msg.moveCursor(QtGui.QTextCursor.End)
 
     # A placeholder for any clean-up operation to be done upon pressing
     # the cancel button.
