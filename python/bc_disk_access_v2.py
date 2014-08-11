@@ -7,11 +7,11 @@
 # License, Version 3. See the text file "COPYING" for further details
 # about the terms of this license.
 #
-# python3 bc_disk_access_v2.py bc_disk_access_v2 --listfiles
+# python3 bc_disk_access_v2.py [--log info|debug]
 #
 #################################################################### 
 # The basic GUI is designed using PyQT4 Designer. 
-# Base .ui file: disk_access_v7.py
+# Base .ui file: bc_disk_access_v2.py
 # Code manually added to QTreeView and for the functionality of all widgets.
 # From the DFXML file, the "filename" attribute is read using 
 # fiwalk.fiwalk_using_sax() API. The list of file-paths is stored in 
@@ -29,6 +29,7 @@ import threading
 import time
 import re
 from os.path import expanduser
+import logging
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -401,6 +402,8 @@ class Ui_MainWindow(object):
         image_file = QtGui.QFileDialog.getOpenFileName(caption="Select an image file")
         self.current_image = image_file
         print(">> Image file selected: ", image_file)
+        logging.info('Image file selected: ' + image_file)
+        
 
         # Check if the image exists. 
         if not os.path.exists(image_file):
@@ -621,8 +624,16 @@ class BcFileStructure:
         for i in range(0, len(self.fiDictList) - 1):
             path = self.fiDictList[i]['filename']
             inode = self.fiDictList[i]['inode']
+
             if self.fiDictList[i]['name_type'] == 'd':
                 isdir = True
+            elif self.fiDictList[i]['name_type'] == '-':
+                # fiwalk marks the name_type of some files as "-" meaning 
+                # "unknown". As we don't know whether it is a file or directory,
+                # we will exclude them from our directory tree. So we will
+                # skip such entries here.
+                logging.debug("name_type is Unknown for file " + path)
+                continue
             else:
                 isdir = False
             pathlist = path.split('/')
@@ -783,6 +794,7 @@ class BcFileStructure:
         global g_dfxmlfile
         g_image = re.escape(image)
         g_dfxmlfile = dfxmlfile
+        unknown_type_files = []
 
         # A dictionary item_of{} is maintained which contains each file/
         # directory and its corresponding " tree item" as its value.
@@ -797,6 +809,50 @@ class BcFileStructure:
             path = self.fiDictList[i]['filename']
             inode = self.fiDictList[i]['inode']
             ## print("D: path, inode: ", path, inode)
+            
+            # Fiwalk marks the name_type as '-' (unknown name_type) for some
+            # files. We exclude them from our directory list as we don't know
+            # whether they are regular files or directories. There are some examples
+            # where some of them are directories, in which case they have files
+            # witin them which could be marked "r" or "d" in their name_types.
+            # Since their parent is of unknwn type (-) we have to exclude these
+            # files (even though marked r or d) as well. To handle such cases, 
+            # we put every file marked '-' in a list, unknown_files_list[]. 
+            # When we come across a file path we do a pattern check to see if 
+            # part of the file path is in this list. If it is, that means its 
+            # parent is marked "unknown name_type" and so it is not to be 
+            # included in the directory tree. There could be other ways to 
+            # handle this - like looking at the parent-inode, but this seems 
+            # to work well. 
+       
+            logging.info("bcExtractFileStr: path "+path + "inode: "+ inode)
+            if self.fiDictList[i]['name_type'] == '-':
+                # Add it to unknown files list
+                unknown_type_files.append(path)
+                logging.info("bcExtractFileStr: Added path " + path + "to unknown_type list")
+                continue
+
+            logging.debug("bcExtractFileStr: Unknown files list: "+ str(unknown_type_files) + "len: " +str(len(unknown_type_files)))
+
+            # Look in the "unknown files list" if any exsiting element of the 
+            # list matches with "path". If so, its parent has the name_type
+            # of "-". So we have to mark the name_type of this file as unknown
+            # irrespective of what it is in the dfxml file. If we don't do it, 
+            # there will be key error while searching the tree as there is no
+            # entry there for the parent.
+            found = False
+            for ii in range (0, len(unknown_type_files)):
+                if path.find(unknown_type_files[ii]) != -1:
+                    logging.debug("bcExtractFileStr: File " + path + " is in unknown_type list")
+                    # Force it's name-type to unknown" as its parent directory
+                    # has Unknown name_type
+                    self.fiDictList[i]['name_type'] = '-'
+                    found = True
+                    break
+            if found == True:
+                logging.debug("bcExtractFileStr: path " + path + "in unknown_type list. Ignoring")
+                continue
+            
             isdir = False
             if self.fiDictList[i]['name_type'] == 'd':
                 isdir = True
@@ -1032,18 +1088,20 @@ class bcfaThread_fw(threading.Thread):
             g_oldstdout = sys.stdout
             sys.stdout = StringIO()
         else:
-            # Set the progresbar active flag so the other thread can
+            # Set the progressbar active flag so the other thread can
             # get out of the while loop.
             ProgressBar._active = False
             #print("D: bcfaThread_fw: Progressbar Active Flag Set to: ", ProgressBar._active)
 
             print("\n>> Success!!! Fiwalk created DFXML file \n")
+            logging.info(" Success!!! Fiwalk created DFXML file ")
 
             # Set the progressbar maximum to > minimum so the spinning will stop
             global_fw.progressbar.setRange(0,1)
 
             # Generate the Directory Tree
             print(">> Generating directory tree ...")
+            logging.info(" Generating directory tree ...")
 
             filestr = BcFileStructure()
             filestr.bcExtractFileStr(self.image_file, self.dfxmlfile, outdir=None)
@@ -1166,11 +1224,37 @@ class ProgressBar( QtGui.QWidget):
 if __name__=="__main__":
     import sys, time, re
 
-    parser = ArgumentParser(prog='bc_disk_access.py', description='File Access')
+    parser = ArgumentParser(prog='bc_disk_access_v2.py', description='File Access')
+    parser.add_argument('--log', action='store', help="Log level ")
     args = parser.parse_args()
 
     global isGenDfxmlFile
     isGenDfxmlFile = False
+
+    # The log info is saved in $cwd/bcfa.log if "--log" option is specified.
+    # From https://docs.python.org/2/howto/logging.html:
+    # CRITICAL:50, ERROR:40, WARNING:30, INFO:20, DEBUG:10, NOTSET:0 	
+    # By default we will keep a value above CRITICAL, which makes the
+    # logging turned off.
+    log_level = 60
+    
+    if (args.log != None):
+    
+        # Open the log file to write debug information
+        cwd = os.getcwd()
+        logfile = cwd + '/bcfa.log'
+
+        #logging.basicConfig(filename=logfile,level=logging.DEBUG)
+        log_level = getattr(logging, args.log.upper(), None)
+    
+        logging.basicConfig(filename=logfile, level=log_level)
+
+        logging.info("Logging into the file: " + logfile)
+        logging.info("Logging level: " + str(log_level))
+    else:
+        logging.basicConfig(level=log_level)
+    
+
 
     filestr = BcFileStructure()
 
