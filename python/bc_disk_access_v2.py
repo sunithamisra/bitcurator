@@ -347,7 +347,7 @@ class Ui_MainWindow(object):
         self.actionOpen_disk_image.setToolTip(_translate("MainWindow", "Open disk image", None))
         self.actionClose_disk_image.setText(_translate("MainWindow", "Close disk image", None))
         self.actionAbout_BitCurator_Disk_Access.setText(_translate("MainWindow", "About BitCurator Disk Access", None))
-        self.actionExport_selected_files.setText(_translate("MainWindow", "Export selected files", None))
+        self.actionExport_selected_files.setText(_translate("MainWindow", "Export selections", None))
         self.actionCancel_export.setText(_translate("MainWindow", "Cancel export", None))
         #self.actionShow_Messages.setText(_translate("MainWindow", "Show Messages", None))
         #self.actionShow_Image_Info.setText(_translate("MainWindow", "Show Image Info", None))
