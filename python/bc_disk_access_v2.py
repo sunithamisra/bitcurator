@@ -325,6 +325,9 @@ class Ui_MainWindow(object):
         self.actionShow_Messages.triggered.connect(self.showMsgsWindowMenu)
         self.actionShow_Image_Info.triggered.connect(self.showImginfoWindowMenu)
 
+        # final trigger for about
+        self.actionAbout_BitCurator_Disk_Access.triggered.connect(self.showAboutDialog)
+
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
     
@@ -598,6 +601,12 @@ class Ui_MainWindow(object):
         MainWindow.restoreState(self.byte_array_msg_window)
         ret = MainWindow.restoreDockWidget(self, self.dockWidget_imginfo)
         ## print("D: showMsgsWidnowMenu: ret: ", ret)
+        return
+
+    def showAboutDialog(self):
+        aboutBC = QtGui.QMessageBox.warning(None, "BitCurator Disk Image Access",
+                             "See http://wiki.bitcurator.net/ for more information.",
+                             QtGui.QMessageBox.Ok)
         return
 
 class BcFileStructure:
