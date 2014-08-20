@@ -488,7 +488,7 @@ class Ui_MainWindow(object):
 
         thread2.start()
         thread1.start()
-        
+
     def closeDiskImageMenu(self):
         print(">> Closing image ", self.current_image)
 
@@ -691,6 +691,19 @@ class BcFileStructure:
                             oldDir = newDir
                         outfile = newDir + '/'+current_fileordir
                         ## print(">> D: Writing to Outfile: ", outfile, path)
+
+                        printstr = '>> Exporting {}\r'.format(path)
+                        cur = g_textEdit_msg.textCursor()
+                        cur.beginEditBlock()
+                        cur.insertText(printstr)
+ 
+                        # FIXME: The following is supposed to bring the anchor to
+                        # the cursor's location which is beginning of the same line. 
+                        # It doesn't seem to work that way as a new-line is added.
+                        # Check if it is necessary to print on the same line.
+                        cur.movePosition(QtGui.QTextCursor.StartOfLine, QtGui.QTextCursor.MoveAnchor)
+                        cur.endEditBlock()
+                        g_textEdit_msg.moveCursor(QtGui.QTextCursor.End)
                         
                         filestr.bcCatFile(path, inode, g_image, g_dfxmlfile, True, outfile)
                     elif current_item.checkState() == 1:
@@ -971,7 +984,8 @@ class BcFileStructure:
                 # For fat12 file-system there is no partiton information.
                 # So skip the step for extracting partition offset.
                 part2_start = 0
-                if self.ftype != 'fat12' and self.ftype != 'iso9660' and imgtype != 'iso':
+                #if self.ftype != 'fat12' and self.ftype != 'iso9660' and imgtype != 'iso':
+                if self.ftype != 'fat12' and self.ftype != 'iso9660' and imgtype != 'iso' and self.ftype != 'fat16':
                     mmls_cmd = "mmls -i " + imgtype +" "+image +" | grep \"02:\""
 
                     ## print("D: Executing mmls command: ", mmls_cmd) 
@@ -1092,7 +1106,6 @@ class bcfaThread_fw(threading.Thread):
             # get out of the while loop.
             ProgressBar._active = False
             #print("D: bcfaThread_fw: Progressbar Active Flag Set to: ", ProgressBar._active)
-
             print("\n>> Success!!! Fiwalk created DFXML file \n")
             logging.info(" Success!!! Fiwalk created DFXML file ")
 
