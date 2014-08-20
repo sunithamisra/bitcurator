@@ -236,6 +236,7 @@ class Ui_MainWindow(object):
         self.statusbar.setObjectName(_fromUtf8("statusbar"))
         MainWindow.setStatusBar(self.statusbar)
         self.toolBar = QtGui.QToolBar(MainWindow)
+        self.toolBar.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
         self.toolBar.setObjectName(_fromUtf8("toolBar"))
         MainWindow.addToolBar(QtCore.Qt.TopToolBarArea, self.toolBar)
         self.actionExit = QtGui.QAction(MainWindow)
@@ -324,6 +325,9 @@ class Ui_MainWindow(object):
         self.actionShow_Messages.triggered.connect(self.showMsgsWindowMenu)
         self.actionShow_Image_Info.triggered.connect(self.showImginfoWindowMenu)
 
+        # final trigger for about
+        self.actionAbout_BitCurator_Disk_Access.triggered.connect(self.showAboutDialog)
+
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
     
@@ -346,7 +350,7 @@ class Ui_MainWindow(object):
         self.actionOpen_disk_image.setToolTip(_translate("MainWindow", "Open disk image", None))
         self.actionClose_disk_image.setText(_translate("MainWindow", "Close disk image", None))
         self.actionAbout_BitCurator_Disk_Access.setText(_translate("MainWindow", "About BitCurator Disk Access", None))
-        self.actionExport_selected_files.setText(_translate("MainWindow", "Export selected files", None))
+        self.actionExport_selected_files.setText(_translate("MainWindow", "Export selections", None))
         self.actionCancel_export.setText(_translate("MainWindow", "Cancel export", None))
         #self.actionShow_Messages.setText(_translate("MainWindow", "Show Messages", None))
         #self.actionShow_Image_Info.setText(_translate("MainWindow", "Show Image Info", None))
@@ -470,7 +474,7 @@ class Ui_MainWindow(object):
         if os.path.exists(dfxmlfile):
             os.system("rm " + dfxmlfile)
 
-        cmd = ['fiwalk', '-z', '-g', '-X', dfxmlfile, image_file]
+        cmd = ['fiwalk', '-b', '-g', '-z', '-X', dfxmlfile, image_file]
         ## print(" >>D: Generating XML File ", dfxmlfile)
         ## print(">>D: Invoking command for Fiwalk = ", cmd)
         self.textEdit_msg.append( sys.stdout.getvalue() )
@@ -597,6 +601,12 @@ class Ui_MainWindow(object):
         MainWindow.restoreState(self.byte_array_msg_window)
         ret = MainWindow.restoreDockWidget(self, self.dockWidget_imginfo)
         ## print("D: showMsgsWidnowMenu: ret: ", ret)
+        return
+
+    def showAboutDialog(self):
+        aboutBC = QtGui.QMessageBox.warning(None, "BitCurator Disk Image Access",
+                             "See http://wiki.bitcurator.net/ for more information.",
+                             QtGui.QMessageBox.Ok)
         return
 
 class BcFileStructure:
