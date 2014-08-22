@@ -330,7 +330,6 @@ class Ui_MainWindow(object):
 
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
-    
 
     def retranslateUi(self, MainWindow):
         ###MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow", None))
@@ -492,6 +491,18 @@ class Ui_MainWindow(object):
 
         thread2.start()
         thread1.start()
+
+        # We will wait till the spinning stops.
+        thread2.join()
+
+        # Generate the Directory Tree
+        print(">> Generating directory tree ...")
+        logging.info(" Generating directory tree ...")
+
+        filestr = BcFileStructure()
+        filestr.bcExtractFileStr(image_file, dfxmlfile, outdir=None)
+
+        g_textEdit_msg.moveCursor(QtGui.QTextCursor.End)
 
     def closeDiskImageMenu(self):
         print(">> Closing image ", self.current_image)
@@ -1121,15 +1132,6 @@ class bcfaThread_fw(threading.Thread):
 
             # Set the progressbar maximum to > minimum so the spinning will stop
             global_fw.progressbar.setRange(0,1)
-
-            # Generate the Directory Tree
-            print(">> Generating directory tree ...")
-            logging.info(" Generating directory tree ...")
-
-            filestr = BcFileStructure()
-            filestr.bcExtractFileStr(self.image_file, self.dfxmlfile, outdir=None)
-
-            g_textEdit_msg.moveCursor(QtGui.QTextCursor.End)
 
 # Thread which exports all the checked files 
 class daThread(threading.Thread):
