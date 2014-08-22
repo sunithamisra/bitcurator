@@ -69,6 +69,7 @@ global g_parent0_item
 global_fw = "null"
 #global g_oldstdout
 global g_img_oldstdout
+global g_checked_files
 
 class Ui_MainWindow(object):
     progressBar = "null"
@@ -383,7 +384,8 @@ class Ui_MainWindow(object):
                 os.mkdir(self.exportOutdirName)
 
         else:
-            print(">> Warning! No output directory selected! ")
+            ## print("D: Warning! No output directory selected! ")
+            return None
         return self.exportOutdirName
     
 
@@ -497,6 +499,11 @@ class Ui_MainWindow(object):
 
         # Generate the Directory Tree
         print(">> Generating directory tree ...")
+        self.textEdit_msg.append( sys.stdout.getvalue() )
+        sys.stdout = g_oldstdout
+        g_oldstdout = sys.stdout
+        sys.stdout = StringIO()
+
         logging.info(" Generating directory tree ...")
 
         filestr = BcFileStructure()
@@ -557,7 +564,7 @@ class Ui_MainWindow(object):
         global global_pb_da
         global_pb_da.progressbar.setRange(0,1)
 
-        g_textEdit_msg.setText( sys.stdout.getvalue() )
+        g_textEdit_msg.append( sys.stdout.getvalue() )
         sys.stdout = g_oldstdout
 
         g_oldstdout = sys.stdout
@@ -573,7 +580,20 @@ class Ui_MainWindow(object):
             print(">> No directory tree exists. Aborting export")
             global g_textEdit_msg
             global g_oldstdout
-            g_textEdit_msg.setText( sys.stdout.getvalue() )
+            g_textEdit_msg.append( sys.stdout.getvalue() )
+            sys.stdout = g_oldstdout
+            g_oldstdout = sys.stdout
+            sys.stdout = StringIO()
+            return
+
+        global g_checked_files
+        g_checked_files = 0
+        BcFileStructure.bcOperateOnFiles(BcFileStructure, 6, None)
+
+        ## print("D: Checked Files: ", g_checked_files)
+        if g_checked_files == 0:
+            print(">> No files checked. Aborting Export")
+            g_textEdit_msg.append( sys.stdout.getvalue() )
             sys.stdout = g_oldstdout
             g_oldstdout = sys.stdout
             sys.stdout = StringIO()
@@ -582,7 +602,19 @@ class Ui_MainWindow(object):
         os.chdir(os.environ["HOME"])
         outdir = self.getExportOutdir()
 
+        if (outdir == None):
+            print(">> No Output Directory Selected. Aborting Export")
+            g_textEdit_msg.append( sys.stdout.getvalue() )
+            sys.stdout = g_oldstdout
+            g_oldstdout = sys.stdout
+            sys.stdout = StringIO()
+            return
+
+
         ## print(">> D: Output Directory Selected: ", exportDir)
+
+        # First find the number of checked files by calling 
+        # bcOperateOnFiles with cehck=6
         
         # Invoke bcOperateOnfiles routine with check=2
         thread1 = daThread(2, outdir)
@@ -641,7 +673,9 @@ class BcFileStructure:
     def bcOperateOnFiles(self, check, exportDir):
         ## print(">>D: Length of fiDictList: ", len(self.fiDictList))
         global g_breakout
+        global g_checked_files
         g_breakout = False
+        serial_num = 0
         for i in range(0, len(self.fiDictList) - 1):
             path = self.fiDictList[i]['filename']
             inode = self.fiDictList[i]['inode']
@@ -713,7 +747,8 @@ class BcFileStructure:
                         outfile = newDir + '/'+current_fileordir
                         ## print(">> D: Writing to Outfile: ", outfile, path)
 
-                        printstr = '>> Exporting {}\r'.format(path)
+                        serial_num += 1
+                        printstr =  '>> Exporting file ' +  str(serial_num) + ' of ' + str(g_checked_files) + ': ' + path + "\n"
                         cur = g_textEdit_msg.textCursor()
                         cur.beginEditBlock()
                         cur.insertText(printstr)
@@ -772,6 +807,12 @@ class BcFileStructure:
                     # If current_item is a deleted file, DeSelect it
                     if deleted == True:
                         current_item.setCheckState(0)
+                elif check == 6:
+                    # check=6 is meant to count the number of checked files
+                    if current_item.checkState() == 2:
+                        g_checked_files += 1
+                    else:
+                        continue
 
     def bcHandleSpecialChars(self, filename):
         #filename = filename.replace("$", "\$")
@@ -1128,6 +1169,10 @@ class bcfaThread_fw(threading.Thread):
             ProgressBar._active = False
             #print("D: bcfaThread_fw: Progressbar Active Flag Set to: ", ProgressBar._active)
             print("\n>> Success!!! Fiwalk created DFXML file \n")
+            g_textEdit_msg.append( sys.stdout.getvalue() )
+            sys.stdout = g_oldstdout
+            g_oldstdout = sys.stdout
+            sys.stdout = StringIO()
             logging.info(" Success!!! Fiwalk created DFXML file ")
 
             # Set the progressbar maximum to > minimum so the spinning will stop
