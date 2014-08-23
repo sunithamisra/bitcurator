@@ -1734,11 +1734,14 @@ class Ui_MainWindow(object):
             self.allrepConfile = ui.lineEdit_allrep_confile.text()
 
         # The directory is not supposed to exist. Return -1 if it does.
-        if (os.path.exists(self.allrepOutDir)):
-            print(">> Error: Output Directory %s exists. " %self.allrepOutDir)
-            return (-1)
-        else:
-            os.mkdir(self.allrepOutDir)
+        #
+        # Removed this check 8/23/2014 - allow previously created dirs - KW
+        #
+        #if (os.path.exists(self.allrepOutDir)):
+        #    print(">> Error: Output Directory %s exists. " %self.allrepOutDir)
+        #    return (-1)
+        #else:
+        #    os.mkdir(self.allrepOutDir)
 
         # If config file is not provided by the user, user the default one
         # FIXME: Check for confile is already done earlier. So no need to 
