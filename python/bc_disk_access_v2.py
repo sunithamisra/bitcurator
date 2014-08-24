@@ -273,6 +273,11 @@ class Ui_MainWindow(object):
         self.actionShow_Messages.setObjectName(_fromUtf8("actionShow_Messages"))
         self.actionShow_Image_Info = QtGui.QAction(MainWindow)
         self.actionShow_Image_Info.setObjectName(_fromUtf8("actionShow_Image_Info"))
+        
+        self.actionSelect_Allocated_Files = QtGui.QAction(MainWindow)
+        self.actionSelect_Allocated_Files.setObjectName(_fromUtf8("actionSelect_Allocated_Files"))
+        self.actionDeSelect_Allocated_Files = QtGui.QAction(MainWindow)
+        self.actionDeSelect_Allocated_Files.setObjectName(_fromUtf8("actionDeSelect_Allocated_Files"))
 
         self.actionSelect_Deleted_Files = QtGui.QAction(MainWindow)
         self.actionSelect_Deleted_Files.setObjectName(_fromUtf8("actionSelect_Deleted_Files"))
@@ -286,6 +291,10 @@ class Ui_MainWindow(object):
         self.menuEdit.addAction(self.actionSelect_All)
         self.menuEdit.addAction(self.actionDeSelect_All)
 
+        self.menuEdit.addSeparator()
+        self.menuEdit.addAction(self.actionSelect_Allocated_Files)
+        self.menuEdit.addAction(self.actionDeSelect_Allocated_Files)
+        self.menuEdit.addSeparator()
         self.menuEdit.addAction(self.actionSelect_Deleted_Files)
         self.menuEdit.addAction(self.actionDeSelect_Deleted_Files)
         
@@ -316,6 +325,8 @@ class Ui_MainWindow(object):
         self.actionExit.triggered.connect(self.exitMenu)
         self.actionSelect_All.triggered.connect(self.selectAllMenu)
         self.actionDeSelect_All.triggered.connect(self.deSelectAllMenu)
+        self.actionSelect_Allocated_Files.triggered.connect(self.selectAllocatedFilesMenu)
+        self.actionDeSelect_Allocated_Files.triggered.connect(self.deSelectAllocatedFilesMenu)
         self.actionSelect_Deleted_Files.triggered.connect(self.selectDeletedFilesMenu)
         self.actionDeSelect_Deleted_Files.triggered.connect(self.deSelectDeletedFilesMenu)
 
@@ -354,6 +365,8 @@ class Ui_MainWindow(object):
         self.actionCancel_export.setText(_translate("MainWindow", "Cancel export", None))
         #self.actionShow_Messages.setText(_translate("MainWindow", "Show Messages", None))
         #self.actionShow_Image_Info.setText(_translate("MainWindow", "Show Image Info", None))
+        self.actionSelect_Allocated_Files.setText(_translate("MainWindow", "Select Allocated Files", None))
+        self.actionDeSelect_Allocated_Files.setText(_translate("MainWindow", "DeSelect Allocated Files", None))
         self.actionSelect_Deleted_Files.setText(_translate("MainWindow", "Select Deleted Files", None))
         self.actionDeSelect_Deleted_Files.setText(_translate("MainWindow", "DeSelect Deleted Files", None))
         
@@ -528,6 +541,12 @@ class Ui_MainWindow(object):
         
     def deSelectAllMenu(self):
         BcFileStructure.bcOperateOnFiles(BcFileStructure, 0, None)
+
+    def selectAllocatedFilesMenu(self):
+        BcFileStructure.bcOperateOnFiles(BcFileStructure, 7, None)
+        
+    def deSelectAllocatedFilesMenu(self):
+        BcFileStructure.bcOperateOnFiles(BcFileStructure, 8, None)
 
     def selectDeletedFilesMenu(self):
         BcFileStructure.bcOperateOnFiles(BcFileStructure, 4, None)
@@ -813,6 +832,16 @@ class BcFileStructure:
                         g_checked_files += 1
                     else:
                         continue
+                elif check == 7:
+                    # If current_item is an allocated file, select it
+                    if deleted == False:
+                        if (current_item.checkState() == 0):
+                            ## print("D: Setting File to Checked_state ", current_fileordir) 
+                            current_item.setCheckState(2)
+                elif check == 8:
+                    # If current_item is an allocated file, DeSelect it
+                    if deleted == False:
+                        current_item.setCheckState(0)
 
     def bcHandleSpecialChars(self, filename):
         #filename = filename.replace("$", "\$")
