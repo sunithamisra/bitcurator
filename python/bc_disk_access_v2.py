@@ -420,7 +420,7 @@ class Ui_MainWindow(object):
         image_file = QtGui.QFileDialog.getOpenFileName(caption="Select an image file")
         self.current_image = image_file
         print(">> Image file selected: ", image_file)
-        logging.info('Image file selected: ' + image_file)
+        ## logging.info('Image file selected: ' + image_file)
         
 
         # Check if the image exists. 
@@ -507,8 +507,12 @@ class Ui_MainWindow(object):
         thread2.start()
         thread1.start()
 
+        '''
+        # FIXME: Commented out as it doesn't wait for the threads to finish
+        # for some reason. This code is moved to the thread until this is fixed. 
         # We will wait till the spinning stops.
         thread2.join()
+        #thread1.join()
 
         # Generate the Directory Tree
         print(">> Generating directory tree ...")
@@ -523,6 +527,7 @@ class Ui_MainWindow(object):
         filestr.bcExtractFileStr(image_file, dfxmlfile, outdir=None)
 
         g_textEdit_msg.moveCursor(QtGui.QTextCursor.End)
+        '''
 
     def closeDiskImageMenu(self):
         print(">> Closing image ", self.current_image)
@@ -706,7 +711,7 @@ class BcFileStructure:
                 # "unknown". As we don't know whether it is a file or directory,
                 # we will exclude them from our directory tree. So we will
                 # skip such entries here.
-                logging.debug("name_type is Unknown for file " + path)
+                ## logging.debug("name_type is Unknown for file " + path)
                 continue
             else:
                 isdir = False
@@ -929,14 +934,14 @@ class BcFileStructure:
             # handle this - like looking at the parent-inode, but this seems 
             # to work well. 
        
-            logging.info("bcExtractFileStr: path "+path + "inode: "+ inode)
+            ##logging.info("bcExtractFileStr: path "+path + "inode: "+ inode)
             if self.fiDictList[i]['name_type'] == '-':
                 # Add it to unknown files list
                 unknown_type_files.append(path)
-                logging.info("bcExtractFileStr: Added path " + path + "to unknown_type list")
+                ## logging.info("bcExtractFileStr: Added path " + path + "to unknown_type list")
                 continue
 
-            logging.debug("bcExtractFileStr: Unknown files list: "+ str(unknown_type_files) + "len: " +str(len(unknown_type_files)))
+            ## logging.debug("bcExtractFileStr: Unknown files list: "+ str(unknown_type_files) + "len: " +str(len(unknown_type_files)))
 
             # Look in the "unknown files list" if any exsiting element of the 
             # list matches with "path". If so, its parent has the name_type
@@ -947,14 +952,14 @@ class BcFileStructure:
             found = False
             for ii in range (0, len(unknown_type_files)):
                 if path.find(unknown_type_files[ii]) != -1:
-                    logging.debug("bcExtractFileStr: File " + path + " is in unknown_type list")
+                    ## logging.debug("bcExtractFileStr: File " + path + " is in unknown_type list")
                     # Force it's name-type to unknown" as its parent directory
                     # has Unknown name_type
                     self.fiDictList[i]['name_type'] = '-'
                     found = True
                     break
             if found == True:
-                logging.debug("bcExtractFileStr: path " + path + "in unknown_type list. Ignoring")
+                ## logging.debug("bcExtractFileStr: path " + path + "in unknown_type list. Ignoring")
                 continue
             
             isdir = False
@@ -1070,7 +1075,7 @@ class BcFileStructure:
                     imgtype = 'raw'
 
                 # Extract the file-system type from dfxml file volume
-                ftype = self.bc_get_ftype_from_sax(dfxmlfile) 
+                ftype = self.bcGetFtypeFromSax(dfxmlfile) 
                 
                 # For fat12 file-system there is no partiton information.
                 # So skip the step for extracting partition offset.
@@ -1148,7 +1153,7 @@ class BcFileStructure:
     def cbv_ftype(self, fv):
         self.ftype = fv.ftype_str()
 
-    def bc_get_ftype_from_sax(self, dfxmlfile):
+    def bcGetFtypeFromSax(self, dfxmlfile):
         fiwalk.fiwalk_vobj_using_sax(xmlfile=open(dfxmlfile, 'rb'),callback=self.cbv_ftype)
        
 # Thread for running the fiwalk command
@@ -1202,10 +1207,22 @@ class bcfaThread_fw(threading.Thread):
             sys.stdout = g_oldstdout
             g_oldstdout = sys.stdout
             sys.stdout = StringIO()
-            logging.info(" Success!!! Fiwalk created DFXML file ")
+            ## logging.info(" Success!!! Fiwalk created DFXML file ")
 
             # Set the progressbar maximum to > minimum so the spinning will stop
             global_fw.progressbar.setRange(0,1)
+
+            #'''
+            # FIXME: This code is to be moved to the main thread.
+            # Generate the Directory Tree
+            print(">> Generating directory tree ...")
+
+            filestr = BcFileStructure()
+            filestr.bcExtractFileStr(self.image_file, self.dfxmlfile, outdir=None)
+
+            g_textEdit_msg.moveCursor(QtGui.QTextCursor.End)
+            
+            #'''
 
 # Thread which exports all the checked files 
 class daThread(threading.Thread):
@@ -1350,8 +1367,8 @@ if __name__=="__main__":
 
         logging.info("Logging into the file: " + logfile)
         logging.info("Logging level: " + str(log_level))
-    else:
-        logging.basicConfig(level=log_level)
+    ##else:
+        ## logging.basicConfig(level=log_level)
     
 
 
