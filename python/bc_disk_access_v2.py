@@ -21,6 +21,7 @@
 # http://pyqt.sourceforge.net/Docs/PyQt4/qstandarditemmodel.html#details
 #################################################################### 
 
+import pdb
 import os, fiwalk, sys
 from PyQt4 import QtCore, QtGui
 import subprocess
@@ -416,13 +417,19 @@ class Ui_MainWindow(object):
         if (g_model):
             g_model.clear()
             BcFileStructure.fiDictList = []
+            BcFileStructure.volume_list = []
 
         image_file = QtGui.QFileDialog.getOpenFileName(caption="Select an image file")
         self.current_image = image_file
-        print(">> Image file selected: ", image_file)
-        ## logging.info('Image file selected: ' + image_file)
+        print(">> Image file selected: ")
+        ####print(">> Image file selected: ", image_file.decode('unicode-escape'))
+        ####print(">> Image file selected: ", image_file)
+        #### FIXME: The above line seems to cause 'core dump intermittently. 
+        #### Running GDB
+        #### says: TypeError: unicode argument expected, got 'str'
+        #### logging.info('Image file selected: ' + image_file)
+        #### Need further debugging
         
-
         # Check if the image exists. 
         if not os.path.exists(image_file):
             print(">> Error! Image {} does not exist: ".format(image_file))
@@ -683,8 +690,11 @@ class BcFileStructure:
     parentlist = []
     file_item_of = dict()
     path_of = dict()
+    num_partitions = 0
 
     x = Ui_MainWindow
+    volumeinfo = ["ftype", "start_offset", "sector_size"]
+    volume_list = []
     
     # bcOperateOnFiles()
     # Iterate through the leaves of the file structure and check/uncheck
@@ -872,6 +882,7 @@ class BcFileStructure:
         global g_model
         g_model.clear()
         self.fiDictList = []
+        self.volume_list = []
  
     # bcExtractFileStr()
     # This routine extracts the file structure given a disk image and the
@@ -882,7 +893,13 @@ class BcFileStructure:
         g_textEdit_msg.append( sys.stdout.getvalue() )
         g_oldstdout = sys.stdout
         sys.stdout = StringIO()
-        
+
+        self.num_partitions = 0
+        self.bcGetVolumeInfoFromSax(dfxmlfile)
+        self.bcGetFtypeFromSax(dfxmlfile)
+        self.num_partitions = len(self.volume_list)
+        logging.debug("Num partitions : "+ str(self.num_partitions))
+
         # Extract the information from dfxml file to create the 
         # dictionary only if it is not done before.
         if len(self.fiDictList) == 0:
@@ -913,6 +930,26 @@ class BcFileStructure:
         global g_model
         g_model.setHorizontalHeaderLabels(['File System: \n  Entries in bold are directories \n  Entries in red are unallocated/deleted files '])
         g_model.appendRow(parent0_item)
+
+        # Set root as the parent of all partitions
+        parent_dir_item = parent0_item
+        logging.info("bcExtractFileStr: Iterating through number of partitions: " + str(self.num_partitions))
+
+        # Create a StandardItem for each partition and add it as a child
+        # to the root - parent_dir_item
+        for k in range(0, self.num_partitions):
+            current_partition = "partition" + str(k)
+            logging.debug("Creating Item for Partition " + str(k))
+
+            current_partition_item = QtGui.QStandardItem('Volume {} ({})'.format((k+1), self.ftype_list[k]))
+            font = QtGui.QFont("Times",12,QtGui.QFont.Bold)
+            current_partition_item.setFont(font)
+            current_partition_item.setForeground(QtGui.QColor('green'))
+            item_of[current_partition] = current_partition_item
+
+            # Add the directory item to the tree.
+            logging.info("Appending Partition " + str(k+1) + "to parent0: "+ current_partition)
+            parent_dir_item.appendRow(current_partition_item)
 
         for i in range(0, len(self.fiDictList) - 1):
             path = self.fiDictList[i]['filename']
@@ -970,6 +1007,9 @@ class BcFileStructure:
             if self.fiDictList[i]['alloc'] == False:
                 deleted = True
 
+            this_partition = self.fiDictList[i]['partition']
+            logging.info("This Partition: " + this_partition)
+
             pathlist = path.split('/')
             pathlen = len(pathlist)
             ## print("D: Path LiSt: ", pathlist, len(pathlist))
@@ -979,10 +1019,12 @@ class BcFileStructure:
                 continue 
 
             if isdir == True:
-                ## print("D: It is  a Directory:  Pathlen: ", pathlen)
+                ## print("D: It is a Directory:  Pathlen: ", pathlen)
+                logging.info("D: It is  a Directory:  Pathlen: "+ path + str(pathlen))
                 if (pathlen < 2):
                     # If pathlen is < 2 it is a file/dir directly off the root.
-                    parent_dir_item = parent0_item
+                    partn = "partition" + str(int(this_partition)-1)
+                    parent_dir_item = item_of[partn]
                 else:
                     parent_dir_item = item_of[pathlist[pathlen-2]]
 
@@ -1011,6 +1053,7 @@ class BcFileStructure:
                 current_item = QtGui.QStandardItem(unique_current_file)
                 ## print("D: It is a file:  ", current_fileordir, current_item)
                 ## print("D: pathlen: ", pathlen)
+                logging.debug("D: It is a file:  "+ current_fileordir)
 
                 # We want just the filename in the GUI - without the inode
                 current_item.setText(current_fileordir)
@@ -1031,7 +1074,8 @@ class BcFileStructure:
                 if pathlen > 1:
                     parent_dir_item = item_of[pathlist[pathlen-2]]
                 else:
-                    parent_dir_item = parent0_item
+                    partn = "partition" + str(int(this_partition)-1)
+                    parent_dir_item = item_of[partn]
             
                 # Add the directory item to the tree.
                 parent_dir_item.appendRow(current_item)
@@ -1075,21 +1119,25 @@ class BcFileStructure:
                     imgtype = 'raw'
 
                 # Extract the file-system type from dfxml file volume
-                ftype = self.bcGetFtypeFromSax(dfxmlfile) 
-                
+                self.bcGetFtypeFromSax(dfxmlfile)
+
+                this_partition = self.fiDictList[i]['partition']
+
+                self.ftype = self.ftype_list[int(this_partition)-1]
+
                 # For fat12 file-system there is no partiton information.
                 # So skip the step for extracting partition offset.
-                part2_start = 0
-                if self.ftype != 'fat12' and self.ftype != 'iso9660' and imgtype != 'iso':
-                    mmls_cmd = "mmls -i " + imgtype +" "+image +" | grep \"02:\""
+                part_start = 0
 
-                    ## print("D: Executing mmls command: ", mmls_cmd) 
-                    part2 = subprocess.check_output(mmls_cmd, shell=True)
-                    ## print("D: Extracting partition-2: ", part2)
+                if self.ftype != 'fat12' and self.ftype != 'iso9660' and imgtype != 'iso' :
+                    logging.info("bcCatFile: Volume Info: " + str(self.volume_list))
 
-                    part2_list = part2.split()
-                    part2_start = int(part2_list[2])
-                
+                    # Get the start_offset for this partition: 
+                    # FIXME: Use the first partition's sector size instead of 
+                    # hardcoded number - 512
+                    part_start = int(int(self.volume_list[int(this_partition)-1]['start_offset']) / 512)
+
+                    logging.info("Start OFfset for this partitiom " + this_partition + "is " + str(part_start))
 
                 ## print("D: Start offset of Partition-2: ", part2_start)
                 ## icat_cmd ex: icat -o 1 ~/aaa/charlie-work-usb-2009-12-11.aff 130 
@@ -1098,9 +1146,10 @@ class BcFileStructure:
                 if (redirect_file == True):
                     outfile = self.bcHandleSpecialChars(outfile)
 
-                    icat_cmd = "icat -o "+str(part2_start)+ " "+ \
+                    icat_cmd = "icat -o "+str(part_start)+ " "+ \
                                 image + " " + \
                                 self.fiDictList[i]['inode'] + ' > ' + outfile
+                    logging.info("bcCatFile: Icat Cmd: " + str(icat_cmd))
                     f2 = Popen(icat_cmd, shell = True, stdout=PIPE, stderr=PIPE)
                     (data, err) = f2.communicate()
 
@@ -1108,7 +1157,7 @@ class BcFileStructure:
                     # Only printable files are dumped on the textEdit wondow.
                     # The rest are redirected to a file in /tmp
                     if (filename.endswith('txt') or filename.endswith('xml')):
-                        icat_cmd = "icat -o "+str(part2_start)+ " "+ image + " " + self.fiDictList[i]['inode']
+                        icat_cmd = "icat -o "+str(part_start)+ " "+ image + " " + self.fiDictList[i]['inode']
                         ## print(">> D: Executing iCAT command: ", icat_cmd)
                         f2 = os.popen(icat_cmd)
                         icat_out = f2.read()
@@ -1119,7 +1168,7 @@ class BcFileStructure:
                     else:
                         # Strip the path to extract just the name of the file.
                         justFilename = self.bcGetFilenameFromPath(filename)                
-                        icat_cmd = "icat -o "+str(part2_start)+ " "+ \
+                        icat_cmd = "icat -o "+str(part_start)+ " "+ \
                                 image + " " + \
                                 self.fiDictList[i]['inode'] + ' > /tmp/'+justFilename
                         f2 = os.popen(icat_cmd)
@@ -1142,18 +1191,44 @@ class BcFileStructure:
                            self.acc_dict_array[3]:fi.name_type(), \
                            self.acc_dict_array[4]:fi.filesize(),\
                            self.acc_dict_array[5]:fi.allocated() })
-
         
     # The fiwalk utility fiwalk_using_sax is invoked with a callback
     # to process the dfxml file contents.
     def bcProcessDfxmlFileUsingSax(self, dfxmlfile):
         fiwalk.fiwalk_using_sax(xmlfile=open(dfxmlfile, 'rb'),callback=self.cb)
 
+    # Call back to get the fs type string
     def cbv_ftype(self, fv):
+        logging.info(fv.ftype_str() + str(self.x))
+        self.x += 1
         self.ftype = fv.ftype_str()
 
+        # Sleuthit doesn't handle old-style hfs, but still calls it hfs.
+        # So add a slight hack to convert "hfs" to "hfs+"
+        if (self.ftype == "hfs"):
+            self.ftype = "hfs+"
+        self.ftype_list.append(self.ftype)
+        logging.info(self.ftype + str((self.x - 1)))
+
+    # Call back to get the volue info
+    def cbv_volumeinfo(self, fv):
+        # If there is no sector_size present, set it to default of 512 bytes
+        sectorsize = fv.sector_size()
+        if fv.sector_size() == None:
+            sectorsize = 512
+
+        self.volume_list.append({self.volumeinfo[0]:fv.ftype_str(), self.volumeinfo[1]:fv.partition_offset(), self.volumeinfo[2]:sectorsize})
+        logging.info("cbv_volumeinfo: Volume Info: " +  str(self.volumeinfo))
+
+
     def bcGetFtypeFromSax(self, dfxmlfile):
+        self.x = 0
+        self.ftype_list = []
         fiwalk.fiwalk_vobj_using_sax(xmlfile=open(dfxmlfile, 'rb'),callback=self.cbv_ftype)
+
+    def bcGetVolumeInfoFromSax(self, dfxmlfile):
+        self.num_partitions = 0
+        fiwalk.fiwalk_vobj_using_sax(xmlfile=open(dfxmlfile, 'rb'),callback=self.cbv_volumeinfo)
        
 # Thread for running the fiwalk command
 class bcfaThread_fw(threading.Thread):
@@ -1366,8 +1441,8 @@ if __name__=="__main__":
 
         logging.info("Logging into the file: " + logfile)
         logging.info("Logging level: " + str(log_level))
-    ##else:
-        ## logging.basicConfig(level=log_level)
+    else:
+        logging.basicConfig(level=log_level)
     
 
 
