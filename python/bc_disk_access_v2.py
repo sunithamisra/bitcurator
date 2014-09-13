@@ -628,6 +628,7 @@ class Ui_MainWindow(object):
             sys.stdout = g_oldstdout
             g_oldstdout = sys.stdout
             sys.stdout = StringIO()
+            g_textEdit_msg.moveCursor(QtGui.QTextCursor.End)
             return
 
         os.chdir(os.environ["HOME"])
@@ -685,7 +686,7 @@ class Ui_MainWindow(object):
 
 class BcFileStructure:
 
-    acc_dict_array = ["filename", "partition", "inode", "name_type", "filesize", "alloc"]
+    acc_dict_array = ["filename", "partition", "inode", "name_type", "filesize", "alloc", "meta_type"]
     fiDictList = []
     parentlist = []
     file_item_of = dict()
@@ -718,13 +719,15 @@ class BcFileStructure:
                 isdir = True
             elif self.fiDictList[i]['name_type'] == '-':
                 # fiwalk marks the name_type of some files as "-" meaning 
-                # "unknown". As we don't know whether it is a file or directory,
-                # we will exclude them from our directory tree. So we will
-                # skip such entries here.
-                ## logging.debug("name_type is Unknown for file " + path)
-                continue
+                # "unknown". 
+                # If we run into the case where name_type is "-", but the 
+                # meta_type is 2, it's a directory. If the meta_type is 1, 
+                # it's a file
+                if self.fiDictList[i]['meta_type'] == 2:
+                    isdir = True
             else:
                 isdir = False
+
             pathlist = path.split('/')
             pathlen = len(pathlist)
             ## print("D: Path LiSt: ", pathlist, len(pathlist))
@@ -956,52 +959,13 @@ class BcFileStructure:
             inode = self.fiDictList[i]['inode']
             ## print("D: path, inode: ", path, inode)
             
-            # Fiwalk marks the name_type as '-' (unknown name_type) for some
-            # files. We exclude them from our directory list as we don't know
-            # whether they are regular files or directories. There are some examples
-            # where some of them are directories, in which case they have files
-            # witin them which could be marked "r" or "d" in their name_types.
-            # Since their parent is of unknwn type (-) we have to exclude these
-            # files (even though marked r or d) as well. To handle such cases, 
-            # we put every file marked '-' in a list, unknown_files_list[]. 
-            # When we come across a file path we do a pattern check to see if 
-            # part of the file path is in this list. If it is, that means its 
-            # parent is marked "unknown name_type" and so it is not to be 
-            # included in the directory tree. There could be other ways to 
-            # handle this - like looking at the parent-inode, but this seems 
-            # to work well. 
-       
-            ##logging.info("bcExtractFileStr: path "+path + "inode: "+ inode)
-            if self.fiDictList[i]['name_type'] == '-':
-                # Add it to unknown files list
-                unknown_type_files.append(path)
-                ## logging.info("bcExtractFileStr: Added path " + path + "to unknown_type list")
-                continue
-
-            ## logging.debug("bcExtractFileStr: Unknown files list: "+ str(unknown_type_files) + "len: " +str(len(unknown_type_files)))
-
-            # Look in the "unknown files list" if any exsiting element of the 
-            # list matches with "path". If so, its parent has the name_type
-            # of "-". So we have to mark the name_type of this file as unknown
-            # irrespective of what it is in the dfxml file. If we don't do it, 
-            # there will be key error while searching the tree as there is no
-            # entry there for the parent.
-            found = False
-            for ii in range (0, len(unknown_type_files)):
-                if path.find(unknown_type_files[ii]) != -1:
-                    ## logging.debug("bcExtractFileStr: File " + path + " is in unknown_type list")
-                    # Force it's name-type to unknown" as its parent directory
-                    # has Unknown name_type
-                    self.fiDictList[i]['name_type'] = '-'
-                    found = True
-                    break
-            if found == True:
-                ## logging.debug("bcExtractFileStr: path " + path + "in unknown_type list. Ignoring")
-                continue
-            
             isdir = False
             if self.fiDictList[i]['name_type'] == 'd':
                 isdir = True
+
+            if self.fiDictList[i]['name_type'] == '-':
+                if self.fiDictList[i]['meta_type'] == 2:
+                    isdir = True
 
             deleted = False
             if self.fiDictList[i]['alloc'] == False:
@@ -1190,7 +1154,8 @@ class BcFileStructure:
                            self.acc_dict_array[2]:fi.inode(), \
                            self.acc_dict_array[3]:fi.name_type(), \
                            self.acc_dict_array[4]:fi.filesize(),\
-                           self.acc_dict_array[5]:fi.allocated() })
+                           self.acc_dict_array[5]:fi.allocated(),\
+                           self.acc_dict_array[6]:fi.meta_type() })
         
     # The fiwalk utility fiwalk_using_sax is invoked with a callback
     # to process the dfxml file contents.
