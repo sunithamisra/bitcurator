@@ -422,6 +422,7 @@ class Ui_MainWindow(object):
         image_file = QtGui.QFileDialog.getOpenFileName(caption="Select an image file")
         self.current_image = image_file
         print(">> Image file selected: ")
+        logging.info(">> Image file selected: ", image_file)
         ####print(">> Image file selected: ", image_file.decode('unicode-escape'))
         ####print(">> Image file selected: ", image_file)
         #### FIXME: The above line seems to cause 'core dump intermittently. 
@@ -646,7 +647,7 @@ class Ui_MainWindow(object):
         ## print(">> D: Output Directory Selected: ", exportDir)
 
         # First find the number of checked files by calling 
-        # bcOperateOnFiles with cehck=6
+        # bcOperateOnFiles with check=6
         
         # Invoke bcOperateOnfiles routine with check=2
         thread1 = daThread(2, outdir)
@@ -712,6 +713,7 @@ class BcFileStructure:
         g_breakout = False
         serial_num = 0
         for i in range(0, len(self.fiDictList) - 1):
+            isdir = False
             path = self.fiDictList[i]['filename']
             inode = self.fiDictList[i]['inode']
 
@@ -750,6 +752,7 @@ class BcFileStructure:
                 unique_path = path + '-' + str(inode)
                 current_item = self.file_item_of[unique_path]
                 if check == 1:
+                    logging.info("OperateOnFiles:check=1: Setting File to Checked_state "+ current_fileordir) 
                     if (current_item.checkState() == 0):
                         ## print("D: Setting File to Checked_state ", current_fileordir) 
                         current_item.setCheckState(2)
@@ -972,7 +975,7 @@ class BcFileStructure:
                 deleted = True
 
             this_partition = self.fiDictList[i]['partition']
-            logging.info("This Partition: " + this_partition)
+            ## logging.info("This Partition: " + this_partition)
 
             pathlist = path.split('/')
             pathlen = len(pathlist)
