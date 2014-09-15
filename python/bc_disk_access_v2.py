@@ -997,6 +997,7 @@ class BcFileStructure:
 
                 current_dir = pathlist[pathlen-1]
                 current_item = QtGui.QStandardItem(current_dir)
+                current_item.setEditable(False)
                 font = QtGui.QFont("Times",12,QtGui.QFont.Bold)
                 current_item.setFont(font)
 
@@ -1029,6 +1030,7 @@ class BcFileStructure:
                 ##sys.stdout = g_oldstdout
 
                 current_item.setCheckable(True)
+                current_item.setEditable(False)
                 current_item.setCheckState(0)
 
                 if deleted == True:
