@@ -411,6 +411,11 @@ class Ui_MainWindow(object):
         g_oldstdout = sys.stdout
         sys.stdout = StringIO()
         
+        image_file = QtGui.QFileDialog.getOpenFileName(caption="Select an image file")
+        # If no image selected, keep the existing tree
+        if image_file == "":
+            return
+
         # First delete any existing QTreeView model. Also clear the 
         # dictionary created for any previous image.
         global g_model
@@ -419,7 +424,6 @@ class Ui_MainWindow(object):
             BcFileStructure.fiDictList = []
             BcFileStructure.volume_list = []
 
-        image_file = QtGui.QFileDialog.getOpenFileName(caption="Select an image file")
         self.current_image = image_file
         print(">> Image file selected: ")
         logging.info(">> Image file selected: "+ image_file)
@@ -904,7 +908,7 @@ class BcFileStructure:
         self.bcGetVolumeInfoFromSax(dfxmlfile)
         self.bcGetFtypeFromSax(dfxmlfile)
         self.num_partitions = len(self.volume_list)
-        logging.debug("Num partitions : "+ str(self.num_partitions))
+        logging.debug("bcExtractFileStr: Num partitions : "+ str(self.num_partitions))
 
         # Extract the information from dfxml file to create the 
         # dictionary only if it is not done before.
@@ -939,13 +943,13 @@ class BcFileStructure:
 
         # Set root as the parent of all partitions
         parent_dir_item = parent0_item
-        logging.info("bcExtractFileStr: Iterating through number of partitions: " + str(self.num_partitions))
+        logging.debug("bcExtractFileStr: Iterating through number of partitions: " + str(self.num_partitions))
 
         # Create a StandardItem for each partition and add it as a child
         # to the root - parent_dir_item
         for k in range(0, self.num_partitions):
             current_partition = "partition" + str(k)
-            logging.debug("Creating Item for Partition " + str(k))
+            logging.debug("bcExtractFileStr: Creating Item for Partition " + str(k))
 
             current_partition_item = QtGui.QStandardItem('Volume {} ({})'.format((k+1), self.ftype_list[k]))
             font = QtGui.QFont("Times",12,QtGui.QFont.Bold)
@@ -954,7 +958,7 @@ class BcFileStructure:
             item_of[current_partition] = current_partition_item
 
             # Add the directory item to the tree.
-            logging.info("Appending Partition " + str(k+1) + "to parent0: "+ current_partition)
+            logging.debug("bcExtractFileStr: Appending Partition " + str(k+1) + "to parent0: "+ current_partition)
             parent_dir_item.appendRow(current_partition_item)
 
         for i in range(0, len(self.fiDictList) - 1):
@@ -1182,13 +1186,25 @@ class BcFileStructure:
 
     # Call back to get the volue info
     def cbv_volumeinfo(self, fv):
-        # If there is no sector_size present, set it to default of 512 bytes
+        # If there is no sector_size present, use the one from the 1st volume
         sectorsize = fv.sector_size()
         if fv.sector_size() == None:
-            sectorsize = 512
+            if len(self.volume_list) == 0:
+                # First Volume itself doesn't have setor size. Default sector 
+                # size to 512
+                logging.debug("1st volume does not have sector size. Default to 512")
+                sectorsize = 512
+            else:
+                logging.debug("Sector size not given for this volume. Using the" + 
+                 " sector size from 1st volume " + self.volume_list[0]['sector_size'])
+                if self.volume_list[0]['sector_size'] != None:
+                    sectorsize = self.volume_list[0]['sector_size']
+                else:
+                    # if 1st partition also doen't have this info, default it to 512.
+                    sectorsize = 512
 
         self.volume_list.append({self.volumeinfo[0]:fv.ftype_str(), self.volumeinfo[1]:fv.partition_offset(), self.volumeinfo[2]:sectorsize})
-        logging.info("cbv_volumeinfo: Volume Info: " +  str(self.volumeinfo))
+        logging.info("cbv_volumeinfo: Volume Info: " +  str(self.volume_list))
 
 
     def bcGetFtypeFromSax(self, dfxmlfile):
