@@ -422,7 +422,7 @@ class Ui_MainWindow(object):
         image_file = QtGui.QFileDialog.getOpenFileName(caption="Select an image file")
         self.current_image = image_file
         print(">> Image file selected: ")
-        logging.info(">> Image file selected: ", image_file)
+        logging.info(">> Image file selected: "+ image_file)
         ####print(">> Image file selected: ", image_file.decode('unicode-escape'))
         ####print(">> Image file selected: ", image_file)
         #### FIXME: The above line seems to cause 'core dump intermittently. 
@@ -749,11 +749,11 @@ class BcFileStructure:
 
                 # Now using the dict of files, file_item_of, get the item 
                 # for this file
-                unique_path = path + '-' + str(inode)
+                unique_path = path + '-' + str(inode) + '-' + str(self.fiDictList[i]['partition'])
                 current_item = self.file_item_of[unique_path]
                 if check == 1:
-                    logging.info("OperateOnFiles:check=1: Setting File to Checked_state "+ current_fileordir) 
-                    if (current_item.checkState() == 0):
+                    ## logging.info("OperateOnFiles:check=1: Setting File to Checked_state: Partition: "+ str(self.fiDictList[i]['partition']) + "File: "+ unique_path + "State: " + str(current_item.checkState())) 
+                    if (current_item.checkState() != 2):
                         ## print("D: Setting File to Checked_state ", current_fileordir) 
                         current_item.setCheckState(2)
                 elif check == 0:
@@ -1017,11 +1017,11 @@ class BcFileStructure:
                 # child of parent0_item (disk img). The level is sensed by the
                 # pathlen 
                 current_fileordir = pathlist[pathlen-1]
-                unique_current_file = current_fileordir + '-' + str(inode)
+                unique_current_file = current_fileordir + '-' + str(inode) + '-' + str(self.fiDictList[i]['partition'])
                 current_item = QtGui.QStandardItem(unique_current_file)
                 ## print("D: It is a file:  ", current_fileordir, current_item)
                 ## print("D: pathlen: ", pathlen)
-                logging.debug("D: It is a file:  "+ current_fileordir)
+                logging.debug("D: It is a file:  "+ unique_current_file)
 
                 # We want just the filename in the GUI - without the inode
                 current_item.setText(current_fileordir)
@@ -1037,7 +1037,7 @@ class BcFileStructure:
                     current_item.setForeground(QtGui.QColor('red'))
 
                 # save the "item" of each file
-                unique_path = path + '-' + str(inode)
+                unique_path = path + '-' + str(inode) + '-' + str(self.fiDictList[i]['partition'])
                 self.file_item_of[unique_path] = current_item
 
                 if pathlen > 1:
