@@ -1278,8 +1278,11 @@ class Ui_MainWindow(object):
         # All set to go. Generate premis events for the disk image and BE
         premis_img_info = bc_utils.bcGetImageInfo(self.allrepImageFileName)
 
-        ## It is assumed that self.allrepOutDir exists - since it is 
-        ## created in check_parameters step.
+        ## Check directory creation (in case user typed it in)
+        if not os.path.exists(self.allrepOutDir):
+            os.mkdir(self.allrepOutDir)
+        ## Now, assume that self.allrepOutDir exists (user used navigation
+        ## button) - this is the only way it is created in check_parameters step.
         genAllrepOutDir = self.allrepOutDir+"/reports"
         if not os.path.exists(genAllrepOutDir):
             os.mkdir(genAllrepOutDir)
