@@ -425,15 +425,8 @@ class Ui_MainWindow(object):
             BcFileStructure.volume_list = []
 
         self.current_image = image_file
-        print(">> Image file selected: ")
         logging.info(">> Image file selected: "+ image_file)
-        ####print(">> Image file selected: ", image_file.decode('unicode-escape'))
-        ####print(">> Image file selected: ", image_file)
-        #### FIXME: The above line seems to cause 'core dump intermittently. 
-        #### Running GDB
-        #### says: TypeError: unicode argument expected, got 'str'
-        #### logging.info('Image file selected: ' + image_file)
-        #### Need further debugging
+        print(">> Image file selected: ", image_file)
         
         # Check if the image exists. 
         if not os.path.exists(image_file):
@@ -485,12 +478,7 @@ class Ui_MainWindow(object):
         image_name = os.path.basename(image_file)
         dfxmlfile = dfxmlpath + '/' + image_name + '_dfxml.xml'
 
-        print(">> Generating DFXML file  ", dfxmlfile)
-        self.textEdit_msg.append( sys.stdout.getvalue() )
-        sys.stdout = g_oldstdout
-
-        g_oldstdout = sys.stdout
-        sys.stdout = StringIO()
+        self.bcWriteToTextEdit(">> Generating DFXML file:  "+ dfxmlfile)
 
         # First check if the file image exists
         if not os.path.exists(image_file):
@@ -501,12 +489,8 @@ class Ui_MainWindow(object):
             os.system("rm " + dfxmlfile)
 
         cmd = ['fiwalk', '-b', '-g', '-z', '-X', dfxmlfile, image_file]
-        ## print(" >>D: Generating XML File ", dfxmlfile)
-        ## print(">>D: Invoking command for Fiwalk = ", cmd)
-        self.textEdit_msg.append( sys.stdout.getvalue() )
-        sys.stdout = g_oldstdout
-        g_oldstdout = sys.stdout
-        sys.stdout = StringIO()
+        logging.info(">>D: fiwalk Generating XML File "+ dfxmlfile)
+        logging.info(">>D: Invoking command for Fiwalk = "+ str(cmd))
 
         thread1 = bcfaThread_fw(cmd, image_file, dfxmlfile)
 
@@ -516,30 +500,69 @@ class Ui_MainWindow(object):
 
         thread2 = guiThread("fiwalk")
 
+        # Set the slot function to be called from the thread when a pyQT4 
+        # API needs to be called, as it has to be done by the main thead.
+        QtGui.QWidget.connect(thread1, QtCore.SIGNAL('buildtree'), self.bcBuildStr)
+        QtGui.QWidget.connect(thread1, QtCore.SIGNAL('fw_failed'), self.bcHandleFwFailure)
+
         thread2.start()
         thread1.start()
 
-        '''
-        # FIXME: Commented out as it doesn't wait for the threads to finish
-        # for some reason. This code is moved to the thread until this is fixed. 
-        # We will wait till the spinning stops.
-        thread2.join()
-        #thread1.join()
-
-        # Generate the Directory Tree
-        print(">> Generating directory tree ...")
-        self.textEdit_msg.append( sys.stdout.getvalue() )
+    def bcWriteToTextEdit(self, print_string):
+        global g_oldstdout
+        print(print_string)
+        g_textEdit_msg.append( sys.stdout.getvalue() )
         sys.stdout = g_oldstdout
         g_oldstdout = sys.stdout
         sys.stdout = StringIO()
 
-        logging.info(" Generating directory tree ...")
+    #
+    # Slot function to generate tree after getting signalled by the thread
+    #
+    def bcBuildStr(self, image_file, dfxmlfile):
+        g_oldstdout = sys.stdout
+        sys.stdout = StringIO()
 
+        logging.info("bcBuildStr: " + image_file + ' ' + dfxmlfile)
+
+        # Set the progressbar active flag so the other thread can
+        # get out of the while loop.
+        ProgressBar._active = False
+
+        logging.info("bcBuildStr: Progressbar Active Flag Set to: " + str(ProgressBar._active))
+        logging.info("\n>> Success!!! Fiwalk created DFXML file " + dfxmlfile)
+
+        self.bcWriteToTextEdit(">> Success!!! Fiwalk created DFXML file ")
+
+        # Set the progressbar maximum to > minimum so the spinning will stop
+        global_fw.progressbar.setRange(0,1)
+
+        self.bcWriteToTextEdit(">> Generating directory tree ...")
+
+        logging.info("Calling bcExtractFileStr ")
         filestr = BcFileStructure()
         filestr.bcExtractFileStr(image_file, dfxmlfile, outdir=None)
 
         g_textEdit_msg.moveCursor(QtGui.QTextCursor.End)
-        '''
+        
+    #
+    # Slot function to handle falure if fiwalk process fails in the thread.
+    #
+    def bcHandleFwFailure(self, image_file, dfxmlfile):
+        logging.info(">> Fiwalk terminated \n")
+        g_oldstdout = sys.stdout
+        sys.stdout = StringIO()
+
+        ProgressBar._active = False
+
+        # We don't want to display this as an error as pressing the cancel
+        # button could bring us here as well.
+        self.bcWriteToTextEdit(">> Fiwalk terminated \n")
+
+        # Set the progressbar maximum to > minimum so the spinning will stop
+        global global_fw
+        global_fw.progressbar.setRange(0,1)
+
 
     def closeDiskImageMenu(self):
         print(">> Closing image ", self.current_image)
@@ -1217,7 +1240,8 @@ class BcFileStructure:
         fiwalk.fiwalk_vobj_using_sax(xmlfile=open(dfxmlfile, 'rb'),callback=self.cbv_volumeinfo)
        
 # Thread for running the fiwalk command
-class bcfaThread_fw(threading.Thread):
+#class bcfaThread_fw(threading.Thread):
+class bcfaThread_fw(QtCore.QThread):
     def __init__(self, cmd, image_file, dfxmlfile):
         threading.Thread.__init__(self)
         self.cmd = cmd
@@ -1235,54 +1259,18 @@ class bcfaThread_fw(threading.Thread):
         super(bcfaThread_fw, self).join(timeout)
 
     def run(self):
-        g_oldstdout = sys.stdout
-        sys.stdout = StringIO()
         p = self.process = Popen(self.cmd, stdout=PIPE, stderr=PIPE)
         (data, err) = p.communicate()
         if p.returncode:
-            ProgressBar._active = False
+            # emit a signal to the main thread.
+            #self.emit(QtCore.SIGNAL('update(QString)'), False)
+            self.emit(QtCore.SIGNAL('fw_failed'), self.image_file, self.dfxmlfile)
 
-            # We don't want to display this as an error as pressing the cancel
-            # button could bring us here as well.
-            ## print(">> D: ERROR!!! Fiwalk terminated with error: \n", err)
-            print(">> Fiwalk terminated \n")
-
-            global g_textEdit_msg
-            g_textEdit_msg.append( sys.stdout.getvalue() )
-            sys.stdout = g_oldstdout
-
-            # Set the progressbar maximum to > minimum so the spinning will stop
-            global global_fw
-            global_fw.progressbar.setRange(0,1)
-
-            g_oldstdout = sys.stdout
-            sys.stdout = StringIO()
         else:
-            # Set the progressbar active flag so the other thread can
-            # get out of the while loop.
-            ProgressBar._active = False
-            #print("D: bcfaThread_fw: Progressbar Active Flag Set to: ", ProgressBar._active)
-            print("\n>> Success!!! Fiwalk created DFXML file \n")
-            g_textEdit_msg.append( sys.stdout.getvalue() )
-            sys.stdout = g_oldstdout
-            g_oldstdout = sys.stdout
-            sys.stdout = StringIO()
-            ## logging.info(" Success!!! Fiwalk created DFXML file ")
-
-            # Set the progressbar maximum to > minimum so the spinning will stop
-            global_fw.progressbar.setRange(0,1)
-
-            #'''
-            # FIXME: This code is to be moved to the main thread.
-            # Generate the Directory Tree
-            print(">> Generating directory tree ...")
-
-            filestr = BcFileStructure()
-            filestr.bcExtractFileStr(self.image_file, self.dfxmlfile, outdir=None)
-
-            g_textEdit_msg.moveCursor(QtGui.QTextCursor.End)
+            # emit a signal to the main thread.
+            #self.emit(QtCore.SIGNAL('update(QString)'), False)
+            self.emit(QtCore.SIGNAL('buildtree'), self.image_file, self.dfxmlfile)
             
-            #'''
 
 # Thread which exports all the checked files 
 class daThread(threading.Thread):
