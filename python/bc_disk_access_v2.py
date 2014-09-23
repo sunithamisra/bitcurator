@@ -372,6 +372,14 @@ class Ui_MainWindow(object):
         self.actionDeSelect_Deleted_Files.setText(_translate("MainWindow", "DeSelect Deleted Files", None))
         
 
+    def bcWriteToTextEdit(self, print_string):
+        global g_oldstdout
+        print(print_string)
+        g_textEdit_msg.append( sys.stdout.getvalue() )
+        sys.stdout = g_oldstdout
+        g_oldstdout = sys.stdout
+        sys.stdout = StringIO()
+
     def getExportOutdir(self):
         # Since This directory should not exist, use getSaveFileName
         # to let the user create a new directory.
@@ -382,12 +390,7 @@ class Ui_MainWindow(object):
         if result:
             export_outdir = export_dialog.selectedFiles()[0]
 
-            print(">> Output directory selected for file export ", export_outdir)
-            global g_oldstdout
-            g_textEdit_msg.append( sys.stdout.getvalue() )
-            sys.stdout = g_oldstdout
-            g_oldstdout = sys.stdout
-            sys.stdout = StringIO()
+            self.bcWriteToTextEdit(">> Output directory selected for file export "+ export_outdir)
             self.exportOutdirName = export_outdir
 
             # Save it in global var for use by the thread
@@ -430,11 +433,13 @@ class Ui_MainWindow(object):
         
         # Check if the image exists. 
         if not os.path.exists(image_file):
+            self.bcWriteToTextEdit(">> Error! Image " + image_file + " does not exist ")
+
             print(">> Error! Image {} does not exist: ".format(image_file))
             g_textEdit_msg.append( sys.stdout.getvalue() )
             sys.stdout = g_oldstdout
             return
-        
+
         g_textEdit_msg.append( sys.stdout.getvalue() )
         sys.stdout = g_oldstdout
 
@@ -508,14 +513,6 @@ class Ui_MainWindow(object):
         thread2.start()
         thread1.start()
 
-    def bcWriteToTextEdit(self, print_string):
-        global g_oldstdout
-        print(print_string)
-        g_textEdit_msg.append( sys.stdout.getvalue() )
-        sys.stdout = g_oldstdout
-        g_oldstdout = sys.stdout
-        sys.stdout = StringIO()
-
     #
     # Slot function to generate tree after getting signalled by the thread
     #
@@ -543,6 +540,7 @@ class Ui_MainWindow(object):
         filestr = BcFileStructure()
         filestr.bcExtractFileStr(image_file, dfxmlfile, outdir=None)
 
+        self.bcWriteToTextEdit(">> Done")
         g_textEdit_msg.moveCursor(QtGui.QTextCursor.End)
         
     #
@@ -565,7 +563,13 @@ class Ui_MainWindow(object):
 
 
     def closeDiskImageMenu(self):
+        if self.current_image == "null":
+            self.bcWriteToTextEdit(">> There is no image to close")
+            return
+
         print(">> Closing image ", self.current_image)
+
+        BcFileStructure.fiDictList = []
 
         BcFileStructure.bcDeleteModel(self, self.current_image)
         self.current_image = "null"
@@ -599,18 +603,13 @@ class Ui_MainWindow(object):
         global g_textEdit_msg
         global g_oldstdout
         if not BcFileStructure.fiDictList:
-            print(">> No directory tree exists. Nothing to cancel ")
-            g_textEdit_msg.setText( sys.stdout.getvalue() )
-            sys.stdout = g_oldstdout
-            g_oldstdout = sys.stdout
-            sys.stdout = StringIO()
+            self.bcWriteToTextEdit(">> No directory tree exists. Nothing to cancel ")
             return
 
         # if dfxml file was internally generated, remove it.
         global isGenDfxmlFile
         if isGenDfxmlFile == True:
             os.system('rm '+g_dfxmlfile)
-        print(">> Disk Access operation is aborted ")
 
         # Set the breakout flag to True to stop the export operation.
         global g_breakout
@@ -623,11 +622,7 @@ class Ui_MainWindow(object):
         global global_pb_da
         global_pb_da.progressbar.setRange(0,1)
 
-        g_textEdit_msg.append( sys.stdout.getvalue() )
-        sys.stdout = g_oldstdout
-
-        g_oldstdout = sys.stdout
-        sys.stdout = StringIO()
+        self.bcWriteToTextEdit(">> Disk Access operation is aborted ")
 
         # Set the flag in the thread to signal thread termination
         global g_thread1_da
@@ -636,13 +631,7 @@ class Ui_MainWindow(object):
     def exportFilesMenu(self):
         # If the tree is not generated yet, just return.
         if not BcFileStructure.fiDictList:
-            print(">> No directory tree exists. Aborting export")
-            global g_textEdit_msg
-            global g_oldstdout
-            g_textEdit_msg.append( sys.stdout.getvalue() )
-            sys.stdout = g_oldstdout
-            g_oldstdout = sys.stdout
-            sys.stdout = StringIO()
+            self.bcWriteToTextEdit(">> No directory tree exists. Aborting export")
             return
 
         global g_checked_files
@@ -651,11 +640,7 @@ class Ui_MainWindow(object):
 
         ## print("D: Checked Files: ", g_checked_files)
         if g_checked_files == 0:
-            print(">> No files checked. Aborting Export")
-            g_textEdit_msg.append( sys.stdout.getvalue() )
-            sys.stdout = g_oldstdout
-            g_oldstdout = sys.stdout
-            sys.stdout = StringIO()
+            self.bcWriteToTextEdit(">> No files checked. Aborting Export")
             g_textEdit_msg.moveCursor(QtGui.QTextCursor.End)
             return
 
@@ -663,13 +648,8 @@ class Ui_MainWindow(object):
         outdir = self.getExportOutdir()
 
         if (outdir == None):
-            print(">> No Output Directory Selected. Aborting Export")
-            g_textEdit_msg.append( sys.stdout.getvalue() )
-            sys.stdout = g_oldstdout
-            g_oldstdout = sys.stdout
-            sys.stdout = StringIO()
+            self.bcWriteToTextEdit(">> No Output Directory Selected. Aborting Export")
             return
-
 
         ## print(">> D: Output Directory Selected: ", exportDir)
 
@@ -688,22 +668,16 @@ class Ui_MainWindow(object):
         thread1.start()
         thread2.start()
 
-    '''
-    def buttonClickedDump(self):
-        BcFileStructure.bcOperateOnFiles(BcFileStructure, 3, None)
-    '''
     def showMsgsWindowMenu(self):
         # FIXME: Under construction
         MainWindow.restoreState(self.byte_array_msg_window)
         ret = MainWindow.restoreDockWidget(self.dockWidget_msg)
-        ## print("D: showMsgsWidnowMenu: ret: ", ret)
         return
 
     def showImginfoWindowMenu(self):
         # FIXME: Under construction
         MainWindow.restoreState(self.byte_array_msg_window)
         ret = MainWindow.restoreDockWidget(self, self.dockWidget_imginfo)
-        ## print("D: showMsgsWidnowMenu: ret: ", ret)
         return
 
     def showAboutDialog(self):
@@ -739,6 +713,12 @@ class BcFileStructure:
         global g_checked_files
         g_breakout = False
         serial_num = 0
+
+        if self.fiDictList == []:
+            Ui_MainWindow.bcWriteToTextEdit(Ui_MainWindow, \
+               ">> No disk image selected. ")
+            return
+
         for i in range(0, len(self.fiDictList) - 1):
             isdir = False
             path = self.fiDictList[i]['filename']
@@ -759,8 +739,8 @@ class BcFileStructure:
 
             pathlist = path.split('/')
             pathlen = len(pathlist)
-            ## print("D: Path LiSt: ", pathlist, len(pathlist))
-            ## print("D: =================")
+            logging.info("D: Path LiSt: "+ str(pathlist) + str(len(pathlist)))
+            logging.info("D: =================")
             last_elem = pathlist[pathlen-1]
             if last_elem == "." or last_elem == "..":
                 # Ignore . and ..
@@ -781,7 +761,7 @@ class BcFileStructure:
                 if check == 1:
                     ## logging.info("OperateOnFiles:check=1: Setting File to Checked_state: Partition: "+ str(self.fiDictList[i]['partition']) + "File: "+ unique_path + "State: " + str(current_item.checkState())) 
                     if (current_item.checkState() != 2):
-                        ## print("D: Setting File to Checked_state ", current_fileordir) 
+                        logging.info("D: Setting File to Checked_state "+ current_fileordir) 
                         current_item.setCheckState(2)
                 elif check == 0:
                     current_item.setCheckState(0)
@@ -812,7 +792,7 @@ class BcFileStructure:
                                 os.mkdir(newDir)
                             oldDir = newDir
                         outfile = newDir + '/'+current_fileordir
-                        ## print(">> D: Writing to Outfile: ", outfile, path)
+                        ## logging.info(">> D: Writing to Outfile: "+ outfile + " " + path)
 
                         serial_num += 1
                         printstr =  '>> Exporting file ' +  str(serial_num) + ' of ' + str(g_checked_files) + ': ' + path + "\n"
@@ -833,8 +813,8 @@ class BcFileStructure:
                         print("Partially checked state: ",current_item.checkState()) 
                         print("File %s is NOT Checked" %current_fileordir)
                         # FIXME: Test the above debug print stmts
+
                         g_textEdit_msg.append( sys.stdout.getvalue() )
-                        #sys.stdout = x.oldstdout
                         sys.stdout = g_oldstdout
                         g_oldstdout = sys.stdout
                         sys.stdout = StringIO()
@@ -987,7 +967,6 @@ class BcFileStructure:
         for i in range(0, len(self.fiDictList) - 1):
             path = self.fiDictList[i]['filename']
             inode = self.fiDictList[i]['inode']
-            ## print("D: path, inode: ", path, inode)
             
             isdir = False
             if self.fiDictList[i]['name_type'] == 'd':
@@ -1006,14 +985,12 @@ class BcFileStructure:
 
             pathlist = path.split('/')
             pathlen = len(pathlist)
-            ## print("D: Path LiSt: ", pathlist, len(pathlist))
             last_elem = pathlist[pathlen-1]
             if last_elem == "." or last_elem == "..":
                 # Ignore . and ..
                 continue 
 
             if isdir == True:
-                ## print("D: It is a Directory:  Pathlen: ", pathlen)
                 logging.info("D: It is  a Directory:  Pathlen: "+ path + str(pathlen))
                 if (pathlen < 2):
                     # If pathlen is < 2 it is a file/dir directly off the root.
@@ -1031,11 +1008,6 @@ class BcFileStructure:
                 # Add the directory item to the tree.
                 parent_dir_item.appendRow(current_item)
 
-                # DEBUG: Following 2 lines are added for debugging 
-                ###g_textEdit_msg.append(sys.stdout.getvalue() )
-                #sys.stdout = x.oldstdout
-                ###sys.stdout = g_oldstdout
-
                 # Save the item of this directory
                 item_of[current_dir] = current_item
                 
@@ -1046,15 +1018,10 @@ class BcFileStructure:
                 current_fileordir = pathlist[pathlen-1]
                 unique_current_file = current_fileordir + '-' + str(inode) + '-' + str(self.fiDictList[i]['partition'])
                 current_item = QtGui.QStandardItem(unique_current_file)
-                ## print("D: It is a file:  ", current_fileordir, current_item)
-                ## print("D: pathlen: ", pathlen)
                 logging.debug("D: It is a file:  "+ unique_current_file)
 
                 # We want just the filename in the GUI - without the inode
                 current_item.setText(current_fileordir)
-
-                ##g_textEdit_msg.append( sys.stdout.getvalue() )
-                ##sys.stdout = g_oldstdout
 
                 current_item.setCheckable(True)
                 current_item.setEditable(False)
@@ -1086,8 +1053,6 @@ class BcFileStructure:
         ## print(">>D: bcCatFile: dfxmlfile: ", dfxmlfile)
         ## print(">>D: bcCatFile: outfile: ", outfile)
         x = Ui_MainWindow
-        #x.oldstdout = sys.stdout
-        #sys.stdout = StringIO()
 
         # First traverse through dfxmlfile to get the block containing 
         # "filename" to extract the inode. Do this just once.
